@@ -10,8 +10,8 @@ public class ConnectionFactory {
         try {
             Class.forName("org.postgresql.Driver");
             
-            // Forçamos a URL completa do JDBC aqui diretamente para isolar o problema
-            String url = "jdbc:postgresql://neondb_owner:npg_kJ1bN0ArPGFu@ep-cold-boat-b51gyhxk-pooler.c-7.us-east-2.aws.neon.tech/neondb?sslmode=require&channel_binding=require";
+            // URL limpa sem parâmetros problemáticos para o driver Java antigo
+            String url = "jdbc:postgresql://neondb_owner:npg_kJ1bN0ArPGFu@ep-cold-boat-b51gyhxk-pooler.c-7.us-east-2.aws.neon.tech/neondb?sslmode=require";
             
             return DriverManager.getConnection(url);
             
