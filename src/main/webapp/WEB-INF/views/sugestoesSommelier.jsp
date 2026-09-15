@@ -1,8 +1,8 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <%@ taglib prefix="c" uri="jakarta.tags.core" %>
+<%@ taglib prefix="fn" uri="jakarta.tags.functions" %>
 <!DOCTYPE html>
 <html lang="pt-BR">
-
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -12,35 +12,29 @@
   <link rel="stylesheet" href="<c:url value='/css/global.css'/>">
   <link rel="stylesheet" href="<c:url value='/css/quiz.css'/>">
   <link rel="stylesheet" href="<c:url value='/css/sugestoes-sommelier.css'/>">
-  <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
-<%@ taglib prefix="c" uri="jakarta.tags.core" %>
-<%@ taglib prefix="fn" uri="jakarta.tags.functions" %>
 
-<!-- INJEÇÃO DOS DADOS DO BANCO PARA O JAVASCRIPT -->
-<script>
-  window.CONTEXT_PATH = '${pageContext.request.contextPath}';
-  
-  const catalogoBanco = [
-    <c:forEach var="p" items="${produtos}" varStatus="status">
-    {
-      id: ${p.id},
-      nome: "${p.nome}",
-      tipo: "${p.tipo}",
-      origem: "${p.origem}",
-      descricao: "${p.descricao}",
-      preco: ${p.preco},
-      precoAntigo: ${p.precoAntigo != null ? p.precoAntigo : 0},
-      desconto: "${p.desconto != null ? p.desconto : ''}",
-      pontuacao: "${p.pontuacao != null ? p.pontuacao : ''}",
-      imagem: "${pageContext.request.contextPath}/${p.imagem}"
-    }<c:if test="${!status.last}">,</c:if>
-    </c:forEach>
-  ];
-</script>
-  
- 
+  <!-- INJEÇÃO DOS DADOS DO BANCO PARA O JAVASCRIPT -->
+  <script>
+    window.CONTEXT_PATH = '${pageContext.request.contextPath}';
+    
+    const catalogoBanco = [
+      <c:forEach var="p" items="${produtos}" varStatus="status">
+      {
+        id: ${p.id},
+        nome: "${p.nome}",
+        tipo: "${p.tipo}",
+        origem: "${p.origem}",
+        descricao: "${p.descricao}",
+        preco: ${p.preco},
+        precoAntigo: ${p.precoAntigo != null ? p.precoAntigo : 0},
+        desconto: "${p.desconto != null ? p.desconto : ''}",
+        pontuacao: "${p.pontuacao != null ? p.pontuacao : ''}",
+        imagem: "${pageContext.request.contextPath}/${p.imagem}"
+      }<c:if test="${!status.last}">,</c:if>
+      </c:forEach>
+    ];
+  </script>
 </head>
-
 <body class="sugestoes-page-body-unique">
 
    <!-- HEADER MODULAR -->
@@ -55,9 +49,9 @@
         <p class="sugestoes-subtitle-unique" id="perfil-descricao-unique">Buscando vinhos harmonizados com o seu perfil...</p>
       </div>
 
-      <!-- GRID DE PRODUTOS ESTILO E-COMMERCE -->
+      <!-- GRID DE PRODUTOS -->
       <div class="vinhos-grid-unique" id="vinhos-container-unique">
-        <!-- Os cards de vinho com imagem, badges e preços serão injetados aqui via JS -->
+        <!-- Os cards de vinho serão injetados aqui via JS -->
       </div>
 
       <div class="sugestoes-actions-unique">
@@ -76,13 +70,11 @@
     <div id="agnello-cart-body" class="agnello-cart-body"></div>
   </div>
 
-    <!-- FOOTER MODULAR -->
+  <!-- FOOTER MODULAR -->
   <jsp:include page="/WEB-INF/componentes/footer.jsp" />
-  
-  
-  
+
+  <!-- SCRIPTS -->
   <script src="<c:url value='/js/pages/sugestoes-sommelier.js'/>"></script>
-  <script src="<c:url value='/js/data/catalogo-vinhos.js'/>"></script>
   <script src="<c:url value='/js/components/carrinho.js'/>"></script>
   <script src="<c:url value='/js/components/componentes.js'/>"></script>
   <script src="<c:url value='/js/components/chat.js'/>"></script>
