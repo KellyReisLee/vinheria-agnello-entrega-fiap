@@ -21,8 +21,17 @@ public class AreaPessoalController extends HttpServlet {
         HttpSession session = request.getSession(false);
         Usuario usuario = (session != null) ? (Usuario) session.getAttribute("clienteLogado") : null;
         
-        // Se o usuário não estiver logado na sessão, redireciona para o login
+        // 1. Se o usuário não estiver logado na sessão, redireciona para o login
         if (usuario == null) {
+            response.sendRedirect(request.getContextPath() + "/login");
+            return;
+        }
+        
+        // 2. Pega o ID enviado via parâmetro na URL (ex: /area-pessoa?id=1)
+        String idParam = request.getParameter("id");
+        
+        // 3. Validação de segurança: se o ID não foi informado ou não pertence ao usuário logado, bloqueia
+        if (idParam == null || !idParam.equals(String.valueOf(usuario.getId()))) {
             response.sendRedirect(request.getContextPath() + "/login");
             return;
         }

@@ -32,7 +32,7 @@
 
   <main>
     <!-- HERO SECTION -->
-    <section class="hero" style="background: linear-gradient(rgba(11, 11, 11, 0.6), rgba(39, 3, 14, 0.85)), url('${pageContext.request.contextPath}/assets/images/hero-image.jpg') center/cover no-repeat;">
+    <section class="hero">
       <div class="hero-content">
         <span class="hero-tag">⭐ CURADORIA FAMILIAR</span>
         <h1 class="hero-title">Da nossa família <span>para a sua mesa.</span></h1>
