@@ -11,13 +11,25 @@ public class ConnectionFactory {
         try {
             Class.forName("org.postgresql.Driver");
             
-            // URL limpa apenas com o endereço e o SSL, sem usuário/senha na string
-            String url = "jdbc:postgresql://ep-cold-boat-b51gyhxk-pooler.c-7.us-east-2.aws.neon.tech/neondb?sslmode=require";
+            // URL limpa buscada da variável de ambiente do Render
+            String url = System.getenv("SUPABASE_DB_URL");
+            String user = System.getenv("SUPABASE_DB_USER");
+            String password = System.getenv("SUPABASE_DB_PASSWORD");
             
-            // Passando as credenciais separadamente para evitar o bug do driver antigo
+            // Validação opcional para garantir que o ambiente está configurado
+            if (url == null || url.isEmpty()) {
+                throw new RuntimeException("A variável de ambiente SUPABASE_DB_URL não está configurada!");
+            }
+            
+            // Passando as credenciais separadamente (exatamente como funcionou no seu teste), 
+            // mas agora vindas das variáveis de ambiente com total segurança
             Properties props = new Properties();
-            props.setProperty("user", "neondb_owner");
-            props.setProperty("password", "npg_kJ1bN0ArPGFu");
+            if (user != null) {
+                props.setProperty("user", user);
+            }
+            if (password != null) {
+                props.setProperty("password", password);
+            }
             
             return DriverManager.getConnection(url, props);
             

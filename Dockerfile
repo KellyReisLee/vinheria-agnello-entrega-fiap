@@ -6,6 +6,7 @@ RUN mvn clean package -DskipTests
 
 # --- ETAPA 2: Rodar a aplicação no Tomcat ---
 FROM tomcat:10.1-jdk17
+
 RUN rm -rf /usr/local/tomcat/webapps/*
 
 # Copia o arquivo .war gerado na etapa anterior para o Tomcat com o nome ROOT.war
