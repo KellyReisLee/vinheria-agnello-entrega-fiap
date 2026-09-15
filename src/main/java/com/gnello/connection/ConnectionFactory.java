@@ -10,19 +10,25 @@ public class ConnectionFactory {
         try {
             Class.forName("org.postgresql.Driver");
             
-            // Pega a URL completa da variável de ambiente
             String url = System.getenv("SUPABASE_DB_URL");
             
             if (url == null || url.isEmpty()) {
                 throw new RuntimeException("A variável de ambiente SUPABASE_DB_URL não está configurada!");
             }
             
-            // Garante que o prefixo jdbc: esteja presente para o driver do Postgres reconhecer
-            if (!url.startsWith("jdbc:")) {
-                url = "jdbc:" + url;
+            // Limpa caso venha com prefixos duplicados acidentais
+            url = url.replace("jdbc:jdbc:postgresql://", "jdbc:postgresql://");
+            url = url.replace("postgresql://postgresql://", "postgresql://");
+            
+            // Garante o prefixo correto apenas uma vez
+            if (!url.startsWith("jdbc:postgresql://")) {
+                if (url.startsWith("postgresql://")) {
+                    url = "jdbc:" + url;
+                } else {
+                    url = "jdbc:postgresql://" + url;
+                }
             }
             
-            // Como a URL do Neon já inclui usuário e senha, usamos a sobrecarga de 1 parâmetro
             return DriverManager.getConnection(url);
             
         } catch (ClassNotFoundException e) {
