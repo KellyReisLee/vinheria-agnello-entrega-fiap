@@ -1,0 +1,255 @@
+/* FAMILY SECTION FROM HOMEPAGE  */
+.family-section {
+  padding: 7rem 5%;
+  background-color: var(--bg-offwhite);
+  overflow: hidden;
+}
+
+.family-container {
+  max-width: 1150px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: 1fr 1.1fr;
+  gap: 5rem;
+  align-items: center;
+}
+
+/* Estado inicial (invisíveis antes de entrar na tela) */
+.family-image-wrapper,
+.family-text,
+.image-frame-decoration,
+.family-mini-badge,
+.founders-profile {
+  opacity: 0;
+  will-change: transform, opacity;
+}
+
+/* Quando cada elemento ganha a classe .is-visible via JS, as animações disparam */
+.family-image-wrapper.is-visible {
+  animation: familyCalmFadeLeft 1.4s cubic-bezier(0.16, 1, 0.3, 1) 0.2s forwards;
+}
+
+.family-image-wrapper.is-visible .image-frame-decoration {
+  animation: familyCalmFadeIn 1.2s cubic-bezier(0.16, 1, 0.3, 1) 0.5s forwards;
+}
+
+.family-image-wrapper.is-visible .family-image-box img {
+  animation: familyImageReveal 1.6s cubic-bezier(0.16, 1, 0.3, 1) 0.2s forwards;
+}
+
+.family-image-wrapper.is-visible .family-mini-badge {
+  animation: familyBadgePop 1.2s cubic-bezier(0.34, 1.56, 0.64, 1) 0.7s forwards;
+}
+
+.family-text.is-visible {
+  animation: familyCalmFadeRight 1.4s cubic-bezier(0.16, 1, 0.3, 1) 0.4s forwards;
+}
+
+.family-text.is-visible .founders-profile {
+  animation: familyCalmFadeUp 1s cubic-bezier(0.16, 1, 0.3, 1) 0.8s forwards;
+}
+
+/* Restante dos estilos visuais dos elementos */
+.image-frame-decoration {
+  position: absolute;
+  top: -15px;
+  left: -15px;
+  width: 80px;
+  height: 80px;
+  border-top: 2px solid var(--accent-gold);
+  border-left: 2px solid var(--accent-gold);
+  z-index: 1;
+}
+
+.family-image-box {
+  width: 100%;
+  height: 420px;
+  background-color: #2C2C2C;
+  border-radius: 4px;
+  position: relative;
+  z-index: 2;
+  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.family-image-box img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  transform: scale(1.05);
+  transition: transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.family-image-box:hover img {
+  transform: scale(1.08);
+}
+
+.family-mini-badge {
+  position: absolute;
+  bottom: -20px;
+  right: -20px;
+  background: var(--card-bg, #FFFFFF);
+  padding: 1rem 1.2rem;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
+  border-left: 3px solid var(--accent-gold);
+  z-index: 3;
+}
+
+.family-mini-badge strong {
+  font-size: 0.75rem;
+  letter-spacing: 0.5px;
+  color: var(--primary-wine);
+  display: block;
+}
+
+.family-mini-badge p {
+  font-size: 0.8rem;
+  color: #666;
+  margin: 0;
+}
+
+.family-text h2 {
+  font-family: var(--font-heading);
+  color: var(--primary-wine);
+  font-size: 2.8rem;
+  line-height: 1.2;
+  margin-bottom: 1.5rem;
+}
+
+.italic-text {
+  font-style: italic;
+  color: #7A7A7A;
+  font-weight: 400;
+}
+
+.family-desc-lead {
+  font-size: 1.05rem;
+  line-height: 1.7;
+  color: var(--text-charcoal);
+  margin-bottom: 1rem;
+}
+
+.family-text p {
+  color: #555;
+  font-size: 0.95rem;
+  line-height: 1.6;
+  margin-bottom: 2rem;
+}
+
+.founders-profile {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.founders-avatar {
+  width: 45px;
+  height: 45px;
+  background-color: var(--primary-wine);
+  color: var(--accent-gold);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  font-size: 0.9rem;
+}
+
+.founders-profile strong {
+  display: block;
+  font-size: 0.95rem;
+  color: var(--text-charcoal);
+}
+
+.founders-role {
+  font-size: 0.7rem;
+  letter-spacing: 1px;
+  color: var(--accent-gold);
+  font-weight: 600;
+}
+
+/* Keyframes mantidos */
+@keyframes familyCalmFadeLeft {
+  from {
+    opacity: 0;
+    transform: translateX(-30px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes familyCalmFadeRight {
+  from {
+    opacity: 0;
+    transform: translateX(30px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes familyCalmFadeUp {
+  from {
+    opacity: 0;
+    transform: translateY(15px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes familyCalmFadeIn {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes familyImageReveal {
+  0% {
+    transform: scale(1.08);
+    opacity: 0;
+  }
+
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+@keyframes familyBadgePop {
+  0% {
+    opacity: 0;
+    transform: translateY(15px) scale(0.95);
+  }
+
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@media screen and (max-width: 1024px) {
+  .family-container {
+    grid-template-columns: 1fr;
+    gap: 3rem;
+  }
+}

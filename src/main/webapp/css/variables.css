@@ -1,0 +1,31 @@
+/* css/variables.css */
+:root {
+  /* Definição das Fontes Padrão do Site */
+  --font-heading: 'Playfair Display', serif;
+  --font-body: 'Plus Jakarta Sans', sans-serif;
+
+  /* Paleta de Cores da Vinheria Agnello */
+  --primary-wine: #4A1525;
+  --accent-gold: #D4AF37;
+  --bg-offwhite: #F9F8F6;
+  --text-charcoal: #2C2C2C;
+}
+
+/* Aplicando as fontes globalmente em todo o site */
+body {
+  font-family: var(--font-body);
+  color: var(--text-charcoal);
+  background-color: var(--bg-offwhite);
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-family: var(--font-heading);
+}

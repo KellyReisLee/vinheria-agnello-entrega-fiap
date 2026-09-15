@@ -1,0 +1,515 @@
+@import url('./sections/_variables.css');
+@import url('./sections/_header.css');
+@import url('./sections/_buttons.css');
+@import url('./sections/_hero.css');
+@import url('./sections/_family.css');
+@import url('./sections/_calculator.css');
+@import url('./sections/_vitrini.css');
+@import url('./sections/_footer-intern.css');
+@import url('./sections/_footer-completed.css');
+@import url('./sections/_responsive.css');
+@import url('./sections/_carrinho.css');
+@import url('./sections/_chat.css');
+
+/* css/catalogo.css */
+.catalog-container {
+  padding: 8rem 5% 4rem;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.filter-bar {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 2rem;
+}
+
+/* ==========================================================================
+   CATÁLOGO - VINHERIA AGNELLO (TEMA CLARO GLOBAL)
+   ================================================================---------- */
+
+.agnello-body {
+  font-family: var(--font-body, 'Plus Jakarta Sans', sans-serif);
+  color: var(--text-charcoal, #2C2C2C);
+  background-color: var(--bg-offwhite, #F9F8F6);
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+
+.agnello-body * {
+  box-sizing: border-box;
+}
+
+
+/* ==========================================================================
+   CONTEÚDO PRINCIPAL & HERO
+   ================================================================---------- */
+.agnello-main {
+  flex: 1;
+  max-width: 1280px;
+  width: 100%;
+  margin: 0 auto;
+  padding: 10rem 2rem 3rem 2rem;
+  /* Espaço adequado em relação ao header */
+}
+
+.agnello-hero {
+  text-align: center;
+  margin-top: 1rem;
+  margin-bottom: 3rem;
+  animation: agnelloFadeInDown 0.8s ease-out;
+}
+
+.agnello-hero-subtitle {
+  display: inline-block;
+  font-size: 1rem;
+  text-transform: uppercase;
+  letter-spacing: 3px;
+  color: var(--accent-gold, #c79c0e);
+  margin-bottom: 0.1rem;
+  font-weight: 600;
+}
+
+.agnello-hero-title {
+  font-family: var(--font-heading, 'Playfair Display', serif);
+  font-size: 2.8rem;
+  font-weight: 700;
+  color: var(--primary-wine, #4A1525);
+  margin-bottom: 1rem;
+}
+
+.agnello-hero-desc {
+  color: #555555;
+  font-size: 1.05rem;
+  max-width: 600px;
+  margin: 0 auto;
+  line-height: 1.6;
+}
+
+/* ==========================================================================
+   BARRA DE FERRAMENTAS (TOOLBAR) - DROPDOWN CUSTOMIZADO INTEGRADO
+   ================================================================---------- */
+.agnello-toolbar {
+  position: relative;
+  z-index: 10;
+  display: grid;
+  grid-template-columns: 1fr auto auto;
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+  align-items: center;
+  background-color: #FFFFFF;
+  padding: 1.2rem;
+  border-radius: 8px;
+  border: 1px solid rgba(212, 175, 55, 0.3);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.02);
+  animation: agnelloFadeInUp 0.8s ease-out;
+}
+
+
+.agnello-search-input {
+  width: 100%;
+  background-color: var(--bg-offwhite, #F9F8F6);
+  border: 1px solid #DDD3C5;
+  border-radius: 4px;
+  padding: 0.8rem 1rem;
+  color: var(--text-charcoal, #2C2C2C);
+  font-family: var(--font-body);
+  font-size: 0.95rem;
+  transition: all 0.3s ease;
+}
+
+.agnello-search-input:focus {
+  outline: none;
+  border-color: var(--accent-gold, #D4AF37);
+  box-shadow: 0 0 0 3px rgba(212, 175, 55, 0.15);
+}
+
+.agnello-filters-wrapper {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.agnello-filter-btn {
+  background-color: transparent;
+  border: 1px solid #DDD3C5;
+  color: var(--text-charcoal, #2C2C2C);
+  padding: 0.6rem 1rem;
+  border-radius: 4px;
+  font-size: 0.9rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.agnello-filter-btn:hover {
+  border-color: var(--accent-gold, #D4AF37);
+  color: var(--primary-wine, #4A1525);
+}
+
+.agnello-filter-btn.agnello-ativo {
+  background-color: var(--primary-wine, #4A1525);
+  color: #FFFFFF;
+  border-color: var(--primary-wine, #4A1525);
+  font-weight: 600;
+}
+
+/* ==========================================================================
+   DROPDOWN CUSTOMIZADO (SUBSTITUIÇÃO SEGURA DO SELECT NATIVO)
+   ================================================================---------- */
+.agnello-custom-select {
+  position: relative;
+  font-family: var(--font-body, 'Plus Jakarta Sans', sans-serif);
+  font-size: 0.9rem;
+  color: var(--text-charcoal, #2C2C2C);
+  background-color: var(--bg-offwhite, #F9F8F6);
+  border: 1px solid #DDD3C5;
+  border-radius: 4px;
+  cursor: pointer;
+  user-select: none;
+  min-width: 200px;
+  transition: border-color 0.3s ease;
+}
+
+.agnello-custom-select:hover {
+  border-color: var(--accent-gold, #D4AF37);
+}
+
+.agnello-select-selected {
+  padding: 0.8rem 2.5rem 0.8rem 1rem;
+  background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%234A1525' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+  background-repeat: no-repeat;
+  background-position: right 1rem center;
+  background-size: 1rem;
+}
+
+.agnello-select-items {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  z-index: 99;
+  background-color: #FFFFFF;
+  border: 1px solid #DDD3C5;
+  border-top: none;
+  border-radius: 0 0 4px 4px;
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.08);
+  margin-top: 1px;
+}
+
+.agnello-select-items div {
+  padding: 0.8rem 1rem;
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+.agnello-select-items div:hover {
+  background-color: #FDF8EC;
+  color: var(--primary-wine, #4A1525);
+}
+
+.agnello-select-hide {
+  display: none;
+}
+
+/* Mantém compatibilidade com a classe antiga caso reutilizada */
+.agnello-sort-select {
+  display: none;
+}
+
+/* ==========================================================================
+   CONTADOR DE RESULTADOS
+   ================================================================---------- */
+.agnello-results-counter {
+  font-size: 0.9rem;
+  color: #666666;
+  margin-bottom: 1.5rem;
+  font-weight: 500;
+}
+
+.agnello-results-counter span {
+  color: var(--primary-wine, #4A1525);
+  font-weight: 700;
+}
+
+/* ==========================================================================
+   ESTILIZAÇÃO DOS CARDS GERADOS DINAMICAMENTE
+   ================================================================---------- */
+/* ==========================================================================
+   ESTRUTURA PROFISSIONAL DO CARD - VINHERIA AGNELLO
+   ================================================================---------- */
+/* ==========================================================================
+   ESTRUTURA DOS CARDS & GRID 4 COLUNAS - VINHERIA AGNELLO
+   ================================================================---------- */
+
+/* Grade principal com 4 colunas perfeitamente alinhadas */
+.agnello-wine-grid,
+.vinhos-grid,
+#vinhos-container {
+  display: grid !important;
+  grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+  gap: 1.5rem !important;
+  width: 100% !important;
+}
+
+.vinhos-grid>div,
+#vinhos-container>div,
+.agnello-wine-card {
+  background-color: #FFFFFF !important;
+  border: 1px solid rgba(212, 175, 55, 0.3) !important;
+  border-radius: 12px !important;
+  padding: 1.2rem !important;
+  display: flex !important;
+  flex-direction: column !important;
+  justify-content: space-between !important;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.03) !important;
+  transition: all 0.35s ease !important;
+  position: relative !important;
+}
+
+.vinhos-grid>div:hover,
+#vinhos-container>div:hover,
+.agnello-wine-card:hover {
+  transform: translateY(-4px);
+  border-color: var(--accent-gold, #D4AF37) !important;
+  box-shadow: 0 10px 25px rgba(74, 21, 37, 0.08) !important;
+}
+
+/* Espaço Placeholder da Imagem */
+/* Container da imagem com respiro interno */
+.agnello-card-img-container,
+.vinho-img-wrapper {
+  width: 100% !important;
+  height: 200px !important;
+  background-color: #F4F1EA !important;
+  border-radius: 8px !important;
+  margin-bottom: 1rem !important;
+  position: relative !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  overflow: hidden !important;
+  padding: 10px !important;
+  /* Adiciona respiro para a garrafa não colar nas bordas */
+}
+
+/* Garante que a garrafa inteira apareça dentro do espaço */
+.agnello-card-img-container img,
+.vinho-img-wrapper img,
+.vinhos-grid img {
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: contain !important;
+  /* Mudado de cover para contain para exibir a garrafa inteira */
+}
+
+/* Selo de Desconto (XX% OFF) */
+.agnello-badge-off,
+.vinho-badge-desconto {
+  position: absolute !important;
+  top: 10px !important;
+  right: 10px !important;
+  background-color: #8B263E !important;
+  color: #FFFFFF !important;
+  font-size: 0.75rem !important;
+  font-weight: 700 !important;
+  padding: 0.25rem 0.6rem !important;
+  border-radius: 4px !important;
+  letter-spacing: 0.5px !important;
+  z-index: 2 !important;
+}
+
+/* Tags de Categoria e Pontuação */
+.agnello-tags-row,
+.vinho-meta-topo {
+  display: flex !important;
+  gap: 0.5rem !important;
+  margin-bottom: 0.5rem !important;
+  flex-wrap: wrap !important;
+}
+
+.agnello-tag-tipo,
+.vinho-tipo {
+  font-size: 0.7rem !important;
+  font-weight: 700 !important;
+  text-transform: uppercase !important;
+  color: #A07825 !important;
+  background-color: #FDF8EC !important;
+  padding: 0.2rem 0.5rem !important;
+  border-radius: 4px !important;
+  letter-spacing: 0.5px !important;
+}
+
+.agnello-tag-pontos,
+.vinho-pontuacao {
+  font-size: 0.7rem !important;
+  font-weight: 600 !important;
+  color: #555555 !important;
+  background-color: #F0EDE6 !important;
+  padding: 0.2rem 0.5rem !important;
+  border-radius: 4px !important;
+}
+
+/* Informações de Texto */
+.agnello-card-origem,
+.vinho-origem {
+  font-size: 0.8rem !important;
+  color: #777777 !important;
+  margin-bottom: 0.3rem !important;
+}
+
+.agnello-card-nome,
+.vinho-nome {
+  font-family: var(--font-heading, 'Playfair Display', serif) !important;
+  font-size: 1.15rem !important;
+  font-weight: 700 !important;
+  color: var(--primary-wine, #4A1525) !important;
+  margin-bottom: 0.5rem !important;
+  line-height: 1.3 !important;
+}
+
+.agnello-card-desc,
+.vinho-desc {
+  font-size: 0.85rem !important;
+  color: #666666 !important;
+  margin-bottom: 1rem !important;
+  line-height: 1.4 !important;
+}
+
+/* Rodapé do Card (Preço e Botão) */
+.agnello-card-footer,
+.vinho-footer {
+  display: flex !important;
+  justify-content: space-between !important;
+  align-items: flex-end !important;
+  border-top: 1px solid #EFECE6 !important;
+  padding-top: 0.8rem !important;
+  margin-top: auto !important;
+  width: 100% !important;
+}
+
+.agnello-preco-antigo,
+.preco-antigo {
+  font-size: 0.75rem !important;
+  color: #999999 !important;
+  text-decoration: line-through !important;
+  display: block !important;
+}
+
+.agnello-preco-atual,
+.vinho-preco {
+  font-size: 1.1rem !important;
+  font-weight: 700 !important;
+  color: var(--primary-wine, #4A1525) !important;
+}
+
+.agnello-btn-comprar,
+.btn-comprar {
+  background-color: var(--primary-wine, #4A1525) !important;
+  color: #FFFFFF !important;
+  border: none !important;
+  padding: 0.5rem 1rem !important;
+  border-radius: 6px !important;
+  font-size: 0.85rem !important;
+  font-weight: 600 !important;
+  cursor: pointer !important;
+  transition: background-color 0.3s ease !important;
+}
+
+.agnello-btn-comprar:hover,
+.btn-comprar:hover {
+  background-color: #6A2135 !important;
+}
+
+/* Responsividade Adaptativa do Grid */
+@media (max-width: 1200px) {
+
+  .agnello-wine-grid,
+  .vinhos-grid,
+  #vinhos-container {
+    grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+  }
+}
+
+@media (max-width: 900px) {
+
+  .agnello-wine-grid,
+  .vinhos-grid,
+  #vinhos-container {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  }
+}
+
+@media (max-width: 600px) {
+
+  .agnello-wine-grid,
+  .vinhos-grid,
+  #vinhos-container {
+    grid-template-columns: 1fr !important;
+  }
+}
+
+/* ==========================================================================
+   ANIMAÇÕES
+   ================================================================---------- */
+@keyframes agnelloFadeInDown {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes agnelloFadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ==========================================================================
+   RESPONSIVIDADE (ATUALIZADA PARA CORRIGIR A BARRA DE FILTROS/SELECT)
+   ================================================================---------- */
+@media (max-width: 968px) {
+  .agnello-toolbar {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+
+  .agnello-filters-wrapper {
+    overflow-x: auto;
+    padding-bottom: 5px;
+    width: 100%;
+  }
+
+  .agnello-custom-select {
+    width: 100%;
+  }
+}
+
+@media (max-width: 768px) {
+  .agnello-nav-links {
+    display: none;
+  }
+
+  .agnello-hero-title {
+    font-size: 2.2rem;
+  }
+
+  .agnello-main {
+    padding: 3rem 1rem 2rem 1rem;
+  }
+}
