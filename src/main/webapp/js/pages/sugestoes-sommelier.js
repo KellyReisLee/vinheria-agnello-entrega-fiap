@@ -23,16 +23,35 @@ document.addEventListener('DOMContentLoaded', () => {
   // Certifica-se de que a lista vinda do banco existe, senão usa um array vazio
   const produtosDisponiveis = typeof catalogoBanco !== 'undefined' ? catalogoBanco : [];
 
+  // Logs úteis para depuração (pressione F12 no navegador para ver)
+  console.log("=== DIAGNÓSTICO DO SOMMELIER ===");
+  console.log("Respostas do Quiz do Cliente:", perfilClienteUnique);
+  console.log("Produtos vindos do Banco (catalogoBanco):", produtosDisponiveis);
+
   // Filtra os vinhos de acordo com as respostas do quiz (Etapa 2 ou Etapa 3)
   const vinhosFiltradosUnique = produtosDisponiveis.filter(vinho => {
-    return vinho.compatibilidade.includes(perfilClienteUnique.etapa2) ||
-      vinho.compatibilidade.includes(perfilClienteUnique.etapa3);
+    const compatibilidade = vinho.compatibilidade || '';
+    const etapa2 = perfilClienteUnique.etapa2 || '';
+    const etapa3 = perfilClienteUnique.etapa3 || '';
+    
+    return compatibilidade.includes(etapa2) || compatibilidade.includes(etapa3);
   });
 
-  // Se houver menos de 4 correspondências, exibe todo o catálogo do banco como fallback
-  const resultadosExibirUnique = vinhosFiltradosUnique.length >= 4 ? vinhosFiltradosUnique : produtosDisponiveis;
+  console.log("Vinhos filtrados pela compatibilidade:", vinhosFiltradosUnique);
+
+  // Se houver menos de 1 correspondência, exibe todo o catálogo do banco como fallback para evitar tela em branco
+  const resultadosExibirUnique = vinhosFiltradosUnique.length > 0 ? vinhosFiltradosUnique : produtosDisponiveis;
 
   if (containerVinhosUnique) {
+    if (resultadosExibirUnique.length === 0) {
+      containerVinhosUnique.innerHTML = `
+        <div style="grid-column: 1 / -1; text-align: center; padding: 40px; color: #fff;">
+          <p>Nenhum rótulo encontrado no momento. Por favor, tente refazer o quiz.</p>
+        </div>
+      `;
+      return;
+    }
+
     containerVinhosUnique.innerHTML = resultadosExibirUnique.map(vinho => `
       <div class="vinho-card-unique">
         ${vinho.desconto ? `<span class="vinho-badge-desconto-unique">${vinho.desconto}</span>` : ''}
@@ -42,7 +61,7 @@ document.addEventListener('DOMContentLoaded', () => {
         <div class="vinho-info-unique">
           <div class="vinho-meta-topo-unique">
             <span class="vinho-tipo-unique">${vinho.tipo}</span>
-            <span class="vinho-pontuacao-unique">${vinho.pontuacao}</span>
+            <span class="vinho-pontuacao-unique">${vinho.pontuacao || ''}</span>
           </div>
           <span class="vinho-origem-unique">${vinho.origem}</span>
           <h3 class="vinho-nome-unique">${vinho.nome}</h3>
