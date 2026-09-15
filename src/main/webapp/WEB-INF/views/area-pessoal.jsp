@@ -73,7 +73,7 @@
           <a href="#" class="nav-item">Minha Adega (Desejos)</a>
           <a href="#" class="nav-item">Clube Agnello</a>
           <a href="#" class="nav-item">Endereços & Pagamento</a>
-          <a href="<c:url value='/login?logout=true'/>" class="nav-item logout">Encerrar Sessão</a>
+         <a href="<c:url value='/login?logout=true'/>" class="nav-item logout">Encerrar Sessão</a>
         </nav>
       </aside>
 
