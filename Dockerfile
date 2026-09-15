@@ -1,15 +1,15 @@
-# Usa uma imagem oficial do Tomcat com Java
-FROM tomcat:10.1-jdk17
+# --- ETAPA 1: Compilar o projeto com Maven ---
+FROM maven:3.9.6-eclipse-temurin-17 AS build
+WORKDIR /app
+COPY . .
+RUN mvn clean package -DskipTests
 
-# Remove os aplicativos padrão que vêm no Tomcat para liberar espaço/portas
+# --- ETAPA 2: Rodar a aplicação no Tomcat ---
+FROM tomcat:10.1-jdk17
 RUN rm -rf /usr/local/tomcat/webapps/*
 
-# Copia o código ou o arquivo war gerado para a pasta raiz do Tomcat renomeando para ROOT
-# (Isso garante que o projeto abra direto na URL principal do site)
-COPY target/vinheria-agnello.war /usr/local/tomcat/webapps/ROOT.war
+# Copia o arquivo .war gerado na etapa anterior para o Tomcat com o nome ROOT.war
+COPY --from=build /app/target/*.war /usr/local/tomcat/webapps/ROOT.war
 
-# Expõe a porta padrão que o Tomcat usa
 EXPOSE 8080
-
-# Inicia o Tomcat
 CMD ["catalina.sh", "run"]
