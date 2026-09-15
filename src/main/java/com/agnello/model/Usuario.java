@@ -1,8 +1,10 @@
 package com.agnello.model;
 
+import java.io.Serializable;
 
-public abstract class Usuario {
-    protected int id;
+public abstract class Usuario implements Serializable{
+    private static final long serialVersionUID = 1L;
+	protected int id;
     protected String email;
     protected String senha;
     protected String telefone;
