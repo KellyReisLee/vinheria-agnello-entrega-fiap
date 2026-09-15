@@ -33,21 +33,21 @@ public class SugestaoSommelierController extends HttpServlet {
             request.setAttribute("produtos", listaProdutos);
 
             // Encaminha com segurança para a view protegida (atualizado sem hífen para evitar ClassNotFoundException)
-            request.getRequestDispatcher("/WEB-INF/views/sugestoesSommelier.jsp").forward(request, response);
+            request.getRequestDispatcher("/WEB-INF/views/sugestoes-sommelier.jsp").forward(request, response);
 
         } catch (RuntimeException e) {
             // Captura falhas encapsuladas pelo DAO (como problemas de conexão com o banco Neon, SQL inválido, etc.)
             LOGGER.log(Level.SEVERE, "Falha de infraestrutura ou banco de dados ao carregar sugestões do sommelier: " + e.getMessage(), e);
             
             request.setAttribute("errorMessage", "Não foi possível conectar ao nosso servidor de adega no momento. Por favor, tente novamente mais tarde.");
-            request.getRequestDispatcher("/WEB-INF/views/sugestoesSommelier.jsp").forward(request, response);
+            request.getRequestDispatcher("/WEB-INF/views/sugestoes-sommelier.jsp").forward(request, response);
 
         } catch (Exception e) {
             // Captura qualquer outra exceção genérica e inesperada do ciclo do Servlet
             LOGGER.log(Level.SEVERE, "Erro crítico inesperado no fluxo de sugestões do sommelier", e);
             
             request.setAttribute("errorMessage", "Ocorreu um erro inesperado ao processar sua solicitação.");
-            request.getRequestDispatcher("/WEB-INF/views/sugestoesSommelier.jsp").forward(request, response);
+            request.getRequestDispatcher("/WEB-INF/views/sugestoes-sommelier.jsp").forward(request, response);
         }
     }
 }
