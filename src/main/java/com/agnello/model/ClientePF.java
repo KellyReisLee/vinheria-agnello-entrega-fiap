@@ -1,4 +1,4 @@
-package com.gnello.model;
+package com.agnello.model;
 
 public class ClientePF extends Usuario {
     private String nome;

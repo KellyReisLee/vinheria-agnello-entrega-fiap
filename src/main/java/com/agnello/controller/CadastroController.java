@@ -1,8 +1,8 @@
-package com.gnello.controller;
+package com.agnello.controller;
 
-import com.gnello.dao.ClienteDAO;
-import com.gnello.model.ClientePF;
-import com.gnello.model.ClientePJ;
+import com.agnello.dao.ClienteDAO;
+import com.agnello.model.ClientePF;
+import com.agnello.model.ClientePJ;
 
 import java.io.IOException;
 import jakarta.servlet.ServletException;

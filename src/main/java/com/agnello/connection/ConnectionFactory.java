@@ -1,4 +1,4 @@
-package com.gnello.connection;
+package com.agnello.connection;
 
 import java.sql.Connection;
 import java.sql.DriverManager;

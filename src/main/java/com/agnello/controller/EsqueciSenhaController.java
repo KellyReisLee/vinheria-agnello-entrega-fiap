@@ -1,7 +1,8 @@
-package com.gnello.controller;
+package com.agnello.controller;
 
-import com.gnello.dao.ClienteDAO;
-import com.gnello.model.Usuario;
+import com.agnello.dao.ClienteDAO;
+import com.agnello.model.Usuario;
+
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;

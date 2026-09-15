@@ -1,9 +1,9 @@
-package com.gnello.dao;
+package com.agnello.dao;
 
-import com.gnello.connection.ConnectionFactory;
-import com.gnello.model.ClientePF;
-import com.gnello.model.ClientePJ;
-import com.gnello.model.Usuario;
+import com.agnello.connection.ConnectionFactory;
+import com.agnello.model.ClientePF;
+import com.agnello.model.ClientePJ;
+import com.agnello.model.Usuario;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
