@@ -1,7 +1,10 @@
 package com.agnello.model;
 
-public class ClientePJ extends Usuario {
-    private String razaoSocial;
+import java.io.Serializable;
+
+public class ClientePJ extends Usuario implements Serializable{
+    private static final long serialVersionUID = 1L;
+	private String razaoSocial;
     private String cnpj;
 
     public ClientePJ() {
