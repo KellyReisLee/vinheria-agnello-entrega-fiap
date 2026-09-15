@@ -12,6 +12,31 @@
   <link rel="stylesheet" href="<c:url value='/css/global.css'/>">
   <link rel="stylesheet" href="<c:url value='/css/quiz.css'/>">
   <link rel="stylesheet" href="<c:url value='/css/sugestoes-sommelier.css'/>">
+  <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
+<%@ taglib prefix="c" uri="jakarta.tags.core" %>
+<%@ taglib prefix="fn" uri="jakarta.tags.functions" %>
+
+<!-- INJEÇÃO DOS DADOS DO BANCO PARA O JAVASCRIPT -->
+<script>
+  window.CONTEXT_PATH = '${pageContext.request.contextPath}';
+  
+  const catalogoBanco = [
+    <c:forEach var="p" items="${produtos}" varStatus="status">
+    {
+      id: ${p.id},
+      nome: "${p.nome}",
+      tipo: "${p.tipo}",
+      origem: "${p.origem}",
+      descricao: "${p.descricao}",
+      preco: ${p.preco},
+      precoAntigo: ${p.precoAntigo != null ? p.precoAntigo : 0},
+      desconto: "${p.desconto != null ? p.desconto : ''}",
+      pontuacao: "${p.pontuacao != null ? p.pontuacao : ''}",
+      imagem: "${pageContext.request.contextPath}/${p.imagem}"
+    }<c:if test="${!status.last}">,</c:if>
+    </c:forEach>
+  ];
+</script>
   
  
 </head>
@@ -54,28 +79,7 @@
     <!-- FOOTER MODULAR -->
   <jsp:include page="/WEB-INF/componentes/footer.jsp" />
   
-  <!-- 1. Primeiro injetamos os dados vindos do banco -->
-  <script>
-    window.CONTEXT_PATH = '${pageContext.request.contextPath}';
-    
-    const catalogoBanco = [
-      <c:forEach var="p" items="${produtos}" varStatus="status">
-      {
-        id: ${p.id},
-        nome: "${p.nome}",
-        tipo: "${p.tipo}",
-        origem: "${p.origem}",
-        descricao: "${p.descricao}",
-        preco: ${p.preco},
-        precoAntigo: ${p.precoAntigo != null ? p.precoAntigo : 0},
-        desconto: "${p.desconto}",
-        pontuacao: "${p.pontuacao}",
-        imagem: "${pageContext.request.contextPath}/${p.imagem}",
-        compatibilidade: ["${p.tipo}", "${p.origem}"]
-      }<c:if test="${!status.last}">,</c:if>
-      </c:forEach>
-    ];
-  </script>
+  
   
   <script src="<c:url value='/js/pages/sugestoes-sommelier.js'/>"></script>
   <script src="<c:url value='/js/data/catalogo-vinhos.js'/>"></script>

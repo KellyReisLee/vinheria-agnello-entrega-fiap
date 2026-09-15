@@ -3,16 +3,15 @@ document.addEventListener('DOMContentLoaded', () => {
   const descricaoPerfilUnique = document.getElementById('perfil-descricao-unique');
   const containerVinhosUnique = document.getElementById('vinhos-container-unique');
 
-  // Define o context path de forma segura para o projeto Java Web
   const contextPath = window.CONTEXT_PATH || '';
 
-  // VALIDAÇÃO: Se não houver dados do quiz salvos, redireciona o cliente para respondê-lo
+  // VALIDAÇÃO: Se não houver dados do quiz salvos, redireciona
   if (!perfilClienteUnique || (!perfilClienteUnique.etapa2 && !perfilClienteUnique.etapa3)) {
     if (descricaoPerfilUnique) {
       descricaoPerfilUnique.textContent = "Redirecionando para o Sommelier Virtual...";
     }
     alert("Por favor, responda ao nosso Sommelier Virtual para encontrarmos os rótulos ideais para você.");
-    window.location.href = contextPath + "/quiz"; // Redireciona para a rota correta do Servlet/JSP do Quiz
+    window.location.href = contextPath + "/quiz";
     return; 
   }
 
@@ -20,33 +19,53 @@ document.addEventListener('DOMContentLoaded', () => {
     descricaoPerfilUnique.textContent = `Filtramos nossa adega com base na sua ocasião e nas preferências de estrutura indicadas. Veja abaixo as melhores opções disponíveis:`;
   }
 
-  // Certifica-se de que a lista vinda do banco existe, senão usa um array vazio
   const produtosDisponiveis = typeof catalogoBanco !== 'undefined' ? catalogoBanco : [];
 
-  // Logs úteis para depuração (pressione F12 no navegador para ver)
-  console.log("=== DIAGNÓSTICO DO SOMMELIER ===");
-  console.log("Respostas do Quiz do Cliente:", perfilClienteUnique);
-  console.log("Produtos vindos do Banco (catalogoBanco):", produtosDisponiveis);
+  console.log("Respostas do Quiz:", perfilClienteUnique);
+  console.log("Produtos do Banco:", produtosDisponiveis);
 
-  // Filtra os vinhos de acordo com as respostas do quiz (Etapa 2 ou Etapa 3)
+  // Função auxiliar que mapeia o tipo do vinho do banco para as tags de compatibilidade do Quiz
+  function obterTagsCompatibilidade(tipoVinho) {
+    const t = (tipoVinho || '').toLowerCase();
+    
+    if (t.includes('tinto')) {
+      return [
+        'carnes-vermelhas', 'corte-gorduroso', 'corte-magro', 
+        'massas-molhos', 'molho-carne-ragu', 'taninos-potentes', 'taninos-macios'
+      ];
+    } else if (t.includes('branco')) {
+      return [
+        'peixes-frutos-mar', 'peixe-grelhado', 'molho-cremoso', 
+        'molho-branco-queijos', 'fresco-mineral', 'frutado-equilibrado'
+      ];
+    } else {
+      // Espumantes / Rosés / Outros
+      return [
+        'ao-ar-livre', 'sunset-refrescante', 'rose-elegante', 
+        'fresco-mineral', 'frutado-equilibrado'
+      ];
+    }
+  }
+
+  // Filtra os vinhos cruzando o tipo do banco com a Etapa 2 ou Etapa 3 respondidas no quiz
   const vinhosFiltradosUnique = produtosDisponiveis.filter(vinho => {
-    const compatibilidade = vinho.compatibilidade || '';
+    const tags = obterTagsCompatibilidade(vinho.tipo);
     const etapa2 = perfilClienteUnique.etapa2 || '';
     const etapa3 = perfilClienteUnique.etapa3 || '';
-    
-    return compatibilidade.includes(etapa2) || compatibilidade.includes(etapa3);
+
+    return tags.includes(etapa2) || tags.includes(etapa3);
   });
 
-  console.log("Vinhos filtrados pela compatibilidade:", vinhosFiltradosUnique);
+  console.log("Vinhos filtrados para o cliente:", vinhosFiltradosUnique);
 
-  // Se houver menos de 1 correspondência, exibe todo o catálogo do banco como fallback para evitar tela em branco
+  // Se o filtro retornar algo, exibe eles; caso contrário, exibe o catálogo completo como segurança
   const resultadosExibirUnique = vinhosFiltradosUnique.length > 0 ? vinhosFiltradosUnique : produtosDisponiveis;
 
   if (containerVinhosUnique) {
     if (resultadosExibirUnique.length === 0) {
       containerVinhosUnique.innerHTML = `
         <div style="grid-column: 1 / -1; text-align: center; padding: 40px; color: #fff;">
-          <p>Nenhum rótulo encontrado no momento. Por favor, tente refazer o quiz.</p>
+          <p>Nenhum rótulo encontrado no momento.</p>
         </div>
       `;
       return;
