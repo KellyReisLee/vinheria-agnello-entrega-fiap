@@ -15,9 +15,23 @@ import java.io.IOException;
 public class LoginController extends HttpServlet {
     private static final long serialVersionUID = 1L;
     
-    // Trata a requisição GET ao acessar a página de login pelo link do menu
+    // Trata a requisição GET (acessar a tela de login ou realizar o logout)
     protected void doGet(HttpServletRequest request, HttpServletResponse response) 
             throws ServletException, IOException {
+        
+        // Verifica se o usuário solicitou o encerramento da sessão
+        String logout = request.getParameter("logout");
+        if ("true".equals(logout)) {
+            HttpSession session = request.getSession(false);
+            if (session != null) {
+                session.invalidate(); // Destrói completamente a sessão ativa
+            }
+            // Redireciona para a página de login limpa (sem parâmetros)
+            response.sendRedirect(request.getContextPath() + "/login");
+            return;
+        }
+
+        // Caso contrário, apenas exibe a página de login normalmente
         request.getRequestDispatcher("/WEB-INF/views/login.jsp").forward(request, response);
     }
 
@@ -36,7 +50,7 @@ public class LoginController extends HttpServlet {
             if (usuario != null && usuario.getSenha().equals(senha)) {
                 // Cria uma sessão HTTP para manter o usuário logado
                 HttpSession session = request.getSession();
-                session.setAttribute("clienteLogado", usuario); // Padronizado como clienteLogado para alinhar com a área pessoal
+                session.setAttribute("clienteLogado", usuario); // Padronizado para alinhar com a área pessoal
 
                 // Redireciona para a área pessoal protegida passando o ID do usuário na URL
                 response.sendRedirect(request.getContextPath() + "/area-pessoa?id=" + usuario.getId());
