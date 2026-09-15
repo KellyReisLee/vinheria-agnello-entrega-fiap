@@ -34,15 +34,18 @@
             <span class="avatar-initials">
               <c:choose>
                 <%-- Se for instância de Pessoa Física --%>
-                <c:when test="${clienteLogado['class'].name eq 'com.gnello.model.ClientePF'}">
+                <c:when test="${clienteLogado['class'].name eq 'com.agnello.model.ClientePF'}">
                   <c:set var="primeiro" value="${not empty clienteLogado.nome ? fn:substring(clienteLogado.nome, 0, 1) : 'A'}" />
                   <c:set var="segundo" value="${not empty clienteLogado.sobrenome ? fn:substring(clienteLogado.sobrenome, 0, 1) : 'G'}" />
                   ${fn:toUpperCase(primeiro)}${fn:toUpperCase(segundo)}
                 </c:when>
-                <%-- Se for Pessoa Jurídica (ajuste o nome do pacote/classe se necessário) --%>
-                <c:otherwise>
+                <%-- Se for Pessoa Jurídica --%>
+                <c:when test="${clienteLogado['class'].name eq 'com.agnello.model.ClientePJ'}">
                   <c:set var="razao" value="${not empty clienteLogado.razaoSocial ? clienteLogado.razaoSocial : 'AG'}" />
                   ${fn:toUpperCase(fn:substring(razao, 0, 2))}
+                </c:when>
+                <c:otherwise>
+                  AG
                 </c:otherwise>
               </c:choose>
             </span>
@@ -50,11 +53,14 @@
           </div>
           <h3>
             <c:choose>
-              <c:when test="${clienteLogado['class'].name eq 'com.gnello.model.ClientePF'}">
+              <c:when test="${clienteLogado['class'].name eq 'com.agnello.model.ClientePF'}">
                 ${clienteLogado.nome} ${clienteLogado.sobrenome}
               </c:when>
-              <c:otherwise>
+              <c:when test="${clienteLogado['class'].name eq 'com.agnello.model.ClientePJ'}">
                 ${clienteLogado.razaoSocial}
+              </c:when>
+              <c:otherwise>
+                Cliente Agnello
               </c:otherwise>
             </c:choose>
           </h3>
@@ -80,8 +86,9 @@
             <span class="sub-tag">ESPAÇO DO APRECIADOR</span>
             <h1>Olá, 
               <c:choose>
-                <c:when test="${clienteLogado['class'].name eq 'com.gnello.model.ClientePF'}">${clienteLogado.nome}</c:when>
-                <c:otherwise>${clienteLogado.razaoSocial}</c:otherwise>
+                <c:when test="${clienteLogado['class'].name eq 'com.agnello.model.ClientePF'}">${clienteLogado.nome}</c:when>
+                <c:when test="${clienteLogado['class'].name eq 'com.agnello.model.ClientePJ'}">${clienteLogado.razaoSocial}</c:when>
+                <c:otherwise>Cliente</c:otherwise>
               </c:choose>! Sua adega particular está em ordem.
             </h1>
             <p>Você possui <strong>12 rótulos</strong> em seu histórico e <strong>R$ 150,00</strong> em créditos de
