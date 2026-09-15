@@ -1,4 +1,4 @@
-package com.gnello.model;
+package com.agnello.model;
 
 
 public abstract class Usuario {

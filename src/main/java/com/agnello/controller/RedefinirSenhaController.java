@@ -1,6 +1,5 @@
-package com.gnello.controller;
+package com.agnello.controller;
 
-import com.gnello.dao.ClienteDAO;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
@@ -8,6 +7,8 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import java.io.IOException;
+
+import com.agnello.dao.ClienteDAO;
 
 @WebServlet("/redefinir-senha")
 public class RedefinirSenhaController extends HttpServlet {
