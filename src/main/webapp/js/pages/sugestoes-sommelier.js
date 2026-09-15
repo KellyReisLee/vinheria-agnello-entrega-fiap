@@ -3,28 +3,34 @@ document.addEventListener('DOMContentLoaded', () => {
   const descricaoPerfilUnique = document.getElementById('perfil-descricao-unique');
   const containerVinhosUnique = document.getElementById('vinhos-container-unique');
 
+  // Define o context path de forma segura para o projeto Java Web
+  const contextPath = window.CONTEXT_PATH || '';
+
   // VALIDAÇÃO: Se não houver dados do quiz salvos, redireciona o cliente para respondê-lo
   if (!perfilClienteUnique || (!perfilClienteUnique.etapa2 && !perfilClienteUnique.etapa3)) {
     if (descricaoPerfilUnique) {
       descricaoPerfilUnique.textContent = "Redirecionando para o Sommelier Virtual...";
     }
     alert("Por favor, responda ao nosso Sommelier Virtual para encontrarmos os rótulos ideais para você.");
-    window.location.href = "quiz.html"; // Altere para o nome do seu arquivo de quiz, se necessário
-    return; // Interrompe a execução para não travar na tela de carregamento
+    window.location.href = contextPath + "/quiz"; // Redireciona para a rota correta do Servlet/JSP do Quiz
+    return; 
   }
 
   if (descricaoPerfilUnique) {
     descricaoPerfilUnique.textContent = `Filtramos nossa adega com base na sua ocasião e nas preferências de estrutura indicadas. Veja abaixo as melhores opções disponíveis:`;
   }
 
+  // Certifica-se de que a lista vinda do banco existe, senão usa um array vazio
+  const produtosDisponiveis = typeof catalogoBanco !== 'undefined' ? catalogoBanco : [];
+
   // Filtra os vinhos de acordo com as respostas do quiz (Etapa 2 ou Etapa 3)
-  const vinhosFiltradosUnique = catalogoVinhos.filter(vinho => {
+  const vinhosFiltradosUnique = produtosDisponiveis.filter(vinho => {
     return vinho.compatibilidade.includes(perfilClienteUnique.etapa2) ||
       vinho.compatibilidade.includes(perfilClienteUnique.etapa3);
   });
 
-  // Se por ventura houver menos correspondências, garante a exibição robusta do catálogo geral
-  const resultadosExibirUnique = vinhosFiltradosUnique.length >= 4 ? vinhosFiltradosUnique : catalogoVinhos;
+  // Se houver menos de 4 correspondências, exibe todo o catálogo do banco como fallback
+  const resultadosExibirUnique = vinhosFiltradosUnique.length >= 4 ? vinhosFiltradosUnique : produtosDisponiveis;
 
   if (containerVinhosUnique) {
     containerVinhosUnique.innerHTML = resultadosExibirUnique.map(vinho => `
@@ -43,11 +49,10 @@ document.addEventListener('DOMContentLoaded', () => {
           <p class="vinho-desc-unique">${vinho.descricao}</p>
           <div class="vinho-footer-unique">
             <div class="vinho-precos-unique">
-              ${vinho.precoAntigo ? `<span class="preco-antigo-unique">${vinho.precoAntigo}</span>` : ''}
-              <span class="vinho-preco-unique">${vinho.preco}</span>
+              ${vinho.precoAntigo > 0 ? `<span class="preco-antigo-unique">R$ ${vinho.precoAntigo}</span>` : ''}
+              <span class="vinho-preco-unique">R$ ${vinho.preco}</span>
             </div>
             <button class="btn-comprar-unique" onclick='adicionarAoCarrinho(${JSON.stringify(vinho)})'>Selecionar</button>
-           
           </div>
         </div>
       </div>

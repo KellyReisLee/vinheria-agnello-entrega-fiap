@@ -3,6 +3,9 @@ document.addEventListener('DOMContentLoaded', () => {
   const totalSteps = 3;
   const userAnswers = {};
 
+  // Define o context path de forma segura para o projeto Java Web
+  const contextPath = window.CONTEXT_PATH || '';
+
   // Define a resposta padrão inicial para a etapa 1
   userAnswers['etapa1'] = 'carnes-vermelhas';
 
@@ -46,6 +49,8 @@ document.addEventListener('DOMContentLoaded', () => {
     if (step === 2) {
       const tituloEtapa2 = document.querySelector('#step-2 .question-title');
       const grupoEtapa2 = document.querySelector('#step-2 .options-list');
+
+      if (!tituloEtapa2 || !grupoEtapa2) return;
 
       if (resp1 === 'carnes-vermelhas') {
         tituloEtapa2.textContent = 'Qual o corte ou intensidade da carne principal?';
@@ -104,6 +109,9 @@ document.addEventListener('DOMContentLoaded', () => {
     else if (step === 3) {
       const tituloEtapa3 = document.querySelector('#step-3 .question-title');
       const grupoEtapa3 = document.querySelector('#step-3 .options-list');
+      
+      if (!tituloEtapa3 || !grupoEtapa3) return;
+      
       const resp2 = userAnswers['etapa2'] || 'corte-gorduroso';
 
       if (resp2 === 'corte-gorduroso' || resp2 === 'molho-carne-ragu') {
@@ -175,10 +183,11 @@ document.addEventListener('DOMContentLoaded', () => {
         prepararEtapasDinamicas(currentStep);
         mostrarEtapa(currentStep);
       } else {
-		  localStorage.setItem('vinhoQuizResult', JSON.stringify(userAnswers));
-		  window.location.href = '/vinheria-agnello/sugestoes';
-		
-    }});
+        // Salva os dados no localStorage e redireciona dinamicamente para o Servlet de Sugestões
+        localStorage.setItem('vinhoQuizResult', JSON.stringify(userAnswers));
+        window.location.href = contextPath + '/sugestoes';
+      }
+    });
   }
 
   // Botão Voltar
@@ -189,7 +198,7 @@ document.addEventListener('DOMContentLoaded', () => {
         currentStep--;
         mostrarEtapa(currentStep);
       } else {
-        window.location.href = 'index.html';
+        window.location.href = contextPath + '/';
       }
     });
   }
