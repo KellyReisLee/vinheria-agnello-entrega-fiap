@@ -1,13 +1,15 @@
-FROM tomcat:10.1-jdk17
+# --- ETAPA 1: Compilar o projeto com Maven ---
+FROM maven:3.9.6-eclipse-temurin-17 AS build
+WORKDIR /app
+COPY . .
+RUN mvn clean package -DskipTests
 
-# Remove aplicações padrão do Tomcat para limpar o ambiente
+# --- ETAPA 2: Rodar a aplicação no Tomcat ---
+FROM tomcat:10.1-jdk17
 RUN rm -rf /usr/local/tomcat/webapps/*
 
-# Define a flag do Java para preferir IPv4 e evitar falhas de rede no Railway
-ENV CATALINA_OPTS="-Djava.net.preferIPv4Stack=true"
-
-# Copia o seu WAR gerado para o Tomcat (ajuste o caminho se o seu arquivo war tiver outro nome)
-COPY target/*.war /usr/local/tomcat/webapps/ROOT.war
+# Copia o arquivo .war gerado na etapa anterior para o Tomcat com o nome ROOT.war
+COPY --from=build /app/target/*.war /usr/local/tomcat/webapps/ROOT.war
 
 EXPOSE 8080
 CMD ["catalina.sh", "run"]
