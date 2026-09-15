@@ -1,0 +1,50 @@
+/* RESPONISVE FROM HOMEPAGE  */
+
+@media (max-width: 1024px) {
+
+  .family-container,
+  .unique-calc-container {
+    grid-template-columns: 1fr;
+    gap: 3rem;
+  }
+
+  .product-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .hero-title {
+    font-size: 2.8rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .hero {
+    height: auto;
+    padding: 6rem 1.5rem 4rem;
+  }
+
+  .hero-title {
+    font-size: 2.2rem;
+  }
+
+  .hero-buttons {
+    flex-direction: column;
+    width: 100%;
+  }
+
+  .btn-gold,
+  .btn-outline {
+    width: 100%;
+    text-align: center;
+  }
+
+  .family-section,
+  .unique-events-calc-section,
+  .vitrine-section {
+    padding: 4rem 4%;
+  }
+
+  .product-grid {
+    grid-template-columns: 1fr;
+  }
+}

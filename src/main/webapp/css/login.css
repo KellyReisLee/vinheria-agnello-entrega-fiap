@@ -1,0 +1,265 @@
+@import url('./sections/_variables.css');
+@import url('./sections/_header.css');
+@import url('./sections/_buttons.css');
+@import url('./sections/_hero.css');
+@import url('./sections/_family.css');
+@import url('./sections/_calculator.css');
+@import url('./sections/_vitrini.css');
+@import url('./sections/_footer-intern.css');
+@import url('./sections/_footer-completed.css');
+@import url('./sections/_responsive.css');
+@import url('./sections/_carrinho.css');
+@import url('./sections/_chat.css');
+@import url('./login.css');
+
+/* Estilos Exclusivos da Página de Login - Vinheria Agnello (Versão Clara e Elegante) */
+.agnello-login-body {
+  background-color: #f9f6f0;
+  /* Fundo creme/marfim claro e acolhedor */
+  color: #2c2c2c;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  min-height: 100vh;
+  margin-top: 4.4rem;
+  display: flex;
+  flex-direction: column;
+}
+
+.agnello-login-main {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 4rem 2rem;
+}
+
+.agnello-login-container {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  max-width: 1050px;
+  width: 100%;
+  background: #ffffff;
+  border: 1px solid rgba(212, 175, 55, 0.3);
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 20px 40px rgba(74, 21, 37, 0.08);
+}
+
+/* Caixa do Formulário */
+.agnello-login-box {
+  padding: 3.5rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.login-tag {
+  font-size: 0.75rem;
+  letter-spacing: 2px;
+  color: #8b2f45;
+  font-weight: 700;
+  text-transform: uppercase;
+  margin-bottom: 0.5rem;
+  display: block;
+}
+
+.login-header-text h1 {
+  font-family: 'Playfair Display', serif;
+  font-size: 2.2rem;
+  margin-bottom: 0.75rem;
+  color: #2c2c2c;
+}
+
+.login-header-text p {
+  color: #665c5e;
+  font-size: 0.95rem;
+  margin-bottom: 2rem;
+  line-height: 1.5;
+}
+
+.agnello-form-login {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+
+}
+
+.input-group-login {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.input-group-login label {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #4a4042;
+}
+
+.label-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.forgot-link {
+  font-size: 0.8rem;
+  color: #8b2f45;
+  text-decoration: none;
+  transition: opacity 0.2s;
+  font-weight: 600;
+}
+
+.forgot-link:hover {
+  opacity: 0.8;
+  text-decoration: underline;
+}
+
+.input-group-login input {
+  background: #fcfbfa;
+  border: 1px solid #dcd6cd;
+  border-radius: 8px;
+  padding: 0.85rem 1rem;
+  color: #2c2c2c;
+  font-size: 0.95rem;
+  transition: all 0.3s ease;
+}
+
+.input-group-login input:focus {
+  outline: none;
+  border-color: #8b2f45;
+  background: #ffffff;
+  box-shadow: 0 0 0 3px rgba(139, 47, 69, 0.1);
+}
+
+.btn-agnello-primary {
+  background: linear-gradient(135deg, #8b2f45 0%, #631d2e 100%);
+  color: #fff;
+  border: 1px solid rgba(212, 175, 55, 0.4);
+  padding: 0.9rem;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  margin-top: 0.5rem;
+}
+
+.btn-agnello-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(139, 47, 69, 0.25);
+}
+
+.login-divider {
+  display: flex;
+  align-items: center;
+  text-align: center;
+  margin: 0.5rem 0;
+  color: #998e90;
+  font-size: 0.8rem;
+}
+
+.login-divider::before,
+.login-divider::after {
+  content: '';
+  flex: 1;
+  border-bottom: 1px solid #e5dfd7;
+}
+
+.login-divider span {
+  padding: 0 10px;
+}
+
+.btn-agnello-outline {
+  background: transparent;
+  color: #4a1525;
+  border: 1px solid #c9bcae;
+  padding: 0.85rem;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 0.95rem;
+  text-align: center;
+  text-decoration: none;
+  transition: all 0.3s ease;
+}
+
+.btn-agnello-outline:hover {
+  border-color: #8b2f45;
+  background: rgba(139, 47, 69, 0.04);
+}
+
+/* Caixa Promocional Direita (Mantém destaque elegante em Vinho nobre) */
+
+.agnello-promo-box {
+  background: linear-gradient(135deg, rgba(84, 44, 56, 0.88) 0%, rgba(63, 5, 20, 0.92) 100%),
+    url('../assets/images/home-atendimento-image.jpg') center/cover no-repeat;
+  position: relative;
+  padding: 3.5rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  color: #fff;
+}
+
+.promo-badge {
+  background: rgba(212, 175, 55, 0.2);
+  color: #f3d879;
+  border: 1px solid rgba(212, 175, 55, 0.4);
+  padding: 0.3rem 0.8rem;
+  border-radius: 20px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  display: inline-block;
+  margin-bottom: 1rem;
+}
+
+.promo-content h2 {
+  font-family: 'Playfair Display', serif;
+  font-size: 2rem;
+  line-height: 1.2;
+  margin-bottom: 1rem;
+  color: #fff;
+}
+
+.promo-content p {
+  color: #e2d1d4;
+  font-size: 0.95rem;
+  line-height: 1.6;
+  margin-bottom: 1.5rem;
+}
+
+.promo-benefits {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.promo-benefits li {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  font-size: 0.9rem;
+  color: #f9f6f0;
+}
+
+.promo-benefits li svg {
+  color: #f3d879;
+  flex-shrink: 0;
+}
+
+/* Responsividade para telas menores */
+@media (max-width: 850px) {
+  .agnello-login-container {
+    grid-template-columns: 1fr;
+  }
+
+  .agnello-promo-box {
+    display: none;
+  }
+
+  .agnello-login-box {
+    padding: 2rem 1.5rem;
+  }
+}

@@ -1,0 +1,17 @@
+# Eclipse
+.settings/
+.project
+.classpath
+
+# IntelliJ IDEA
+.idea/
+*.iml
+
+# Maven / Build
+target/
+build/
+.gradle/
+
+# Configurações do Servidor
+/.metadata/
+/.tmp/

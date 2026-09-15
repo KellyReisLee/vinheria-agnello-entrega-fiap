@@ -1,0 +1,264 @@
+@import url('./sections/_variables.css');
+@import url('./sections/_header.css');
+@import url('./sections/_buttons.css');
+@import url('./sections/_hero.css');
+@import url('./sections/_family.css');
+@import url('./sections/_calculator.css');
+@import url('./sections/_vitrini.css');
+@import url('./sections/_footer-intern.css');
+@import url('./sections/_footer-completed.css');
+@import url('./sections/_responsive.css');
+@import url('./sections/_carrinho.css');
+@import url('./sections/_chat.css');
+
+/* Estilos específicos para a Página de Cadastro inspirada na Wine */
+
+.agnello-login-body {
+  background-color: var(--bg-offwhite);
+  color: var(--text-charcoal);
+  font-family: var(--font-body);
+}
+
+.agnello-cadastro-main {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 50px 20px;
+  min-height: calc(100vh - 160px);
+  margin-top: 5.5rem;
+
+}
+
+.agnello-cadastro-container {
+  display: grid;
+  grid-template-columns: 1.1fr 0.9fr;
+  background: #ffffff;
+  width: 100%;
+  max-width: 1050px;
+  border-radius: 12px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+  overflow: hidden;
+  border: 1px solid rgba(74, 21, 37, 0.08);
+}
+
+.agnello-cadastro-box {
+  padding: 40px 50px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+
+}
+
+.cadastro-header-text {
+  margin-bottom: 24px;
+}
+
+.cadastro-header-text h1 {
+  font-size: 24px;
+  color: var(--primary-wine);
+  margin-bottom: 8px;
+  font-family: var(--font-heading);
+}
+
+.cadastro-header-text p {
+  font-size: 14px;
+  color: #666;
+}
+
+/* Sistema de Abas (Pessoa Física / Jurídica) */
+.signup-tabs {
+  display: flex;
+  gap: 30px;
+  border-bottom: 1px solid #e0e0e0;
+  margin-bottom: 24px;
+}
+
+.tab-btn {
+  background: none;
+  border: none;
+  font-family: var(--font-body);
+  font-size: 13px;
+  font-weight: 700;
+  color: #999;
+  padding-bottom: 10px;
+  cursor: pointer;
+  position: relative;
+  transition: color 0.3s ease;
+}
+
+.tab-btn.active {
+  color: var(--primary-wine);
+}
+
+.tab-btn.active::after {
+  content: '';
+  position: absolute;
+  bottom: -1px;
+  left: 0;
+  width: 100%;
+  height: 2px;
+  background-color: var(--primary-wine);
+}
+
+/* Campos de Input minimalistas inspirados no layout da Wine */
+.input-group-login {
+  margin-bottom: 16px;
+}
+
+.input-group-login label {
+  display: block;
+  font-size: 13px;
+  color: #777;
+  margin-bottom: 4px;
+}
+
+.input-group-login input {
+  width: 100%;
+  border: none;
+  border-bottom: 1px solid #ccc;
+  padding: 8px 0;
+  font-size: 15px;
+  color: var(--text-charcoal);
+  background: transparent;
+  outline: none;
+  transition: border-color 0.3s;
+}
+
+.input-group-login input:focus {
+  border-bottom-color: var(--primary-wine);
+}
+
+/* Botões */
+.btn-agnello-primary {
+  width: 100%;
+  background-color: var(--primary-wine);
+  color: #fff;
+  border: none;
+  padding: 12px;
+  border-radius: 4px;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  margin-top: 10px;
+  transition: opacity 0.2s;
+}
+
+.btn-agnello-primary:hover {
+  opacity: 0.9;
+}
+
+.login-divider {
+  text-align: center;
+  position: relative;
+  margin: 20px 0;
+}
+
+.login-divider::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 0;
+  width: 100%;
+  height: 1px;
+  background: #eee;
+}
+
+.login-divider span {
+  background: #fff;
+  padding: 0 10px;
+  position: relative;
+  font-size: 12px;
+  color: #888;
+  text-transform: lowercase;
+}
+
+.btn-agnello-outline {
+  display: block;
+  text-align: center;
+  width: 100%;
+  border: 1px solid var(--primary-wine);
+  color: var(--primary-wine);
+  padding: 11px;
+  border-radius: 4px;
+  font-size: 14px;
+  font-weight: 600;
+  text-decoration: none;
+  transition: background 0.2s, color 0.2s;
+}
+
+.btn-agnello-outline:hover {
+  background-color: var(--primary-wine);
+  color: #fff;
+}
+
+/* Lado Direito - Banner Promocional */
+.agnello-promo-box {
+  background: linear-gradient(135deg, var(--primary-wine) 0%, #2f0b15 100%);
+  color: #fff;
+  padding: 50px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.promo-badge {
+  display: inline-block;
+  background-color: var(--accent-gold);
+  color: #111;
+  font-size: 11px;
+  font-weight: 700;
+  padding: 4px 10px;
+  border-radius: 20px;
+  margin-bottom: 15px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.promo-content h2 {
+  font-size: 28px;
+  font-family: var(--font-heading);
+  margin-bottom: 15px;
+  line-height: 1.3;
+}
+
+.promo-content p {
+  font-size: 14px;
+  color: rgba(255, 255, 255, 0.8);
+  margin-bottom: 25px;
+  line-height: 1.6;
+}
+
+.promo-benefits {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.promo-benefits li {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 13px;
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.promo-benefits svg {
+  stroke: var(--accent-gold);
+  flex-shrink: 0;
+}
+
+/* Responsivo para telas menores */
+@media (max-width: 768px) {
+  .agnello-login-container {
+    grid-template-columns: 1fr;
+  }
+
+  .agnello-promo-box {
+    display: none;
+  }
+
+  .agnello-login-box {
+    padding: 30px 20px;
+  }
+}

@@ -1,0 +1,65 @@
+/* css/global.css */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Playfair+Display:wght@600;700&display=swap');
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+
+
+body {
+  background-color: var(--bg-offwhite);
+  color: var(--text-charcoal);
+  font-family: var(--font-body);
+  line-height: 1.5;
+}
+
+h1,
+h2,
+h3,
+h4 {
+  font-family: var(--font-heading);
+}
+
+/* Esconde a gaveta e o overlay por padrão fora da tela */
+#agnello-cart-drawer-unique,
+#agnello-cart-drawer {
+  position: fixed;
+  top: 0;
+  right: -400px;
+  /* Joga a gaveta totalmente para fora da tela à direita */
+  width: 380px;
+  height: 100vh;
+  background: #FFFFFF;
+  box-shadow: -5px 0 25px rgba(0, 0, 0, 0.2);
+  transition: right 0.3s ease-in-out;
+  z-index: 9999;
+}
+
+/* Mostra a gaveta quando a classe 'ativo' for adicionada pelo JavaScript */
+#agnello-cart-drawer-unique.ativo,
+#agnello-cart-drawer.ativo {
+  right: 0;
+}
+
+#agnello-cart-overlay-unique,
+#agnello-cart-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0, 0, 0, 0.5);
+  visibility: hidden;
+  opacity: 0;
+  transition: opacity 0.3s ease-in-out, visibility 0.3s ease-in-out;
+  z-index: 9998;
+}
+
+#agnello-cart-overlay-unique.ativo,
+#agnello-cart-overlay.ativo {
+  visibility: visible;
+  opacity: 1;
+}

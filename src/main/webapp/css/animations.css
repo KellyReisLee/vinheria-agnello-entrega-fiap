@@ -1,0 +1,225 @@
+/* ==========================================================================
+   ANIMAÇÕES REFINADAS E OTIMIZADAS PARA RAPIDEZ E FLUIDEZ
+   ========================================================================== */
+
+@keyframes familyFadeInLeft {
+  from {
+    opacity: 0;
+    transform: translateX(-30px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes familyFadeInRight {
+  from {
+    opacity: 0;
+    transform: translateX(30px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes familyCalmFadeUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes badgePopUp {
+  0% {
+    opacity: 0;
+    transform: translateY(15px) scale(0.95);
+  }
+
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes uniqueFadeDown {
+  from {
+    opacity: 0;
+    transform: translateY(-15px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes uniqueFadeIn {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes uniqueScaleUp {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes uniquePulseValue {
+  0% {
+    transform: scale(1);
+  }
+
+  50% {
+    transform: scale(1.04);
+  }
+
+  100% {
+    transform: scale(1);
+  }
+}
+
+@keyframes familyImageReveal {
+  0% {
+    transform: scale(1.05);
+    opacity: 0;
+  }
+
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+/* ==========================================================================
+   ESTADO GLOBAL DE SCROLL (COM TRANSIÇÕES MAIS RÁPIDAS)
+   ========================================================================== */
+
+.scroll-animate-left,
+.scroll-animate-right,
+.scroll-animate-up {
+  opacity: 0;
+  will-change: opacity, transform;
+  transition: opacity 1s cubic-bezier(0.25, 1, 0.5, 1), transform 1s cubic-bezier(0.25, 1, 0.5, 1);
+}
+
+.scroll-animate-left {
+  transform: translateX(-25px);
+}
+
+.scroll-animate-right {
+  transform: translateX(25px);
+}
+
+.scroll-animate-up {
+  transform: translateY(25px);
+}
+
+.scroll-animate-left.is-visible,
+.scroll-animate-right.is-visible,
+.scroll-animate-up.is-visible {
+  opacity: 1;
+  transform: translate(0, 0);
+}
+
+/* ==========================================================================
+   HERO SECTION
+   ========================================================================== */
+
+@keyframes heroFadeUp {
+  0% {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.hero .hero-tag {
+  opacity: 0;
+  animation: heroFadeUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) 0.1s forwards;
+}
+
+.hero .hero-title {
+  opacity: 0;
+  animation: heroFadeUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) 0.25s forwards;
+}
+
+.hero .hero-subtitle {
+  opacity: 0;
+  animation: heroFadeUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) 0.4s forwards;
+}
+
+.hero .hero-buttons {
+  opacity: 0;
+  animation: heroFadeUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) 0.55s forwards;
+}
+
+.hero .btn-gold,
+.hero .btn-outline {
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.hero .btn-gold:hover,
+.hero .btn-outline:hover {
+  transform: translateY(-3px);
+}
+
+/* ==========================================================================
+   SEÇÃO FAMILY (ÁGIL E SINCRONIZADA COM O SCROLL)
+   ========================================================================== */
+
+.family-image-wrapper,
+.family-text,
+.image-frame-decoration,
+.family-mini-badge,
+.founders-profile {
+  opacity: 0;
+  will-change: transform, opacity;
+}
+
+.family-image-wrapper.is-visible {
+  animation: familyFadeInLeft 0.8s cubic-bezier(0.16, 1, 0.3, 1) 0.1s forwards;
+}
+
+.family-image-wrapper.is-visible .image-frame-decoration {
+  animation: uniqueFadeIn 0.6s cubic-bezier(0.16, 1, 0.3, 1) 0.2s forwards;
+}
+
+.family-image-wrapper.is-visible .family-image-box img {
+  animation: familyImageReveal 0.9s cubic-bezier(0.16, 1, 0.3, 1) 0.1s forwards;
+}
+
+.family-image-wrapper.is-visible .family-mini-badge {
+  animation: badgePopUp 0.7s cubic-bezier(0.34, 1.56, 0.64, 1) 0.3s forwards;
+}
+
+.family-text.is-visible {
+  animation: familyFadeInRight 0.8s cubic-bezier(0.16, 1, 0.3, 1) 0.2s forwards;
+}
+
+.family-text.is-visible .founders-profile {
+  animation: familyCalmFadeUp 0.7s cubic-bezier(0.16, 1, 0.3, 1) 0.35s forwards;
+}
