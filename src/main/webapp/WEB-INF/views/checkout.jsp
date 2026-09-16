@@ -35,10 +35,41 @@
       <!-- Coluna Esquerda: Formulários de Etapas -->
       <div class="checkout-steps-wrapper">
 
-        <!-- Etapa 1: Endereço de Entrega -->
-        <section class="checkout-card">
+        <!-- NOVA ETAPA: Identificação / Acesso Rápido -->
+        <section class="checkout-card" id="identification-card">
           <div class="step-header">
             <span class="step-number">1</span>
+            <h2>Identificação</h2>
+          </div>
+          <form class="checkout-form" id="form-identification" onsubmit="event.preventDefault();">
+            <div class="input-row-grid single-col">
+              <div class="input-group">
+                <label for="checkout-email">E-mail para acompanhamento do pedido</label>
+                <div class="input-with-action">
+                  <input type="email" id="checkout-email" placeholder="seu.email@exemplo.com" required>
+                  <button type="button" id="btn-check-email" class="btn-secondary-action">Continuar</button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Bloco condicional para senha (exibido caso o e-mail já exista) -->
+            <div id="password-group" class="conditional-auth-box" style="display: none;">
+              <p class="auth-msg">Detectamos uma conta com este e-mail. Digite sua senha para recuperar seus dados salvos:</p>
+              <div class="input-row-grid">
+                <div class="input-group span-2">
+                  <label for="checkout-password">Senha</label>
+                  <input type="password" id="checkout-password" placeholder="Sua senha de acesso">
+                </div>
+              </div>
+              <button type="button" id="btn-login-checkout" class="btn-secondary-action mt-2">Entrar</button>
+            </div>
+          </form>
+        </section>
+
+        <!-- Etapa 1 (Agora 2): Endereço de Entrega -->
+        <section class="checkout-card">
+          <div class="step-header">
+            <span class="step-number">2</span>
             <h2>Endereço de Entrega</h2>
           </div>
           <form class="checkout-form" onsubmit="event.preventDefault();">
@@ -75,10 +106,10 @@
           </form>
         </section>
 
-        <!-- Etapa 2: Método de Frete -->
+        <!-- Etapa 2 (Agora 3): Método de Frete -->
         <section class="checkout-card">
           <div class="step-header">
-            <span class="step-number">2</span>
+            <span class="step-number">3</span>
             <h2>Método de Envio</h2>
           </div>
           <div class="shipping-options-grid">
@@ -101,10 +132,10 @@
           </div>
         </section>
 
-        <!-- Etapa 3: Forma de Pagamento -->
+        <!-- Etapa 3 (Agora 4): Forma de Pagamento -->
         <section class="checkout-card">
           <div class="step-header">
-            <span class="step-number">3</span>
+            <span class="step-number">4</span>
             <h2>Forma de Pagamento</h2>
           </div>
 
