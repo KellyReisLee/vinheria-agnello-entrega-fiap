@@ -375,7 +375,6 @@
   line-height: 1.4;
 }
 
-
 /* Barra de Retorno Inferior do Checkout */
 .checkout-navigation-footer {
   background: transparent;
@@ -451,19 +450,90 @@
   background: #631d2e;
 }
 
+/* ==========================================
+   ESTÉTICA PROFISSIONAL: Bloco de Senha (Forçado por ID)
+   ========================================== */
 .conditional-auth-box {
-  margin-top: 1.2rem;
-  padding: 1.2rem;
-  background: #f5f1eb;
-  border-radius: 10px;
-  border: 1px dashed rgba(212, 175, 55, 0.4);
+  margin-top: 1.5rem !important;
+  padding: 2rem !important;
+  background: #ffffff !important;
+  border-radius: 12px !important;
+  border: 1px solid #dcd6cd !important;
+  box-shadow: 0 8px 24px rgba(74, 21, 37, 0.06) !important;
 }
 
-.auth-msg {
-  font-size: 0.85rem;
-  color: #4a4042;
-  margin-bottom: 0.8rem;
-  line-height: 1.4;
+.conditional-auth-box .auth-msg {
+  font-size: 0.95rem !important;
+  color: #2c2c2c !important;
+  margin-bottom: 1.25rem !important;
+  line-height: 1.5 !important;
+  font-weight: 500 !important;
+}
+
+.conditional-auth-box .input-group {
+  margin-bottom: 1.25rem !important;
+}
+
+.conditional-auth-box label {
+  font-size: 0.75rem !important;
+  font-weight: 700 !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.8px !important;
+  color: #7a6e70 !important;
+  margin-bottom: 0.5rem !important;
+  display: block !important;
+}
+
+.conditional-auth-box input#checkout-senha {
+  width: 100% !important;
+  max-width: 100% !important;
+  background: #fcfbfa !important;
+  border: 1px solid #dcd6cd !important;
+  border-radius: 8px !important;
+  padding: 0.85rem 1rem !important;
+  color: #2c2c2c !important;
+  font-size: 0.95rem !important;
+  outline: none !important;
+  box-sizing: border-box !important;
+}
+
+.conditional-auth-box input#checkout-senha:focus {
+  border-color: #4a1525 !important;
+  background: #ffffff !important;
+  box-shadow: 0 0 0 3px rgba(74, 21, 37, 0.1) !important;
+}
+
+/* Botão Entrar corrigido com ID específico e dimensões profissionais */
+body #btn-entrar-senha {
+  all: unset !important; /* Remove qualquer herança externa indesejada */
+  box-sizing: border-box !important;
+  background: #4a1525 !important;
+  color: #f3d879 !important;
+  border: 1px solid rgba(212, 175, 55, 0.3) !important;
+  border-radius: 8px !important;
+  padding: 0.9rem 2.5rem !important;
+  font-weight: 700 !important;
+  font-size: 0.95rem !important;
+  font-family: 'Plus Jakarta Sans', sans-serif !important;
+  cursor: pointer !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  letter-spacing: 0.8px !important;
+  box-shadow: 0 4px 14px rgba(74, 21, 37, 0.2) !important;
+  text-align: center !important;
+  min-width: 160px !important;
+  margin-top: 0.5rem !important;
+}
+
+body #btn-entrar-senha:hover {
+  background: #631d2e !important;
+  transform: translateY(-2px) !important;
+  box-shadow: 0 6px 18px rgba(74, 21, 37, 0.3) !important;
+}
+
+body #btn-entrar-senha:active {
+  transform: translateY(0) !important;
 }
 
 .mt-2 {

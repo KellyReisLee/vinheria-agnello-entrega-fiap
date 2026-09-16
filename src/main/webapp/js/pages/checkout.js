@@ -146,8 +146,8 @@ document.addEventListener('DOMContentLoaded', function () {
       // Pega o contexto da aplicação dinamicamente ou usa a rota relativa
       const contextPath = window.location.pathname.substring(0, window.location.pathname.indexOf("/", 2));
 
-      // Requisição AJAX para o Servlet VerificarEmailController
-      fetch(contextPath + '/api/verificar-email', {
+      // Requisição AJAX para o CheckoutController
+      fetch(contextPath + '/checkout', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/x-www-form-urlencoded',
@@ -168,13 +168,68 @@ document.addEventListener('DOMContentLoaded', function () {
           btnCheckEmail.textContent = 'Confirmado ✓';
           btnCheckEmail.style.background = '#2e7d32'; // Verde de sucesso
           alert('E-mail verificado! Prossiga para o endereço de entrega.');
-          
-          // Opcional: Aqui você pode habilitar visualmente os próximos blocos de endereço se necessário
         }
       })
       .catch(error => {
         console.error('Erro ao verificar o e-mail:', error);
         alert('Ocorreu um erro ao verificar o e-mail. Tente novamente.');
+      });
+    });
+  }
+
+  // ==========================================
+  // PARTE 3: Validação de Senha (Cliente Antigo)
+  // ==========================================
+
+  const btnEntrarSenha = document.getElementById('btn-entrar-senha');
+
+  if (btnEntrarSenha) {
+    // ADICIONE O 'event' AQUI DENTRO DOS PARÊNTESES:
+    btnEntrarSenha.addEventListener('click', function(event) {
+      event.preventDefault(); // <--- ESTA LINHA É OBRIGATÓRIA AQUI!
+      
+      const senhaInput = document.getElementById('checkout-senha');
+      const senha = senhaInput ? senhaInput.value.trim() : '';
+      
+      if (!senha) {
+        alert('Por favor, digite sua senha.');
+        if (senhaInput) senhaInput.focus();
+        return;
+      }
+
+      const contextPath = window.location.pathname.substring(0, window.location.pathname.indexOf("/", 2));
+
+      // Requisição AJAX para validar a senha no CheckoutController
+      fetch(contextPath + '/checkout', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        body: 'senha=' + encodeURIComponent(senha)
+      })
+      .then(response => response.json())
+      .then(data => {
+        if (data.sucesso) {
+          // SENHA CORRETA: Loga o cliente e dá feedback visual de sucesso
+          alert('Login realizado com sucesso! Seus dados foram carregados.');
+          btnEntrarSenha.textContent = 'Logado ✓';
+          btnEntrarSenha.style.background = '#2e7d32'; // Verde de sucesso
+          if (senhaInput) senhaInput.readOnly = true;
+          
+          const passwordGroup = document.getElementById('password-group');
+          if (passwordGroup) passwordGroup.style.opacity = '0.9';
+        } else {
+          // SENHA ERRADA: Avisa que está incorreto
+          alert('Senha incorreta. Tente novamente.');
+          if (senhaInput) {
+            senhaInput.value = '';
+            senhaInput.focus();
+          }
+        }
+      })
+      .catch(error => {
+        console.error('Erro ao validar a senha:', error);
+        alert('Ocorreu um erro ao validar a senha. Tente novamente.');
       });
     });
   }
