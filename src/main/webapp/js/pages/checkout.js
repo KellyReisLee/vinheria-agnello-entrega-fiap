@@ -1,5 +1,10 @@
-// Script Dinâmico para Carrinho e Frete-- >
+// Script Dinâmico para Carrinho, Frete e Identificação de Cliente
 document.addEventListener('DOMContentLoaded', function () {
+  
+  // ==========================================
+  // PARTE 1: Carrinho, Resumo e Frete
+  // ==========================================
+  
   // 1. Busca diretamente pela chave correta que vimos no print: 'agnello_carrinho'
   let rawCart = localStorage.getItem('agnello_carrinho') || localStorage.getItem('agnello_cart') || '[]';
   let cartItems = [];
@@ -21,6 +26,8 @@ document.addEventListener('DOMContentLoaded', function () {
   const itemsListContainer = document.querySelector('.summary-items-list');
 
   function renderCartSummary() {
+    if (!itemsListContainer) return;
+    
     itemsListContainer.innerHTML = '';
     let subtotal = 0;
 
@@ -116,4 +123,60 @@ document.addEventListener('DOMContentLoaded', function () {
   });
 
   renderCartSummary();
+
+
+  // ==========================================
+  // PARTE 2: Verificação de E-mail (Ajax / Servlet)
+  // ==========================================
+  
+  const btnCheckEmail = document.getElementById('btn-check-email');
+  
+  if (btnCheckEmail) {
+    btnCheckEmail.addEventListener('click', function() {
+      const emailInput = document.getElementById('checkout-email');
+      const email = emailInput.value.trim();
+      const passwordGroup = document.getElementById('password-group');
+      
+      if (!email || !email.includes('@')) {
+        alert('Por favor, informe um e-mail válido.');
+        emailInput.focus();
+        return;
+      }
+
+      // Pega o contexto da aplicação dinamicamente ou usa a rota relativa
+      const contextPath = window.location.pathname.substring(0, window.location.pathname.indexOf("/", 2));
+
+      // Requisição AJAX para o Servlet VerificarEmailController
+      fetch(contextPath + '/api/verificar-email', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        body: 'email=' + encodeURIComponent(email)
+      })
+      .then(response => response.json())
+      .then(data => {
+        if (data.existe) {
+          // CENÁRIO A: Cliente antigo -> Trava o campo e pede a senha
+          emailInput.readOnly = true;
+          if (passwordGroup) passwordGroup.style.display = 'block';
+          btnCheckEmail.textContent = 'Alterar';
+          alert('Encontramos uma conta com este e-mail. Digite sua senha para recuperar seus dados salvos.');
+        } else {
+          // CENÁRIO B: Cliente novo -> E-mail validado para compra rápida (Guest)
+          emailInput.readOnly = true;
+          btnCheckEmail.textContent = 'Confirmado ✓';
+          btnCheckEmail.style.background = '#2e7d32'; // Verde de sucesso
+          alert('E-mail verificado! Prossiga para o endereço de entrega.');
+          
+          // Opcional: Aqui você pode habilitar visualmente os próximos blocos de endereço se necessário
+        }
+      })
+      .catch(error => {
+        console.error('Erro ao verificar o e-mail:', error);
+        alert('Ocorreu um erro ao verificar o e-mail. Tente novamente.');
+      });
+    });
+  }
+
 });

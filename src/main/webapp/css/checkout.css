@@ -418,6 +418,58 @@
   color: #4a1525;
 }
 
+/* Correção de layout para a Etapa de Identificação */
+.input-row-grid.single-col {
+  grid-template-columns: 1fr !important;
+}
+
+.input-with-action {
+  display: flex;
+  gap: 0.8rem;
+  align-items: stretch;
+}
+
+.input-with-action input {
+  flex: 1;
+}
+
+.btn-secondary-action {
+  background: #4a1525;
+  color: #f3d879;
+  border: none;
+  padding: 0 1.5rem;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: background 0.2s;
+  white-space: nowrap;
+  height: auto;
+}
+
+.btn-secondary-action:hover {
+  background: #631d2e;
+}
+
+.conditional-auth-box {
+  margin-top: 1.2rem;
+  padding: 1.2rem;
+  background: #f5f1eb;
+  border-radius: 10px;
+  border: 1px dashed rgba(212, 175, 55, 0.4);
+}
+
+.auth-msg {
+  font-size: 0.85rem;
+  color: #4a4042;
+  margin-bottom: 0.8rem;
+  line-height: 1.4;
+}
+
+.mt-2 {
+  margin-top: 0.8rem;
+}
+
 /* Responsividade */
 @media (max-width: 900px) {
   .checkout-container {
