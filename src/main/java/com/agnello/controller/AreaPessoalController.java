@@ -10,7 +10,7 @@ import java.io.IOException;
 
 import com.agnello.model.Usuario;
 
-@WebServlet(name = "AreaPessoaController", urlPatterns = {"/area-pessoal"})
+@WebServlet(name = "AreaPessoalController", urlPatterns = {"/area-pessoal"})
 public class AreaPessoalController extends HttpServlet {
     private static final long serialVersionUID = 1L;
 
@@ -21,22 +21,25 @@ public class AreaPessoalController extends HttpServlet {
         HttpSession session = request.getSession(false);
         Usuario usuario = (session != null) ? (Usuario) session.getAttribute("clienteLogado") : null;
         
-        // 1. Se o usuário não estiver logado na sessão, redireciona para o login
+        // 1. Se o usuário não estiver logado na sessão, redireciona para o login de forma segura
         if (usuario == null) {
             response.sendRedirect(request.getContextPath() + "/login");
             return;
         }
         
-        // 2. Pega o ID enviado via parâmetro na URL (ex: /area-pessoa?id=1)
+        // 2. Pega o ID enviado via parâmetro na URL
         String idParam = request.getParameter("id");
+        String idUsuarioLogado = String.valueOf(usuario.getId());
         
-        // 3. Validação de segurança: se o ID não foi informado ou não pertence ao usuário logado, bloqueia
-        if (idParam == null || !idParam.equals(String.valueOf(usuario.getId()))) {
-            response.sendRedirect(request.getContextPath() + "/login");
+        // 3. Se o ID não foi informado na URL ou é diferente do usuário logado, 
+        // corrigimos a rota redirecionando silenciosamente para a área correta dele, 
+        // evitando expulsar o usuário por um clique sem parâmetro.
+        if (idParam == null || !idParam.equals(idUsuarioLogado)) {
+            response.sendRedirect(request.getContextPath() + "/area-pessoal?id=" + idUsuarioLogado);
             return;
         }
         
-        // Caminho exato apontando para a pasta views dentro de WEB-INF
+        // 4. Tudo certo: exibe a página JSP protegida dentro de WEB-INF
         request.getRequestDispatcher("/WEB-INF/views/area-pessoal.jsp").forward(request, response);
     }
 }
