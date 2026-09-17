@@ -379,9 +379,15 @@
 
 	<div class="checkout-navigation-footer">
 		<div class="nav-footer-inner">
-			<a href="${pageContext.request.contextPath}/area-pessoal"
-				class="return-link">← Voltar para Minha Adega</a> <a
-				href="${pageContext.request.contextPath}/catalogo"
+			<%
+			com.agnello.model.Usuario userSessao = (com.agnello.model.Usuario) session.getAttribute("clienteLogado");
+			String urlAdega = request.getContextPath() + "/login";
+			if (userSessao != null) {
+				urlAdega = request.getContextPath() + "/area-pessoal?id=" + userSessao.getId();
+			}
+			%>
+			<a href="<%=urlAdega%>" class="return-link">← Voltar para Minha
+				Adega</a> <a href="${pageContext.request.contextPath}/catalogo"
 				class="catalog-link">Continuar comprando no catálogo</a>
 		</div>
 	</div>
