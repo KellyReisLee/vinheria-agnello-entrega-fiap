@@ -129,6 +129,55 @@ document.addEventListener('DOMContentLoaded', function () {
   const checkoutUrl = baseUrl + contextPath + '/checkout';
 
   // ==========================================
+  // PARTE 1.5: Verificação de Sessão Ativa ao Carregar (Mantém logado ao retornar)
+  // ==========================================
+  const serverIsLoggedInput = document.getElementById('server-is-logged');
+  const serverUserEmailInput = document.getElementById('server-user-email');
+
+  if (serverIsLoggedInput && serverIsLoggedInput.value === 'true') {
+    const emailField = document.getElementById('checkout-email');
+    const passwordGroup = document.getElementById('password-group');
+    const btnCheckEmail = document.getElementById('btn-check-email');
+    const btnEntrarSenha = document.getElementById('btn-entrar-senha');
+
+    if (emailField && serverUserEmailInput) {
+      emailField.value = serverUserEmailInput.value;
+      emailField.readOnly = true; // Trava o e-mail
+    }
+
+    if (btnCheckEmail) {
+      btnCheckEmail.textContent = 'Alterar';
+      btnCheckEmail.id = 'btn-alterar-email';
+      
+      // Permite que o cliente clique em "Alterar" caso queira trocar de e-mail/conta
+      btnCheckEmail.onclick = () => {
+        emailField.readOnly = false;
+        emailField.value = '';
+        passwordGroup.style.display = 'none';
+        btnCheckEmail.textContent = 'Continuar';
+        btnCheckEmail.id = 'btn-check-email';
+      };
+    }
+
+    if (passwordGroup) {
+      passwordGroup.style.display = 'block';
+      
+      const senhaField = document.getElementById('checkout-senha');
+      if (senhaField) {
+        senhaField.value = '********';
+        senhaField.readOnly = true;
+      }
+
+      if (btnEntrarSenha) {
+        btnEntrarSenha.textContent = 'Logado ✓';
+        btnEntrarSenha.style.background = '#6d3240';
+        btnEntrarSenha.style.color = '#fff';
+        btnEntrarSenha.disabled = true;
+      }
+    }
+  }
+
+  // ==========================================
   // PARTE 2: Verificação de E-mail (Apenas Consulta)
   // ==========================================
   const btnCheckEmail = document.getElementById('btn-check-email');
@@ -232,7 +281,7 @@ document.addEventListener('DOMContentLoaded', function () {
           if (senhaErrorBox) senhaErrorBox.style.display = 'none';
           
           btnEntrarSenha.textContent = 'Logado ✓';
-          btnEntrarSenha.style.background = '#2e7d32';
+          btnEntrarSenha.style.background = '#6d3240';
           if (senhaInput) senhaInput.readOnly = true;
           
           const passwordGroup = document.getElementById('password-group');
