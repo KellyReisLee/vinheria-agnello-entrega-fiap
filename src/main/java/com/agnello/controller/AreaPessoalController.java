@@ -10,7 +10,7 @@ import java.io.IOException;
 
 import com.agnello.model.Usuario;
 
-@WebServlet(name = "AreaPessoaController", urlPatterns = {"/area-pessoa"})
+@WebServlet(name = "AreaPessoaController", urlPatterns = {"/area-pessoal"})
 public class AreaPessoalController extends HttpServlet {
     private static final long serialVersionUID = 1L;
 
