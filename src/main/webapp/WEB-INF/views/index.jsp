@@ -37,7 +37,8 @@
 	window.CONTEXT_PATH = '${pageContext.request.contextPath}';
 </script>
 
-<link rel="preload" href="assets/images/image-wines/hero-image.png" as="image">
+<!-- Caminho corrigido para a pasta images -->
+<link rel="preload" href="${pageContext.request.contextPath}/assets/images/hero-image.png" as="image">
 </head>
 
 <body>
@@ -212,7 +213,6 @@
 			</div>
 		</section>
 
-		<!-- VITRINE (Híbrida: Suporta JSTL do Servidor ou fallback para JS) -->
 		<!-- VITRINE (Achados da Semana com Design Novo e Grid Correto) -->
 		<section class="vitrine-section">
 			<div class="section-header">
