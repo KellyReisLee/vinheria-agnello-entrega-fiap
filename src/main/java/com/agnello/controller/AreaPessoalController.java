@@ -32,8 +32,7 @@ public class AreaPessoalController extends HttpServlet {
         String idUsuarioLogado = String.valueOf(usuario.getId());
         
         // 3. Se o ID não foi informado na URL ou é diferente do usuário logado, 
-        // corrigimos a rota redirecionando silenciosamente para a área correta dele, 
-        // evitando expulsar o usuário por um clique sem parâmetro.
+        // corrigimos redirecionando para a rota correta com o ID correto.
         if (idParam == null || !idParam.equals(idUsuarioLogado)) {
             response.sendRedirect(request.getContextPath() + "/area-pessoal?id=" + idUsuarioLogado);
             return;
