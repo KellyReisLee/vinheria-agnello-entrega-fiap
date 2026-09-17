@@ -379,7 +379,7 @@
 
 	<div class="checkout-navigation-footer">
 		<div class="nav-footer-inner">
-			<a href="${pageContext.request.contextPath}/login"
+			<a href="${pageContext.request.contextPath}/area-pessoal"
 				class="return-link">← Voltar para Minha Adega</a> <a
 				href="${pageContext.request.contextPath}/catalogo"
 				class="catalog-link">Continuar comprando no catálogo</a>
