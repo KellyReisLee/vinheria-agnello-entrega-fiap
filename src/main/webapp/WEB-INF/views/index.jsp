@@ -36,6 +36,8 @@
 <script>
 	window.CONTEXT_PATH = '${pageContext.request.contextPath}';
 </script>
+
+<link rel="preload" href="/assets/image/hero-image.jpg" as="image">
 </head>
 
 <body>
