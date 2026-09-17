@@ -270,13 +270,11 @@
 										</div>
 
 										<button class="agnello-btn-comprar" data-id="${vinho.id}"
-											data-nome="${vinho.nome}"
-											data-preco="R$ <fmt:formatNumber value='${vinho.preco}' minFractionDigits='2' maxFractionDigits='2' />"
+											data-nome="${vinho.nome}" data-preco="R$ ${vinho.preco}"
 											data-imagem="${pageContext.request.contextPath}${vinho.imagem.startsWith('.') ? vinho.imagem.substring(1) : vinho.imagem}">
 											Selecionar</button>
 									</div>
 								</div>
-							</div>
 						</c:forEach>
 					</c:when>
 					<c:otherwise>
