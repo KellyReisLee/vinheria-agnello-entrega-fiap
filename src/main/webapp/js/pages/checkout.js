@@ -5,7 +5,6 @@ document.addEventListener('DOMContentLoaded', function () {
   // PARTE 1: Carrinho, Resumo e Frete
   // ==========================================
   
-  // 1. Busca diretamente pela chave correta que vimos no print: 'agnello_carrinho'
   let rawCart = localStorage.getItem('agnello_carrinho') || localStorage.getItem('agnello_cart') || '[]';
   let cartItems = [];
 
@@ -16,7 +15,6 @@ document.addEventListener('DOMContentLoaded', function () {
     cartItems = [];
   }
 
-  // Fallback caso esteja vazio
   if (!cartItems || cartItems.length === 0) {
     cartItems = [
       { nome: 'Bodega Chacra Barda Pinot Noir', preco: 'R$ 289,00', quantity: 1 }
@@ -38,12 +36,10 @@ document.addEventListener('DOMContentLoaded', function () {
         let itemName = item.name || item.nome || item.titulo || 'Vinho Agnello';
         let itemQty = Number(item.quantity || item.qtd || item.quantidade || 1);
 
-        // Trata o preço caso venha como string "R$ 289,00" ou número
         let rawPrice = item.price || item.preco || 0;
         let numericPrice = 0;
 
         if (typeof rawPrice === 'string') {
-          // Remove "R$", espaços, troca ponto de milhar se houver e substitui vírgula por ponto
           numericPrice = parseFloat(
             rawPrice.replace(/[R$\s]/g, '').replace(/\./g, '').replace(',', '.')
           ) || 0;
@@ -124,55 +120,70 @@ document.addEventListener('DOMContentLoaded', function () {
 
   renderCartSummary();
 
+  // ==========================================
+  // CONFIGURAÇÃO DE ROTA (Evita Erro 404 no Render)
+  // ==========================================
+  const baseUrl = window.location.origin;
+  const pathParts = window.location.pathname.split('/');
+  const contextPath = pathParts.length > 2 && !pathParts[1].includes('html') && !pathParts[1].includes('jsp') ? '/' + pathParts[1] : '';
+  const checkoutUrl = baseUrl + contextPath + '/checkout';
 
   // ==========================================
-  // PARTE 2: Verificação de E-mail (Ajax / Servlet)
+  // PARTE 2: Verificação de E-mail (Apenas Consulta)
   // ==========================================
-  
   const btnCheckEmail = document.getElementById('btn-check-email');
-  
+
   if (btnCheckEmail) {
     btnCheckEmail.addEventListener('click', function() {
       const emailInput = document.getElementById('checkout-email');
-      const email = emailInput.value.trim();
+      const email = emailInput ? emailInput.value.trim() : '';
       const passwordGroup = document.getElementById('password-group');
+      const registerGroup = document.getElementById('register-group');
+      const inputTipoCliente = document.getElementById('tipo_cliente');
+      const emailErrorBox = document.getElementById('email-error-box');
       
+      // Oculta o box de erro caso estivesse visível anteriormente
+      if (emailErrorBox) emailErrorBox.style.display = 'none';
+
+      // Validação substituindo o alert pelo box estilizado
       if (!email || !email.includes('@')) {
-        alert('Por favor, informe um e-mail válido.');
-        emailInput.focus();
+        if (emailErrorBox) {
+          emailErrorBox.textContent = 'Por favor, informe um e-mail válido.';
+          emailErrorBox.style.display = 'block';
+        }
+        if (emailInput) emailInput.focus();
         return;
       }
 
-      // Pega o contexto da aplicação dinamicamente ou usa a rota relativa
-      const contextPath = window.location.pathname.substring(0, window.location.pathname.indexOf("/", 2));
+      const tipoClienteVal = inputTipoCliente ? inputTipoCliente.value : 'PF';
+      const bodyData = 'email=' + encodeURIComponent(email) + '&tipo_cliente=' + encodeURIComponent(tipoClienteVal);
 
-      // Requisição AJAX para o CheckoutController
-      fetch(contextPath + '/checkout', {
+      fetch(checkoutUrl, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/x-www-form-urlencoded',
         },
-        body: 'email=' + encodeURIComponent(email)
+        body: bodyData
       })
       .then(response => response.json())
       .then(data => {
+        emailInput.readOnly = true;
+        btnCheckEmail.textContent = 'Alterar';
+
         if (data.existe) {
-          // CENÁRIO A: Cliente antigo -> Trava o campo e pede a senha
-          emailInput.readOnly = true;
           if (passwordGroup) passwordGroup.style.display = 'block';
-          btnCheckEmail.textContent = 'Alterar';
-          alert('Encontramos uma conta com este e-mail. Digite sua senha para recuperar seus dados salvos.');
+          if (registerGroup) registerGroup.style.display = 'none';
         } else {
-          // CENÁRIO B: Cliente novo -> E-mail validado para compra rápida (Guest)
-          emailInput.readOnly = true;
-          btnCheckEmail.textContent = 'Confirmado ✓';
-          btnCheckEmail.style.background = '#2e7d32'; // Verde de sucesso
-          alert('E-mail verificado! Prossiga para o endereço de entrega.');
+          if (passwordGroup) passwordGroup.style.display = 'none';
+          if (registerGroup) registerGroup.style.display = 'block';
         }
       })
       .catch(error => {
         console.error('Erro ao verificar o e-mail:', error);
-        alert('Ocorreu um erro ao verificar o e-mail. Tente novamente.');
+        if (emailErrorBox) {
+          emailErrorBox.textContent = 'Ocorreu um erro ao verificar o e-mail. Tente novamente.';
+          emailErrorBox.style.display = 'block';
+        }
       });
     });
   }
@@ -180,16 +191,18 @@ document.addEventListener('DOMContentLoaded', function () {
   // ==========================================
   // PARTE 3: Validação de Senha (Cliente Antigo)
   // ==========================================
-
   const btnEntrarSenha = document.getElementById('btn-entrar-senha');
 
   if (btnEntrarSenha) {
-    // ADICIONE O 'event' AQUI DENTRO DOS PARÊNTESES:
     btnEntrarSenha.addEventListener('click', function(event) {
-      event.preventDefault(); // <--- ESTA LINHA É OBRIGATÓRIA AQUI!
+      event.preventDefault();
       
       const senhaInput = document.getElementById('checkout-senha');
+      const emailInput = document.getElementById('checkout-email');
+      const senhaErrorBox = document.getElementById('senha-error-box');
+      
       const senha = senhaInput ? senhaInput.value.trim() : '';
+      const email = emailInput ? emailInput.value.trim() : '';
       
       if (!senha) {
         alert('Por favor, digite sua senha.');
@@ -197,30 +210,43 @@ document.addEventListener('DOMContentLoaded', function () {
         return;
       }
 
-      const contextPath = window.location.pathname.substring(0, window.location.pathname.indexOf("/", 2));
+      if (!email) {
+        alert('E-mail não identificado. Por favor, redigite seu e-mail.');
+        return;
+      }
 
-      // Requisição AJAX para validar a senha no CheckoutController
-      fetch(contextPath + '/checkout', {
+      const params = new URLSearchParams();
+      params.append('email', email);
+      params.append('senha', senha);
+
+      fetch(checkoutUrl, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/x-www-form-urlencoded',
         },
-        body: 'senha=' + encodeURIComponent(senha)
+        body: params.toString()
       })
       .then(response => response.json())
       .then(data => {
         if (data.sucesso) {
-          // SENHA CORRETA: Loga o cliente e dá feedback visual de sucesso
-          alert('Login realizado com sucesso! Seus dados foram carregados.');
+          if (senhaErrorBox) senhaErrorBox.style.display = 'none';
+          
           btnEntrarSenha.textContent = 'Logado ✓';
-          btnEntrarSenha.style.background = '#2e7d32'; // Verde de sucesso
+          btnEntrarSenha.style.background = '#2e7d32';
           if (senhaInput) senhaInput.readOnly = true;
           
           const passwordGroup = document.getElementById('password-group');
           if (passwordGroup) passwordGroup.style.opacity = '0.9';
         } else {
-          // SENHA ERRADA: Avisa que está incorreto
-          alert('Senha incorreta. Tente novamente.');
+          if (senhaErrorBox) {
+            senhaErrorBox.style.display = 'block';
+            senhaErrorBox.style.background = '#f8d7da';
+            senhaErrorBox.style.color = '#721c24';
+            senhaErrorBox.style.border = '1px solid #f5c6cb';
+            senhaErrorBox.style.padding = '0.75rem';
+            senhaErrorBox.style.borderRadius = '6px';
+            senhaErrorBox.style.fontSize = '0.85rem';
+          }
           if (senhaInput) {
             senhaInput.value = '';
             senhaInput.focus();
@@ -228,8 +254,121 @@ document.addEventListener('DOMContentLoaded', function () {
         }
       })
       .catch(error => {
-        console.error('Erro ao validar a senha:', error);
-        alert('Ocorreu um erro ao validar a senha. Tente novamente.');
+        console.error('Erro na requisição fetch:', error);
+        alert('Ocorreu um erro ao validar a senha. Verifique o console do navegador.');
+      });
+    });
+  }
+
+  // ==========================================
+  // PARTE 4: Alternância PF e PJ no Cadastro
+  // ==========================================
+  const tabPf = document.querySelector('.tab-pf');
+  const tabPj = document.querySelector('.tab-pj');
+  const fieldsPf = document.getElementById('fields-pf');
+  const fieldsPj = document.getElementById('fields-pj');
+  const inputTipoCliente = document.getElementById('tipo_cliente');
+
+  if (tabPf && tabPj) {
+    tabPf.addEventListener('click', function() {
+      if (inputTipoCliente) inputTipoCliente.value = 'PF';
+
+      tabPf.classList.add('active');
+      tabPf.style.color = '#4a1525';
+      tabPf.style.borderBottom = '2px solid #4a1525';
+      tabPf.style.paddingBottom = '0.3rem';
+
+      tabPj.classList.remove('active');
+      tabPj.style.color = '#999';
+      tabPj.style.borderBottom = 'none';
+
+      if (fieldsPf) fieldsPf.style.display = 'block';
+      if (fieldsPj) fieldsPj.style.display = 'none';
+    });
+
+    tabPj.addEventListener('click', function() {
+      if (inputTipoCliente) inputTipoCliente.value = 'PJ';
+
+      tabPj.classList.add('active');
+      tabPj.style.color = '#4a1525';
+      tabPj.style.borderBottom = '2px solid #4a1525';
+      tabPj.style.paddingBottom = '0.3rem';
+
+      tabPf.classList.remove('active');
+      tabPf.style.color = '#999';
+      tabPf.style.borderBottom = 'none';
+
+      if (fieldsPj) fieldsPj.style.display = 'block';
+      if (fieldsPf) fieldsPf.style.display = 'none';
+    });
+  }
+
+  // ==========================================
+  // PARTE 5: Submissão do Cadastro Completo (Com caixas estilizadas)
+  // ==========================================
+  const btnFinalizarCadastro = document.getElementById('btn-finalizar-cadastro');
+
+  if (btnFinalizarCadastro) {
+    btnFinalizarCadastro.addEventListener('click', function(event) {
+      event.preventDefault();
+
+      const formEl = document.getElementById('form-identification');
+      const senhaInput = document.getElementById('novo-senha');
+      const senhaValor = senhaInput ? senhaInput.value.trim() : '';
+      
+      const successBox = document.getElementById('register-success-box');
+      const errorBox = document.getElementById('register-error-box');
+      const errorMsgText = document.getElementById('register-error-msg');
+
+      if (successBox) successBox.style.display = 'none';
+      if (errorBox) errorBox.style.display = 'none';
+
+      if (!senhaValor || senhaValor.length < 6) {
+        if (errorBox && errorMsgText) {
+          errorMsgText.textContent = 'A senha deve ter no mínimo 6 caracteres.';
+          errorBox.style.display = 'block';
+        }
+        if (senhaInput) senhaInput.focus();
+        return;
+      }
+
+      const formData = new URLSearchParams(new FormData(formEl));
+      formData.set('senha', senhaValor);
+
+      fetch(checkoutUrl, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        body: formData.toString()
+      })
+      .then(response => response.json())
+      .then(data => {
+        if (data.sucesso) {
+          if (successBox) {
+            successBox.style.display = 'block';
+          }
+          btnFinalizarCadastro.disabled = true;
+          btnFinalizarCadastro.style.opacity = '0.6';
+
+          setTimeout(() => {
+            location.reload();
+          }, 1500);
+
+        } else {
+          if (errorBox && errorMsgText) {
+            errorMsgText.textContent = data.mensagem || 'Não foi possível concluir o cadastro. Verifique os dados e tente novamente.';
+            errorBox.style.display = 'block';
+            errorBox.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+          }
+        }
+      })
+      .catch(error => {
+        console.error('Erro na requisição de cadastro:', error);
+        if (errorBox && errorMsgText) {
+          errorMsgText.textContent = 'Ocorreu um erro de conexão com o servidor. Tente novamente.';
+          errorBox.style.display = 'block';
+        }
       });
     });
   }

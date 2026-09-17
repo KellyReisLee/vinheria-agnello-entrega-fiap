@@ -470,8 +470,18 @@
   font-weight: 500 !important;
 }
 
+.conditional-auth-box .input-row-grid{
+   display: grid;
+   grid-template-columns: 2fr 1fr; /* Coluna da esquerda (input) maior que a da direita (botão) */
+   gap: 1rem;
+   align-items: center; 
+   
+}
+ 
+
+
 .conditional-auth-box .input-group {
-  margin-bottom: 1.25rem !important;
+  margin-bottom: 1rem !important;
 }
 
 .conditional-auth-box label {
@@ -480,7 +490,7 @@
   text-transform: uppercase !important;
   letter-spacing: 0.8px !important;
   color: #7a6e70 !important;
-  margin-bottom: 0.5rem !important;
+  
   display: block !important;
 }
 
@@ -511,7 +521,7 @@ body #btn-entrar-senha {
   color: #f3d879 !important;
   border: 1px solid rgba(212, 175, 55, 0.3) !important;
   border-radius: 8px !important;
-  padding: 0.9rem 2.5rem !important;
+  padding: 0.7rem 2.5rem !important;
   font-weight: 700 !important;
   font-size: 0.95rem !important;
   font-family: 'Plus Jakarta Sans', sans-serif !important;
@@ -520,7 +530,7 @@ body #btn-entrar-senha {
   align-items: center !important;
   justify-content: center !important;
   letter-spacing: 0.8px !important;
-  box-shadow: 0 4px 14px rgba(74, 21, 37, 0.2) !important;
+  
   text-align: center !important;
   min-width: 160px !important;
   margin-top: 0.5rem !important;
