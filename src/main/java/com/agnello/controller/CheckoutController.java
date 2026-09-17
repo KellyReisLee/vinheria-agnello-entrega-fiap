@@ -17,10 +17,20 @@ import com.agnello.model.Usuario;
 public class CheckoutController extends HttpServlet {
     private static final long serialVersionUID = 1L;
 
-    // 1. O doGet renderiza a página do checkout quando o cliente entra na URL /checkout
+ // 1. O doGet renderiza a página do checkout quando o cliente entra na URL /checkout
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) 
             throws ServletException, IOException {
+        
+        // Verifica se já existe um usuário logado na sessão
+        HttpSession session = request.getSession(false);
+        Usuario usuario = (session != null) ? (Usuario) session.getAttribute("clienteLogado") : null;
+        
+        // Se houver, injetamos ele como atributo para o JSP conseguir ler
+        if (usuario != null) {
+            request.setAttribute("usuarioLogado", usuario);
+        }
+        
         request.getRequestDispatcher("/WEB-INF/views/checkout.jsp").forward(request, response);
     }
 

@@ -1,6 +1,13 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8"
 	pageEncoding="UTF-8"%>
 <%@ taglib prefix="c" uri="jakarta.tags.core"%>
+
+<%
+    // Recupera o usuário injetado pelo CheckoutController (se houver)
+    com.agnello.model.Usuario userCheckout = (com.agnello.model.Usuario) request.getAttribute("usuarioLogado");
+    boolean jaLogado = (userCheckout != null);
+    String emailLogado = jaLogado ? userCheckout.getEmail() : "";
+%>
 <!DOCTYPE html>
 <html lang="pt-BR">
 
@@ -28,6 +35,10 @@
 </head>
 
 <body class="agnello-checkout-body">
+
+	<!-- INPUTS OCULTOS PARA O JAVASCRIPT LER O ESTADO DE LOGIN -->
+	<input type="hidden" id="server-is-logged" value="<%= jaLogado %>">
+	<input type="hidden" id="server-user-email" value="<%= emailLogado %>">
 
 	<!-- Header Simplificado de Checkout -->
 	<header class="checkout-top-bar">
@@ -72,7 +83,7 @@
 								</div>
 							</div>
 						</div>
-						<!-- Bloco condicional para senha (exibido caso o e-mail já exista) -->
+						<!-- Bloco condicional para senha (exibido caso o e-mail já exista ou usuário esteja logado) -->
 						<div id="password-group" class="conditional-auth-box"
 							style="display: none;">
 							<p class="auth-msg">Detectamos uma conta com este e-mail.
@@ -179,7 +190,7 @@
 								</div>
 							</div>
 
-							<!-- Campos de PESSOA JURÍDICA (Oculto por padrão) - name ajustado para razao_social -->
+							<!-- Campos de PESSOA JURÍDICA (Oculto por padrão) -->
 							<div id="fields-pj" class="pessoa-fields" style="display: none;">
 								<div class="input-row-grid" style="margin-bottom: 1rem;">
 									<div class="input-group">
