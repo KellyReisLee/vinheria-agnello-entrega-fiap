@@ -7,37 +7,41 @@ document.addEventListener('DOMContentLoaded', () => {
     // Se o HTML/JSTL do servidor NÃO preencheu a vitrine, usa o fallback do JS antigo
     if (!containerVitrine.innerHTML.trim() && typeof achadosDaSemana !== 'undefined' && achadosDaSemana.length > 0) {
       containerVitrine.innerHTML = achadosDaSemana.map((produto) => `
-        <article class="${produto.cardClass || 'product-card'}">
-          ${produto.tag || ''}
-          <div class="product-img-placeholder">
-            <img src="${produto.imagem}" alt="${produto.nome}">
+        <div class="agnello-wine-card">
+          ${produto.desconto ? `<span class="agnello-badge-off">${produto.desconto}</span>` : ''}
+          <div class="agnello-card-img-container">
+            <img src="${window.CONTEXT_PATH || ''}${produto.imagem}" alt="${produto.nome}">
           </div>
-          <div class="product-info">
-            <span class="product-meta">${produto.meta}</span>
-            <h3 class="product-name">${produto.nome}</h3>
-            <ul class="product-scores">
-              ${produto.scores.map(score => `
-                <li>
-                  <img class="score-icon" src="${window.CONTEXT_PATH || ''}/assets/icons/star-check.svg" alt="Estrela de verificação">
-                  ${score}
-                </li>
-              `).join('')}
-            </ul>
-          </div>
-          <div class="product-footer">
-            <div class="price-box">
-              ${produto.precoAntigo ? `<span class="old-price">${produto.precoAntigo}</span>` : ''}
-              <span class="product-price">${produto.preco}</span>
+          <div class="agnello-card-info">
+            <div class="agnello-tags-row">
+              <span class="agnello-tag-tipo">${produto.tipo || produto.meta}</span>
+              ${produto.pontuacao ? `<span class="agnello-tag-pontos">${produto.pontuacao}</span>` : ''}
             </div>
-            <button class="btn-circle-add" aria-label="Selecionar" data-id="${produto.id}">+</button>
+            <span class="agnello-card-origem">${produto.origem || ''}</span>
+            <h3 class="agnello-card-nome">${produto.nome}</h3>
+            ${produto.descricao ? `<p class="agnello-card-desc">${produto.descricao}</p>` : ''}
+            <div class="agnello-card-footer">
+              <div class="agnello-card-precos">
+                ${produto.precoAntigo ? `<span class="agnello-preco-antigo">${produto.precoAntigo}</span>` : ''}
+                <span class="agnello-preco-atual">${produto.preco}</span>
+              </div>
+              <button class="agnello-btn-comprar" 
+                      data-id="${produto.id}" 
+                      data-nome="${produto.nome}" 
+                      data-preco="${produto.preco}" 
+                      data-imagem="${window.CONTEXT_PATH || ''}${produto.imagem}">
+                Selecionar
+              </button>
+            </div>
           </div>
-        </article>
+        </div>
       `).join('');
     }
 
     // Ouvinte de clique unificado para ambos os casos (Servidor ou JS estático)
     containerVitrine.addEventListener('click', (event) => {
-      const btn = event.target.closest('.btn-circle-add');
+      // Suporta tanto o novo botão "Selecionar" quanto o antigo botão circular caso ainda exista
+      const btn = event.target.closest('.agnello-btn-comprar, .btn-circle-add');
       if (!btn) return;
 
       const produtoId = btn.getAttribute('data-id');
