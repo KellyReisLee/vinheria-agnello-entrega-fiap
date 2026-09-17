@@ -37,8 +37,7 @@
 	window.CONTEXT_PATH = '${pageContext.request.contextPath}';
 </script>
 
-<link rel="preload" href="/vinheria-agnello-entrega-fiap/assets/images/image-wines/hero-image.jpg" as="image">
-
+<link rel="preload" href="assets/images/image-wines/hero-image.png" as="image">
 </head>
 
 <body>
