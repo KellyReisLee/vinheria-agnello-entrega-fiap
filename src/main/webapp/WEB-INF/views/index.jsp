@@ -228,7 +228,7 @@
 							<article class="product-card">
 								<!-- Selo de Desconto (ex: 17% OFF) -->
 								<c:if test="${not empty vinho.desconto}">
-									<span class="product-tag">${vinho.desconto}</span>
+									<span class="agnello-badge-off">${vinho.desconto}</span>
 								</c:if>
 
 								<!-- Imagem -->
