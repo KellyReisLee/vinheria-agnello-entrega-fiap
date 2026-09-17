@@ -53,7 +53,7 @@ public class LoginController extends HttpServlet {
                 session.setAttribute("clienteLogado", usuario); // Padronizado para alinhar com a área pessoal
 
                 // Redireciona para a área pessoal protegida passando o ID do usuário na URL
-                response.sendRedirect(request.getContextPath() + "/area-pessoa?id=" + usuario.getId());
+                response.sendRedirect(request.getContextPath() + "/area-pessoal?id=" + usuario.getId());
             } else {
                 // Caso falhe, retorna para a tela de login com erro
                 request.setAttribute("erro", "E-mail ou senha inválidos.");
