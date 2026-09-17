@@ -211,84 +211,79 @@
 		</section>
 
 		<!-- VITRINE (Híbrida: Suporta JSTL do Servidor ou fallback para JS) -->
-		<!-- VITRINE (Achados da Semana alinhados ao design do Catálogo) -->
-		<section class="vitrine-section">
-			<div class="section-header">
-				<div>
-					<h2>Achados da Semana</h2>
-					<p>Rótulos de importação própria recém-chegados à nossa adega.</p>
-				</div>
-			</div>
 
-			<div class="agnello-wine-grid" id="vitrine-achados-container">
-				<c:choose>
-					<c:when test="${not empty listaVinhos}">
-						<c:forEach var="vinho" items="${listaVinhos}">
-							<div class="agnello-wine-card">
-								<!-- Badge de Desconto (ex: 17% OFF) -->
-								<c:if test="${not empty vinho.desconto}">
-									<span class="agnello-badge-off">${vinho.desconto}</span>
-								</c:if>
+    <section class="vitrine-section">
+      <div class="section-header">
+        <div>
+          <h2>Achados da Semana</h2>
+          <p>Rótulos de importação própria recém-chegados à nossa adega.</p>
+        </div>
+      </div>
 
-								<!-- Imagem do Vinho -->
-								<div class="agnello-card-img-container">
-									<img
-										src="${pageContext.request.contextPath}${vinho.imagem.startsWith('.') ? vinho.imagem.substring(1) : vinho.imagem}"
-										alt="${vinho.nome}"
-										onerror="this.style.display='none'; this.parentElement.style.backgroundColor='#F4F1EA';">
-								</div>
+      <!-- Certifique-se de que a classe aqui é EXATAMENTE product-grid -->
+      <div class="product-grid" id="vitrine-achados-container">
+        <c:choose>
+          <c:when test="${not empty listaVinhos}">
+            <c:forEach var="vinho" items="${listaVinhos}">
+              <article class="product-card">
+                
+                <!-- Selo de Desconto -->
+                <c:if test="${not empty vinho.desconto}">
+                  <span class="product-tag">${vinho.desconto}</span>
+                </c:if>
+                
+                <!-- Imagem -->
+                <div class="product-img-placeholder">
+                  <img src="${pageContext.request.contextPath}${vinho.imagem.startsWith('.') ? vinho.imagem.substring(1) : vinho.imagem}" 
+                       alt="${vinho.nome}" 
+                       onerror="this.style.display='none'; this.parentElement.style.backgroundColor='#F8F7F4';">
+                </div>
 
-								<!-- Informações do Produto -->
-								<div class="agnello-card-info">
-									<div class="agnello-tags-row">
-										<span class="agnello-tag-tipo">${vinho.tipo}</span>
-										<c:if test="${not empty vinho.pontuacao}">
-											<span class="agnello-tag-pontos">${vinho.pontuacao}</span>
-										</c:if>
-									</div>
+                <!-- Informações -->
+                <div class="product-info">
+                  <span class="product-meta">${vinho.tipo} • ${vinho.origem}</span>
+                  <h3 class="product-name">${vinho.nome}</h3>
+                  
+                  <c:if test="${not empty vinho.pontuacao}">
+                    <ul class="product-scores">
+                      <li>
+                        <img class="score-icon" src="${pageContext.request.contextPath}/assets/icons/star-check.svg" alt="Estrela">
+                        ${vinho.pontuacao}
+                      </li>
+                    </ul>
+                  </c:if>
+                </div>
+                
+                <!-- Rodapé com Preço e Botão de Adicionar -->
+                <div class="product-footer">
+                  <div class="price-box">
+                    <c:if test="${vinho.precoAntigo > 0}">
+                      <span class="old-price">R$ ${vinho.precoAntigo}</span>
+                    </c:if>
+                    <span class="product-price">R$ ${vinho.preco}</span>
+                  </div>
 
-									<span class="agnello-card-origem">${vinho.origem}</span>
-									<h3 class="agnello-card-nome">${vinho.nome}</h3>
+                  <!-- Botão padrão que interage com o carrinho -->
+                  <button class="btn-circle-add" 
+                          aria-label="Adicionar" 
+                          data-id="${vinho.id}"
+                          data-nome="${vinho.nome}"
+                          data-preco="R$ ${vinho.preco}"
+                          data-imagem="${pageContext.request.contextPath}${vinho.imagem.startsWith('.') ? vinho.imagem.substring(1) : vinho.imagem}">+</button>
+                </div>
+              </article>
+            </c:forEach>
+          </c:when>
+          <c:otherwise>
+            <!-- Fallback caso a lista venha vazia -->
+          </c:otherwise>
+        </c:choose>
+      </div>
 
-									<c:if test="${not empty vinho.descricao}">
-										<p class="agnello-card-desc">${vinho.descricao}</p>
-									</c:if>
-
-									<!-- Rodapé com Preço e Botão Selecionar -->
-									<div class="agnello-card-footer">
-										<div class="agnello-card-precos">
-											<c:if test="${vinho.precoAntigo > 0}">
-												<span class="agnello-preco-antigo"> R$ <fmt:formatNumber
-														value="${vinho.precoAntigo}" minFractionDigits="2"
-														maxFractionDigits="2" />
-												</span>
-											</c:if>
-											<span class="agnello-preco-atual"> R$ <fmt:formatNumber
-													value="${vinho.preco}" minFractionDigits="2"
-													maxFractionDigits="2" />
-											</span>
-										</div>
-
-										<button class="agnello-btn-comprar" data-id="${vinho.id}"
-											data-nome="${vinho.nome}" data-preco="R$ ${vinho.preco}"
-											data-imagem="${pageContext.request.contextPath}${vinho.imagem.startsWith('.') ? vinho.imagem.substring(1) : vinho.imagem}">
-											Selecionar</button>
-									</div>
-								</div>
-						</c:forEach>
-					</c:when>
-					<c:otherwise>
-						<!-- Caso venha vazio do servidor, o JavaScript de fallback pode popular aqui -->
-					</c:otherwise>
-				</c:choose>
-			</div>
-
-			<div class="center-action"
-				style="margin-top: 2rem; text-align: center;">
-				<a href="${pageContext.request.contextPath}/catalogo"
-					class="btn-outline-dark">Ver Toda a Adega</a>
-			</div>
-		</section>
+      <div class="center-action" style="margin-top: 2rem; text-align: center;">
+        <a href="${pageContext.request.contextPath}/catalogo" class="btn-outline-dark">Ver Toda a Adega</a>
+      </div>
+    </section>
 	</main>
 
 	<!-- FOOTER MODULAR (Protegido em WEB-INF) -->
