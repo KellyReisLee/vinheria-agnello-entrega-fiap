@@ -32,7 +32,8 @@ document.addEventListener('DOMContentLoaded', () => {
             <button class="agnello-btn-comprar" aria-label="Selecionar" 
                     data-id="${produto.id}" 
                     data-nome="${produto.nome}" 
-                    data-preco="${produto.preco}" 
+                    data-preco="${produto.precoNumerico || produto.preco}" 
+                    data-origem="${produto.origem || produto.meta || ''}"
                     data-imagem="${produto.imagem}">Selecionar</button>
           </div>
         </article>
@@ -41,49 +42,35 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Ouvinte de clique unificado para ambos os casos (Servidor ou JS estático)
     containerVitrine.addEventListener('click', (event) => {
-      // Suporta o botão "Selecionar" ou o antigo botão circular
-      const btn = event.target.closest('.agnello-btn-comprar, .btn-circle-add');
+      const btn = event.target.closest('.agnello-btn-comprar');
       if (!btn) return;
 
       const produtoId = btn.getAttribute('data-id');
-      let produtoSelecionado = null;
+      const nome = btn.getAttribute('data-nome');
+      const precoStr = btn.getAttribute('data-preco');
+      const origem = btn.getAttribute('data-origem');
+      const imagem = btn.getAttribute('data-imagem');
 
-      // Tenta buscar pelo array estático se ele existir
-      if (typeof achadosDaSemana !== 'undefined') {
-        produtoSelecionado = achadosDaSemana.find(p => String(p.id) === String(produtoId));
-      }
+      // Tenta extrair o valor numérico com segurança para formatar certinho
+      let precoNumerico = parseFloat(String(precoStr).replace('R$', '').replace(',', '.').trim());
+      if (isNaN(precoNumerico)) precoNumerico = 0;
 
-      if (produtoSelecionado) {
-        // Se encontrou no array estático (fallback)
-        if (typeof adicionarAoCarrinho === 'function') {
-          adicionarAoCarrinho({
-            id: produtoSelecionado.id,
-            nome: produtoSelecionado.nome,
-            preco: produtoSelecionado.preco,
-            imagem: produtoSelecionado.imagem
-          });
-        } else {
-          console.error('Função adicionarAoCarrinho não encontrada.');
-        }
+      // Formata o preço corretamente para o padrão brasileiro com 2 casas decimais (ex: R$ 125,00)
+      const precoFormatado = 'R$ ' + precoNumerico.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+
+      if (typeof adicionarAoCarrinho === 'function') {
+        adicionarAoCarrinho({
+          id: produtoId,
+          nome: nome,
+          preco: precoFormatado,
+          subtitulo: origem, // Garante que o subtítulo/origem vá para o carrinho no lugar do "undefined"
+          imagem: imagem
+        });
       } else {
-        // Se veio do banco de dados (JSTL), pega direto dos data-attributes do botão
-        const nome = btn.getAttribute('data-nome');
-        const preco = btn.getAttribute('data-preco');
-        const imagem = btn.getAttribute('data-imagem');
-
-        if (typeof adicionarAoCarrinho === 'function') {
-          adicionarAoCarrinho({
-            id: produtoId,
-            nome: nome,
-            preco: preco,
-            imagem: imagem
-          });
-        } else {
-          console.error('Função adicionarAoCarrinho não encontrada.');
-        }
+        console.error('Função adicionarAoCarrinho não encontrada.');
       }
     });
-  }
+  } // <--- Chave fechada corretamente aqui!
 
   // 2. Observer de animação exclusivo da Home (Seção Família e afins)
   const observer = new IntersectionObserver((entries) => {

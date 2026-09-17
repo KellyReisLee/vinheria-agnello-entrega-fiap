@@ -3,10 +3,10 @@
 <%@ taglib prefix="c" uri="jakarta.tags.core"%>
 
 <%
-    // Recupera o usuário injetado pelo CheckoutController (se houver)
-    com.agnello.model.Usuario userCheckout = (com.agnello.model.Usuario) request.getAttribute("usuarioLogado");
-    boolean jaLogado = (userCheckout != null);
-    String emailLogado = jaLogado ? userCheckout.getEmail() : "";
+// Recupera o usuário injetado pelo CheckoutController (se houver)
+com.agnello.model.Usuario userCheckout = (com.agnello.model.Usuario) request.getAttribute("usuarioLogado");
+boolean jaLogado = (userCheckout != null);
+String emailLogado = jaLogado ? userCheckout.getEmail() : "";
 %>
 <!DOCTYPE html>
 <html lang="pt-BR">
@@ -37,14 +37,26 @@
 <body class="agnello-checkout-body">
 
 	<!-- INPUTS OCULTOS PARA O JAVASCRIPT LER O ESTADO DE LOGIN -->
-	<input type="hidden" id="server-is-logged" value="<%= jaLogado %>">
-	<input type="hidden" id="server-user-email" value="<%= emailLogado %>">
+	<input type="hidden" id="server-is-logged" value="<%=jaLogado%>">
+	<input type="hidden" id="server-user-email" value="<%=emailLogado%>">
 
 	<!-- Header Simplificado de Checkout -->
 	<header class="checkout-top-bar">
 		<div class="checkout-brand">
-			<a href="${pageContext.request.contextPath}/catalogo">VINHERIA
-				AGNELLO</a> <span class="secure-badge">🔒 Ambiente 100% Seguro</span>
+
+			<a href="${pageContext.request.contextPath}/home"
+				class="agnello-logo-link"
+				style="text-decoration: none; display: inline-flex; align-items: center;">
+				<div class="logo">
+					<img class="logo-img"
+						src="${pageContext.request.contextPath}/assets/images/logo-no-bg.png"
+						alt="Ícone Vinheria Agnello">
+					<div>
+						<span class="logo-title">VINHERIA AGNELLO</span> <span
+							class="logo-subtitle">DESDE 1978</span>
+					</div>
+				</div>
+			</a><span class="secure-badge">🔒 Ambiente 100% Seguro</span>
 		</div>
 	</header>
 
