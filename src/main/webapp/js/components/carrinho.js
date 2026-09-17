@@ -41,14 +41,22 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 
-  // Intercepta de forma global e segura o clique no botão de finalizar pedido
+ 
+  // Intercepta o clique no botão de finalizar pedido de forma dinâmica
   document.addEventListener('click', (event) => {
     if (event.target && event.target.id === 'btn-ir-checkout') {
       event.preventDefault();
-      window.location.href = '/vinheria-agnello/checkout';
+      
+      // Descobre o caminho base do projeto automaticamente (funciona local e no Render)
+      const baseUrl = window.location.origin;
+      const pathParts = window.location.pathname.split('/');
+      const contextPath = pathParts.length > 2 && !pathParts[1].includes('html') && !pathParts[1].includes('jsp') ? '/' + pathParts[1] : '';
+      
+      window.location.href = baseUrl + contextPath + '/checkout';
     }
   });
-
+  
+  
   if (closeBtn) closeBtn.addEventListener('click', fecharCarrinho);
   if (overlay) overlay.addEventListener('click', fecharCarrinho);
 
