@@ -12,13 +12,13 @@ public class ConnectionFactory {
             Class.forName("org.postgresql.Driver");
             
             // URL limpa buscada da variável de ambiente do Render
-            String url = System.getenv("SUPABASE_DB_URL");
-            String user = System.getenv("SUPABASE_DB_USER");
-            String password = System.getenv("SUPABASE_DB_PASSWORD");
+            String url = System.getenv("NEON_DB_URL");
+            String user = System.getenv("NEON_DB_USER");
+            String password = System.getenv("NEON_DB_PASSWORD");
             
             // Validação opcional para garantir que o ambiente está configurado
             if (url == null || url.isEmpty()) {
-                throw new RuntimeException("A variável de ambiente SUPABASE_DB_URL não está configurada!");
+                throw new RuntimeException("A variável de ambiente NEON_DB_URL não está configurada!");
             }
             
             // Passando as credenciais separadamente (exatamente como funcionou no seu teste), 
