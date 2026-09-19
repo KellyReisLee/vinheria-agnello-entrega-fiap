@@ -25,7 +25,7 @@
 }
 
 .sugestoes-main-wrapper-unique {
-  margin-top: 7rem;
+  margin-top: 6rem;
   display: flex;
   justify-content: center;
   align-items: center;
@@ -275,12 +275,19 @@
 
 /* Responsividade Adaptativa E-commerce */
 @media (max-width: 1024px) {
+	.sugestoes-main-wrapper-unique {
+  margin-top: 5rem;
+	}
   .vinhos-grid-unique {
     grid-template-columns: repeat(2, 1fr);
   }
+  
 }
 
 @media (max-width: 650px) {
+	.sugestoes-main-wrapper-unique {
+  margin-top: 4rem;
+	}
   .sugestoes-container-unique {
     padding: 2rem 1rem;
   }

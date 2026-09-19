@@ -560,3 +560,113 @@ body #btn-entrar-senha:active {
     position: static;
   }
 }
+
+/* ==========================================
+   AJUSTES DE RESPONSIVIDADE MOBILE - CHECKOUT
+   ========================================== */
+@media (max-width: 768px) {
+  /* Garante que o corpo e os containers principais respeitem a largura da tela */
+  .agnello-checkout-body {
+    overflow-x: hidden;
+  }
+
+  .agnello-checkout-main {
+    padding: 1.5rem 1rem;
+  }
+
+  .checkout-container {
+    width: 100%;
+    margin: 0;
+    padding: 0;
+    gap: 1.5rem;
+  }
+
+  /* Reduz o padding dos cards de etapas para ganhar espaço útil */
+  .checkout-card {
+    padding: 1.25rem;
+    border-radius: 12px;
+  }
+
+  /* Transforma todas as grades de colunas duplas em coluna única no mobile */
+  .input-row-grid,
+  .input-row-grid.three-cols,
+  .conditional-auth-box .input-row-grid {
+    grid-template-columns: 1fr !important;
+    gap: 0.8rem;
+  }
+
+  /* Ajuste para inputs com botões internos (como o campo de e-mail) empilharem ou adaptarem */
+  .input-with-action {
+    flex-direction: column;
+    gap: 0.6rem;
+  }
+
+  .input-with-action button,
+  .btn-secondary-action {
+    width: 100%;
+    padding: 0.8rem;
+    text-align: center;
+  }
+
+  /* Botão Entrar da senha ocupando toda a largura no mobile */
+  body #btn-entrar-senha {
+    width: 100% !important;
+    min-width: 100% !important;
+  }
+
+  /* Abas de pagamento (Pix, Cartão, Boleto) ajustadas para toque mobile */
+  .payment-tabs {
+    grid-template-columns: 1fr;
+    gap: 0.4rem;
+  }
+
+  .pay-tab {
+    width: 100%;
+    text-align: center;
+    padding: 0.8rem;
+  }
+
+  /* Ajuste do rodapé inferior de navegação do checkout */
+  .checkout-navigation-footer {
+    padding: 1rem;
+  }
+
+  .nav-footer-inner {
+    flex-direction: column;
+    gap: 1rem;
+    align-items: flex-start;
+    text-align: left;
+  }
+
+  /* Correção do espaçamento e largura do footer geral incluído via JSP */
+  footer, 
+  .agnello-footer, 
+  .footer-container {
+    width: 100% !important;
+    max-width: 100% !important;
+    box-sizing: border-box !important;
+    margin: 0 !important;
+    padding: 2rem 1rem !important;
+  }
+}
+
+/* ==========================================
+   CORREÇÃO DO SELO DE SEGURANÇA NO MOBILE
+   ========================================== */
+@media (max-width: 768px) {
+  .checkout-top-bar {
+    padding: 1rem;
+  }
+
+  .checkout-brand {
+    flex-direction: column;
+    gap: 0.8rem;
+    align-items: center;
+    text-align: center;
+  }
+
+  .secure-badge {
+    font-size: 0.75rem;
+    padding: 0.25rem 0.6rem;
+  }
+}
