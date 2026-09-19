@@ -17,6 +17,16 @@
   <link
     href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400..900;1,400..900&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap"
     rel="stylesheet">
+    
+    <script>
+    // Detecta se a página foi carregada do cache do navegador (botão voltar)
+    window.addEventListener("pageshow", function (event) {
+        if (event.persisted) {
+            // Força a recarga da página a partir do servidor
+            window.location.reload();
+        }
+    });
+</script>
 </head>
 
 <body class="agnello-account-body">
@@ -73,7 +83,7 @@
           <a href="#" class="nav-item">Minha Adega (Desejos)</a>
           <a href="#" class="nav-item">Clube Agnello</a>
           <a href="#" class="nav-item">Endereços & Pagamento</a>
-         <a href="<c:url value='/login?logout=true'/>" class="nav-item logout">Encerrar Sessão</a>
+        <a href="<c:url value='/logout'/>" class="nav-item logout">Encerrar Sessão</a>
         </nav>
       </aside>
 

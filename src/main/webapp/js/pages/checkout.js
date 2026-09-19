@@ -286,6 +286,12 @@ document.addEventListener('DOMContentLoaded', function () {
           
           const passwordGroup = document.getElementById('password-group');
           if (passwordGroup) passwordGroup.style.opacity = '0.9';
+
+          // ADICIONADO: Recarrega a página após 1 segundo para atualizar o cabeçalho
+          setTimeout(() => {
+            location.reload();
+          }, 1000);
+
         } else {
           if (senhaErrorBox) {
             senhaErrorBox.style.display = 'block';
