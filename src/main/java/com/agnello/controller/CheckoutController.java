@@ -8,25 +8,23 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 
-import com.agnello.dao.ClienteDAO;
-import com.agnello.model.ClientePF;
-import com.agnello.model.ClientePJ;
 import com.agnello.model.Usuario;
+import com.agnello.service.ClienteService;
 
 @WebServlet(name = "CheckoutController", urlPatterns = {"/checkout"})
 public class CheckoutController extends HttpServlet {
     private static final long serialVersionUID = 1L;
 
- // 1. O doGet renderiza a página do checkout quando o cliente entra na URL /checkout
+    private ClienteService clienteService = new ClienteService();
+
+    // 1. O doGet renderiza a página do checkout
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) 
             throws ServletException, IOException {
         
-        // Verifica se já existe um usuário logado na sessão
         HttpSession session = request.getSession(false);
         Usuario usuario = (session != null) ? (Usuario) session.getAttribute("clienteLogado") : null;
         
-        // Se houver, injetamos ele como atributo para o JSP conseguir ler
         if (usuario != null) {
             request.setAttribute("usuarioLogado", usuario);
         }
@@ -34,7 +32,7 @@ public class CheckoutController extends HttpServlet {
         request.getRequestDispatcher("/WEB-INF/views/checkout.jsp").forward(request, response);
     }
 
-    // 2. O doPost lida com as requisições AJAX do JavaScript (Verificação de E-mail, Validação de Senha e Novo Cadastro)
+    // 2. O doPost lida com as requisições AJAX (Login por etapa, Cadastro e Verificação de E-mail)
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response) 
             throws ServletException, IOException {
@@ -48,22 +46,20 @@ public class CheckoutController extends HttpServlet {
         String tipoCliente = request.getParameter("tipo_cliente"); 
 
         // =========================================================================
-        // CASO 1: Requisição para validar a senha do cliente antigo (Login na etapa)
+        // CASO 1: Validação de senha do cliente existente
         // =========================================================================
-        if (senhaInformada != null && !senhaInformada.trim().isEmpty() && (request.getParameter("nome") == null && request.getParameter("razao_social") == null)) {
+        if (senhaInformada != null && !senhaInformada.trim().isEmpty() && 
+            (request.getParameter("nome") == null && request.getParameter("razao_social") == null)) {
+            
             boolean senhaValida = false;
             
             try {
-                ClienteDAO dao = new ClienteDAO();
-                Usuario usuarioBanco = dao.buscarPorEmail(email);
+                Usuario usuarioBanco = clienteService.autenticar(email, senhaInformada);
                 
                 if (usuarioBanco != null) {
-                    if (usuarioBanco.getSenha() != null && usuarioBanco.getSenha().trim().equals(senhaInformada.trim())) {
-                        senhaValida = true;
-                        
-                        HttpSession session = request.getSession();
-                        session.setAttribute("clienteLogado", usuarioBanco);
-                    }
+                    senhaValida = true;
+                    HttpSession session = request.getSession();
+                    session.setAttribute("clienteLogado", usuarioBanco);
                 }
             } catch (Exception e) {
                 e.printStackTrace();
@@ -74,7 +70,7 @@ public class CheckoutController extends HttpServlet {
         }
 
         // =========================================================================
-        // CASO 2: Requisição para cadastrar novo cliente (Só executa se houver dados de cadastro completos)
+        // CASO 2: Cadastro de novo cliente (Utilizando o método unificado do Service)
         // =========================================================================
         boolean temDadosCadastro = (request.getParameter("nome") != null && !request.getParameter("nome").trim().isEmpty()) || 
                                    (request.getParameter("razao_social") != null && !request.getParameter("razao_social").trim().isEmpty());
@@ -84,36 +80,20 @@ public class CheckoutController extends HttpServlet {
             String mensagemErro = "";
 
             try {
-                ClienteDAO dao = new ClienteDAO();
                 String telefone = request.getParameter("telefone");
+                String nome = request.getParameter("nome");
+                String sobrenome = request.getParameter("sobrenome");
+                String cpf = request.getParameter("cpf");
+                String razaoSocial = request.getParameter("razao_social");
+                String cnpj = request.getParameter("cnpj");
 
-                if ("PF".equalsIgnoreCase(tipoCliente)) {
-                    ClientePF pf = new ClientePF();
-                    pf.setNome(request.getParameter("nome"));
-                    pf.setSobrenome(request.getParameter("sobrenome"));
-                    pf.setCpf(request.getParameter("cpf"));
-                    pf.setEmail(email);
-                    pf.setTelefone(telefone);
-                    pf.setSenha(senhaInformada);
-                    
-                    dao.cadastrarPF(pf);
-                    sucesso = true;
+                // Chamada limpa utilizando o método unificado do ClienteService
+                clienteService.cadastrarCliente(tipoCliente, email, senhaInformada, telefone, nome, sobrenome, cpf, razaoSocial, cnpj);
+                sucesso = true;
 
-                } else if ("PJ".equalsIgnoreCase(tipoCliente)) {
-                    ClientePJ pj = new ClientePJ();
-                    pj.setRazaoSocial(request.getParameter("razao_social"));
-                    pj.setCnpj(request.getParameter("cnpj"));
-                    pj.setEmail(email);
-                    pj.setTelefone(telefone);
-                    pj.setSenha(senhaInformada);
-                    
-                    dao.cadastrarPJ(pj);
-                    sucesso = true;
-                }
-
-                // Após o cadastro, busca o usuário e o salva na sessão como "clienteLogado" (Login Automático)
+                // Login automático pós-cadastro
                 if (sucesso) {
-                    Usuario usuarioCriado = dao.buscarPorEmail(email);
+                    Usuario usuarioCriado = clienteService.buscarPorEmail(email);
                     if (usuarioCriado != null) {
                         HttpSession session = request.getSession();
                         session.setAttribute("clienteLogado", usuarioCriado);
@@ -123,7 +103,7 @@ public class CheckoutController extends HttpServlet {
             } catch (Exception e) {
                 e.printStackTrace();
                 sucesso = false;
-                mensagemErro = e.getMessage().toLowerCase();
+                mensagemErro = e.getMessage() != null ? e.getMessage().toLowerCase() : "erro desconhecido";
                 if (mensagemErro.contains("violates unique constraint") || mensagemErro.contains("duplicate key")) {
                     mensagemErro = "Este CPF, CNPJ ou E-mail já está cadastrado em nossa base.";
                 } else {
@@ -140,18 +120,14 @@ public class CheckoutController extends HttpServlet {
         }
 
         // =========================================================================
-        // CASO 3: Apenas verificação inicial de e-mail (Não salva nada no banco!)
+        // CASO 3: Verificação inicial de e-mail
         // =========================================================================
         boolean existe = false;
         if (email != null && !email.trim().isEmpty()) {
             try {
-                ClienteDAO dao = new ClienteDAO();
-                Usuario usuario = dao.buscarPorEmail(email.trim());
-                
+                Usuario usuario = clienteService.buscarPorEmail(email);
                 if (usuario != null) {
                     existe = true;
-                    HttpSession session = request.getSession();
-                    session.setAttribute("clienteLogado", usuario); 
                 }
             } catch (Exception e) {
                 e.printStackTrace();

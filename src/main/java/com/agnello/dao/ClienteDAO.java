@@ -117,4 +117,6 @@ public class ClienteDAO {
             throw new RuntimeException("Erro ao atualizar a senha no Supabase: " + e.getMessage(), e);
         }
     }
+    
+    
 }

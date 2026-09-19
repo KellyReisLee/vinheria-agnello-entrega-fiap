@@ -1,7 +1,7 @@
 package com.agnello.controller;
 
-import com.agnello.dao.ClienteDAO;
 import com.agnello.model.Usuario;
+import com.agnello.service.ClienteService;
 
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
@@ -15,23 +15,12 @@ import java.io.IOException;
 public class LoginController extends HttpServlet {
     private static final long serialVersionUID = 1L;
     
-    // Trata a requisição GET (acessar a tela de login ou realizar o logout)
+    private ClienteService clienteService = new ClienteService();
+    
     protected void doGet(HttpServletRequest request, HttpServletResponse response) 
             throws ServletException, IOException {
         
-        // Verifica se o usuário solicitou o encerramento da sessão
-        String logout = request.getParameter("logout");
-        if ("true".equals(logout)) {
-            HttpSession session = request.getSession(false);
-            if (session != null) {
-                session.invalidate(); // Destrói completamente a sessão ativa
-            }
-            // Redireciona para a página de login limpa (sem parâmetros)
-            response.sendRedirect(request.getContextPath() + "/login");
-            return;
-        }
-
-        // Caso contrário, apenas exibe a página de login normalmente
+        // Apenas exibe a página de login normalmente
         request.getRequestDispatcher("/WEB-INF/views/login.jsp").forward(request, response);
     }
 
@@ -43,19 +32,14 @@ public class LoginController extends HttpServlet {
         String senha = request.getParameter("senha");
 
         try {
-            ClienteDAO dao = new ClienteDAO();
-            Usuario usuario = dao.buscarPorEmail(email);
+            // Delega a autenticação para a camada de serviço
+            Usuario usuario = clienteService.autenticar(email, senha);
 
-            // Valida se o usuário existe e se a senha confere
-            if (usuario != null && usuario.getSenha().equals(senha)) {
-                // Cria uma sessão HTTP para manter o usuário logado
+            if (usuario != null) {
                 HttpSession session = request.getSession();
-                session.setAttribute("clienteLogado", usuario); // Padronizado para alinhar com a área pessoal
-
-                // Redireciona para a área pessoal protegida passando o ID do usuário na URL
+                session.setAttribute("clienteLogado", usuario);
                 response.sendRedirect(request.getContextPath() + "/area-pessoal?id=" + usuario.getId());
             } else {
-                // Caso falhe, retorna para a tela de login com erro
                 request.setAttribute("erro", "E-mail ou senha inválidos.");
                 request.getRequestDispatcher("/WEB-INF/views/login.jsp").forward(request, response);
             }

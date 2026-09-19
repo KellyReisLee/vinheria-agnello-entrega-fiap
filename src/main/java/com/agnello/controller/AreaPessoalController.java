@@ -18,27 +18,29 @@ public class AreaPessoalController extends HttpServlet {
     protected void doGet(HttpServletRequest request, HttpServletResponse response) 
             throws ServletException, IOException {
         
-        HttpSession session = request.getSession(false);
-        Usuario usuario = (session != null) ? (Usuario) session.getAttribute("clienteLogado") : null;
+        // Evita cache da página protegida
+        response.setHeader("Cache-Control", "no-cache, no-store, must-revalidate");
+        response.setHeader("Pragma", "no-cache");
+        response.setDateHeader("Expires", 0);
         
-        // 1. Se o usuário não estiver logado na sessão, redireciona para o login de forma segura
-        if (usuario == null) {
+        HttpSession session = request.getSession(false);
+        Usuario usuario = null;
+        
+        if (session != null) {
+            // Suporta ambas as chaves de sessão para total compatibilidade
+            usuario = (Usuario) session.getAttribute("clienteLogado");
+            if (usuario == null) {
+                usuario = (Usuario) session.getAttribute("usuarioLogado");
+            }
+        }
+        
+        // Se o usuário não estiver autenticado, manda para o login
+        if (usuario == null || usuario.getId() <= 0) {
             response.sendRedirect(request.getContextPath() + "/login");
             return;
         }
         
-        // 2. Pega o ID enviado via parâmetro na URL
-        String idParam = request.getParameter("id");
-        String idUsuarioLogado = String.valueOf(usuario.getId());
-        
-        // 3. Se o ID não foi informado na URL ou é diferente do usuário logado, 
-        // corrigimos redirecionando para a rota correta com o ID correto.
-        if (idParam == null || !idParam.equals(idUsuarioLogado)) {
-            response.sendRedirect(request.getContextPath() + "/area-pessoal?id=" + idUsuarioLogado);
-            return;
-        }
-        
-        // 4. Tudo certo: exibe a página JSP protegida dentro de WEB-INF
+        // Tudo certo: exibe a página protegida com URL limpa e segura
         request.getRequestDispatcher("/WEB-INF/views/area-pessoal.jsp").forward(request, response);
     }
 }
