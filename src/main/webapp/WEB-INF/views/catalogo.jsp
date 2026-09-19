@@ -73,7 +73,27 @@
     <div id="agnello-cart-body" class="agnello-cart-body"></div>
   </div>
 
-  <script src="${pageContext.request.contextPath}/js/data/catalogo-vinhos.js"></script>
+  <%-- Transforma a lista de produtos vindos do Servlet/Banco em um array JavaScript --%>
+  <script>
+    const catalogoVinhos = [
+      <c:forEach var="p" items="${produtos}" varStatus="status">
+      {
+        id: "${p.id}",
+        nome: "${p.nome}",
+        tipo: "${p.tipo}",
+        origem: "${p.origem}",
+        pontuacao: "${p.pontuacao}",
+        preco: "${p.preco}",
+        precoAntigo: "${p.precoAntigo != null ? p.precoAntigo : ''}",
+        descricao: "${p.descricao}",
+        imagem: "${p.imagem}",
+        desconto: "${p.desconto != null ? p.desconto : ''}"
+      }${!status.last ? ',' : ''}
+      </c:forEach>
+    ];
+  </script>
+
+  <!-- Scripts que vão processar e exibir os dados -->
   <script src="${pageContext.request.contextPath}/js/pages/catalogo.js"></script>
   <script src="${pageContext.request.contextPath}/js/components/carrinho.js"></script>
   <script src="${pageContext.request.contextPath}/js/components/componentes.js"></script>

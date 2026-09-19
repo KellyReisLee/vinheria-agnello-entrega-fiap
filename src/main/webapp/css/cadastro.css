@@ -262,3 +262,63 @@
     padding: 30px 20px;
   }
 }
+
+/* ==========================================
+   CORREÇÃO DE RESPONSIVIDADE - PÁGINA CADASTRO
+   ========================================== */
+@media (max-width: 768px) {
+  /* Evita scroll horizontal na tela */
+  body {
+    overflow-x: hidden;
+  }
+
+  /* Ajusta o espaçamento superior e lateral do container principal */
+  .agnello-cadastro-main {
+    padding: 20px 12px !important;
+    margin-top: 3.5rem !important;
+    min-height: auto;
+  }
+
+  /* Transforma o grid de duas colunas em coluna única */
+  .agnello-cadastro-container {
+    grid-template-columns: 1fr !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    margin: 0 !important;
+    border-radius: 8px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+  }
+
+  /* Esconde o banner promocional no telemóvel para focar no formulário */
+  .agnello-promo-box {
+    display: none !important;
+  }
+
+  /* Compacta o padding interno do formulário para aproveitar melhor a tela */
+  .agnello-cadastro-box {
+    padding: 24px 16px !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
+  }
+
+  /* Ajusta margens de textos e espaçamentos dos inputs */
+  .cadastro-header-text {
+    margin-bottom: 16px;
+  }
+
+  .signup-tabs {
+    gap: 20px;
+    margin-bottom: 18px;
+  }
+
+  /* Garante largura total uniforme no rodapé mobile */
+  footer, 
+  .agnello-footer, 
+  .footer-container {
+    width: 100% !important;
+    max-width: 100% !important;
+    box-sizing: border-box !important;
+    margin: 0 !important;
+    padding: 2rem 1rem !important;
+  }
+}

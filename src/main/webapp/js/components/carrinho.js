@@ -267,11 +267,11 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   // Inicialização
-  renderizarConteudoCarrinho();
+    renderizarConteudoCarrinho();
 
-  if (typeof catalogoVinhos !== 'undefined') {
-    renderizarCatalogo(catalogoVinhos);
-  } else {
-    console.error("O arquivo catalogo.js não foi carregado corretamente.");
-  }
-});
+    if (typeof catalogoVinhos !== 'undefined') {
+      renderizarCatalogo(catalogoVinhos);
+    } else {
+      console.error("A lista de produtos (catalogoVinhos) não foi carregada corretamente do banco de dados.");
+    }
+  });

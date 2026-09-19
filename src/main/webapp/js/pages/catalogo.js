@@ -124,32 +124,32 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   // Event Listeners para o Dropdown Customizado de Ordenação
-  if (customSelect && selectedDiv && itemsContainer) {
-    selectedDiv.addEventListener('click', (e) => {
-      e.stopPropagation();
-      itemsContainer.classList.toggle('agnello-select-hide');
-    });
-
-    optionItems.forEach(item => {
-      item.addEventListener('click', (e) => {
+    if (customSelect && selectedDiv && itemsContainer) {
+      selectedDiv.addEventListener('click', (e) => {
         e.stopPropagation();
-        selectedDiv.textContent = item.textContent;
-        itemsContainer.classList.add('agnello-select-hide');
-
-        criterioOrdenacaoAtual = item.getAttribute('data-value');
-        aplicarFiltrosEBusca();
+        itemsContainer.classList.toggle('agnello-select-hide');
       });
-    });
 
-    document.addEventListener('click', () => {
-      itemsContainer.classList.add('agnello-select-hide');
-    });
-  }
+      optionItems.forEach(item => {
+        item.addEventListener('click', (e) => {
+          e.stopPropagation();
+          selectedDiv.textContent = item.textContent;
+          itemsContainer.classList.add('agnello-select-hide');
 
-  // Carga inicial exibindo todos os vinhos do catalogo.js
-  if (typeof catalogoVinhos !== 'undefined') {
-    renderizarCatalogo(catalogoVinhos);
-  } else {
-    console.error("O arquivo catalogo.js não foi carregado corretamente.");
-  }
-});
+          criterioOrdenacaoAtual = item.getAttribute('data-value');
+          aplicarFiltrosEBusca();
+        });
+      });
+
+      document.addEventListener('click', () => {
+        itemsContainer.classList.add('agnello-select-hide');
+      });
+    }
+
+    // Carga inicial exibindo todos os vinhos vindos do banco de dados (via JSP)
+    if (typeof catalogoVinhos !== 'undefined') {
+      renderizarCatalogo(catalogoVinhos);
+    } else {
+      console.error("A lista de produtos (catalogoVinhos) não foi carregada corretamente do banco de dados.");
+    }
+  });
