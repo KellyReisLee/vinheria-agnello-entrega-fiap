@@ -26,7 +26,7 @@
         <c:when test="${not empty sessionScope.clienteLogado or not empty sessionScope.usuarioLogado}">
             <!-- URL limpa apontando para a área pessoal -->
             <a href="${pageContext.request.contextPath}/area-pessoal" class="icon-btn" aria-label="Área Pessoal" title="Minha Conta">
-                <img src="${pageContext.request.contextPath}/assets/icons/user.svg" alt="perfil">
+                <img src="${pageContext.request.contextPath}/assets/icons/user-check.svg" alt="perfil verificado">
             </a>
         </c:when>
         <c:otherwise>
