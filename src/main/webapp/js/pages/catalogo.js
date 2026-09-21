@@ -13,107 +13,89 @@ document.addEventListener('DOMContentLoaded', () => {
   let categoriaAtiva = 'todos';
   let criterioOrdenacaoAtual = 'relevancia';
 
-  // Função principal para renderizar os cards na tela
-  function renderizarCatalogo(listaDeVinhos) {
-    if (!containerVinhos) return;
-
+  // 1. Função para atualizar o contador visível de produtos filtrados
+  function atualizarContador(cardsVisiveis) {
     if (totalProdutosEl) {
-      totalProdutosEl.textContent = listaDeVinhos.length;
+      totalProdutosEl.textContent = cardsVisiveis.length;
     }
-
-    if (listaDeVinhos.length === 0) {
-      containerVinhos.innerHTML = `
-        <div style="grid-column: 1 / -1; text-align: center; padding: 3rem; color: #666;">
-          <h3>Nenhum rótulo encontrado</h3>
-          <p>Tente buscar por outro termo ou categoria.</p>
-        </div>
-      `;
-      return;
-    }
-
-    containerVinhos.innerHTML = listaDeVinhos.map(vinho => `
-      <div class="agnello-wine-card">
-        ${vinho.desconto ? `<span class="agnello-badge-off">${vinho.desconto}</span>` : ''}
-        <div class="agnello-card-img-container">
-          <img src="${vinho.imagem}" alt="${vinho.nome}" onerror="this.style.display='none'; this.parentElement.style.backgroundColor='#f4f4f4';">
-        </div>
-        <div class="agnello-card-info">
-          <div class="agnello-tags-row">
-            <span class="agnello-tag-tipo">${vinho.tipo}</span>
-            <span class="agnello-tag-pontos">${vinho.pontuacao}</span>
-          </div>
-          <span class="agnello-card-origem">${vinho.origem}</span>
-          <h3 class="agnello-card-nome">${vinho.nome}</h3>
-          <p class="agnello-card-desc">${vinho.descricao}</p>
-          <div class="agnello-card-footer">
-            <div class="agnello-card-precos">
-              ${vinho.precoAntigo ? `<span class="agnello-preco-antigo">${vinho.precoAntigo}</span>` : ''}
-              <span class="agnello-preco-atual">${vinho.preco}</span>
-            </div>
-            <button class="agnello-btn-comprar" onclick="alert('Rótulo ${vinho.nome} selecionado com sucesso!')">Selecionar</button>
-          </div>
-        </div>
-      </div>
-    `).join('');
   }
 
-  // Função auxiliar para converter o preço em texto em número para ordenação
+  // 2. Função auxiliar para converter string de preço em número para ordenação
   function converterPrecoParaNumero(precoStr) {
     if (!precoStr) return 0;
-    return parseFloat(precoStr.replace('R$', '').replace('.', '').replace(',', '.').trim());
+    return parseFloat(String(precoStr).replace('R$', '').replace('.', '').replace(',', '.').trim()) || 0;
   }
 
-  // Lógica combinada de Filtragem, Busca e Ordenação
+  // 3. Lógica principal de Filtragem, Busca e Ordenação baseada no DOM
   function aplicarFiltrosEBusca() {
-    let resultado = [...catalogoVinhos];
+    if (!containerVinhos) return;
 
-    // 1. Filtrar por categoria selecionada nos botões
-    if (categoriaAtiva === 'tinto') {
-      resultado = resultado.filter(v => v.tipo.toLowerCase().includes('tinto'));
-    } else if (categoriaAtiva === 'branco') {
-      resultado = resultado.filter(v => v.tipo.toLowerCase().includes('branco'));
-    } else if (categoriaAtiva === 'espumante') {
-      resultado = resultado.filter(v => v.tipo.toLowerCase().includes('espumante') || v.tipo.toLowerCase().includes('cava'));
-    }
+    // Seleciona todos os cards de produtos renderizados pelo Servidor (JSTL)
+    const cards = Array.from(containerVinhos.querySelectorAll('.product-card'));
+    const emptyState = containerVinhos.querySelector('.grid-empty-state');
 
-    // 2. Filtrar pelo termo digitado na barra de busca
-    if (inputBusca) {
-      const termoBusca = inputBusca.value.toLowerCase().trim();
-      if (termoBusca !== '') {
-        resultado = resultado.filter(v =>
-          v.nome.toLowerCase().includes(termoBusca) ||
-          v.origem.toLowerCase().includes(termoBusca) ||
-          v.tipo.toLowerCase().includes(termoBusca) ||
-          v.descricao.toLowerCase().includes(termoBusca)
-        );
+    let cardsVisiveis = 0;
+
+    cards.forEach(card => {
+      const tipo = (card.getAttribute('data-tipo') || '').toLowerCase();
+      const nome = (card.getAttribute('data-nome') || '').toLowerCase();
+      const origem = (card.getAttribute('data-origem') || '').toLowerCase();
+      
+      let passaFiltroCategoria = true;
+      let passaFiltroBusca = true;
+
+      // Filtro por Categoria
+      if (categoriaAtiva === 'tinto') {
+        passaFiltroCategoria = tipo.includes('tinto');
+      } else if (categoriaAtiva === 'branco') {
+        passaFiltroCategoria = tipo.includes('branco');
+      } else if (categoriaAtiva === 'espumante') {
+        passaFiltroCategoria = tipo.includes('espumante') || tipo.includes('cava') || tipo.includes('rosé');
       }
-    }
 
-    // 3. Ordenação baseada no dropdown customizado
-    if (criterioOrdenacaoAtual === 'menor-preco') {
-      resultado.sort((a, b) => converterPrecoParaNumero(a.preco) - converterPrecoParaNumero(b.preco));
-    } else if (criterioOrdenacaoAtual === 'maior-preco') {
-      resultado.sort((a, b) => converterPrecoParaNumero(b.preco) - converterPrecoParaNumero(a.preco));
-    } else if (criterioOrdenacaoAtual === 'pontuacao') {
-      resultado.sort((a, b) => {
-        const pA = parseInt(a.pontuacao) || 0;
-        const pB = parseInt(b.pontuacao) || 0;
-        return pB - pA;
+      // Filtro por Busca (Input)
+      if (inputBusca && inputBusca.value.trim() !== '') {
+        const termo = inputBusca.value.toLowerCase().trim();
+        passaFiltroBusca = nome.includes(termo) || origem.includes(termo) || tipo.includes(termo);
+      }
+
+      // Exibe ou oculta o card com base nos filtros
+      if (passaFiltroCategoria && passaFiltroBusca) {
+        card.style.display = '';
+        cardsVisiveis++;
+      } else {
+        card.style.display = 'none';
+      }
+    });
+
+    // Atualiza o contador de rótulos encontrados
+    atualizarContador(cards.filter(c => c.style.display !== 'none'));
+
+    // Ordenação visual dos cards no DOM
+    if (criterioOrdenacaoAtual !== 'relevancia') {
+      cards.sort((a, b) => {
+        const precoA = converterPrecoParaNumero(a.getAttribute('data-preco'));
+        const precoB = converterPrecoParaNumero(b.getAttribute('data-preco'));
+        const pontA = parseInt(a.getAttribute('data-pontuacao')) || 0;
+        const pontB = parseInt(b.getAttribute('data-pontuacao')) || 0;
+
+        if (criterioOrdenacaoAtual === 'menor-preco') return precoA - precoB;
+        if (criterioOrdenacaoAtual === 'maior-preco') return precoB - precoA;
+        if (criterioOrdenacaoAtual === 'pontuacao') return pontB - pontA;
+        return 0;
       });
-    } else if (criterioOrdenacaoAtual === 'relevancia') {
-      // Tratamento explícito para Relevância mantendo o fluxo dinâmico
-      resultado = [...resultado];
-    }
 
-    renderizarCatalogo(resultado);
+      // Reorganiza os elementos no DOM mantendo o empty state no fim se existir
+      cards.forEach(card => containerVinhos.appendChild(card));
+    }
   }
 
-  // Event Listeners para Busca
+  // 4. Event Listeners para Busca
   if (inputBusca) {
     inputBusca.addEventListener('input', aplicarFiltrosEBusca);
   }
 
-  // Event Listeners para Filtros de Categoria
+  // 5. Event Listeners para Filtros de Categoria (Botões)
   botoesFiltro.forEach(botao => {
     botao.addEventListener('click', (e) => {
       botoesFiltro.forEach(b => b.classList.remove('agnello-ativo'));
@@ -123,33 +105,32 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   });
 
-  // Event Listeners para o Dropdown Customizado de Ordenação
-    if (customSelect && selectedDiv && itemsContainer) {
-      selectedDiv.addEventListener('click', (e) => {
+  // 6. Event Listeners para o Dropdown Customizado de Ordenação
+  if (customSelect && selectedDiv && itemsContainer) {
+    selectedDiv.addEventListener('click', (e) => {
+      e.stopPropagation();
+      itemsContainer.classList.toggle('agnello-select-hide');
+    });
+
+    optionItems.forEach(item => {
+      item.addEventListener('click', (e) => {
         e.stopPropagation();
-        itemsContainer.classList.toggle('agnello-select-hide');
-      });
-
-      optionItems.forEach(item => {
-        item.addEventListener('click', (e) => {
-          e.stopPropagation();
-          selectedDiv.textContent = item.textContent;
-          itemsContainer.classList.add('agnello-select-hide');
-
-          criterioOrdenacaoAtual = item.getAttribute('data-value');
-          aplicarFiltrosEBusca();
-        });
-      });
-
-      document.addEventListener('click', () => {
+        selectedDiv.textContent = item.textContent;
         itemsContainer.classList.add('agnello-select-hide');
-      });
-    }
 
-    // Carga inicial exibindo todos os vinhos vindos do banco de dados (via JSP)
-    if (typeof catalogoVinhos !== 'undefined') {
-      renderizarCatalogo(catalogoVinhos);
-    } else {
-      console.error("A lista de produtos (catalogoVinhos) não foi carregada corretamente do banco de dados.");
-    }
-  });
+        criterioOrdenacaoAtual = item.getAttribute('data-value');
+        aplicarFiltrosEBusca();
+      });
+    });
+
+    document.addEventListener('click', () => {
+      itemsContainer.classList.add('agnello-select-hide');
+    });
+  }
+
+  // Carga inicial: conta os produtos renderizados pelo servidor assim que abre a página
+  if (containerVinhos) {
+    const cardsIniciais = containerVinhos.querySelectorAll('.product-card');
+    atualizarContador(cardsIniciais);
+  }
+});

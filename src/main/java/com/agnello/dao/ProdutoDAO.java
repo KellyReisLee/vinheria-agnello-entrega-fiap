@@ -17,6 +17,8 @@ public class ProdutoDAO {
     public List<Produto> listarTodos() {
     	
     	
+    	
+    	// Pega todos os produtos do banco de dados:
         List<Produto> produtos = new ArrayList<>();
         String sql = "SELECT id, nome, tipo, origem, descricao, preco, preco_antigo, desconto, pontuacao, estoque, imagem FROM produtos";
 
