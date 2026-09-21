@@ -282,11 +282,14 @@
 						</c:forEach>
 					</c:when>
 					<c:otherwise>
-						<!-- Fallback JS -->
+						<!-- Box elegante de aviso para lista vazia -->
+						<div class="grid-empty-state" style="grid-column: 1 / -1; text-align: center; padding: 3rem 1.5rem; background-color: #faf8f6; border: 1px dashed #dcd5d0; border-radius: 8px; margin: 1rem 0;">
+							<p style="font-size: 1.1rem; color: #4a1525; font-weight: 600; margin-bottom: 0.5rem;">Nenhum vinho encontrado no momento.</p>
+							<p style="font-size: 0.9rem; color: #736b6d;">Estamos a atualizar a nossa seleção de rótulos exclusivos. Por favor, volte em breve!</p>
+						</div>
 					</c:otherwise>
 				</c:choose>
 			</div>
-
 			<div class="center-action">
 				<a href="${pageContext.request.contextPath}/catalogo"
 					class="btn-outline-dark">Ver Toda a Adega</a>
