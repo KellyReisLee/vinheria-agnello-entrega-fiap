@@ -1,0 +1,187 @@
+/* ==========================================================
+   MODAL DE SUCESSO - VINHERIA AGNELLO (ULTRA PROFISSIONAL)
+   ========================================================== */
+
+.agnello-modal-overlay {
+  background: rgba(15, 23, 42, 0.65);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 9999;
+  opacity: 0;
+  animation: agnelloFadeIn 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.agnello-modal-card.success-card {
+  background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
+  border-radius: 20px;
+  padding: 48px 36px;
+  max-width: 460px;
+  width: 90%;
+  box-shadow: 0 25px 50px -12px rgba(15, 23, 42, 0.25), 0 0 0 1px rgba(255, 255, 255, 0.8) inset;
+  animation: agnelloModalScaleUp 0.45s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  position: relative;
+  overflow: hidden;
+  box-sizing: border-box;
+}
+
+/* Barra superior com gradiente rico em tom de vinho da marca */
+.agnello-modal-card.success-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 6px;
+  background: linear-gradient(90deg, #722f37 0%, #9b3b47 50%, #c25e6b 100%);
+}
+
+.success-card .text-center {
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+/* Ícone com animação refinada e glow verde esmeralda */
+.success-icon-wrapper {
+  background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%);
+  border-radius: 50%;
+  width: 88px;
+  height: 88px;
+  min-width: 88px;
+  min-height: 88px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 24px auto;
+  box-shadow: 0 10px 25px -5px rgba(16, 185, 129, 0.25), 0 0 0 8px rgba(209, 250, 229, 0.4);
+  animation: agnelloPulseGlow 2.5s infinite ease-in-out;
+}
+
+.success-icon-wrapper svg {
+  width: 44px;
+  height: 44px;
+  display: block;
+  flex-shrink: 0;
+  stroke: #059669;
+  animation: agnelloCheckPop 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275) 0.2s both;
+}
+
+.success-card h2 {
+  color: #1e293b;
+  font-size: 1.55rem;
+  font-weight: 700;
+  margin: 0 0 12px 0;
+  letter-spacing: -0.03em;
+}
+
+.success-main-text {
+  color: #475569;
+  font-size: 1rem;
+  font-weight: 500;
+  line-height: 1.5;
+  margin: 0 0 8px 0;
+}
+
+.success-detail {
+  color: #64748b; /* Texto mais claro, limpo e legível */
+  font-size: 0.925rem;
+  line-height: 1.6;
+  margin: 0 0 24px 0;
+}
+
+/* Bloco de redirecionamento elegante com indicador visual animado */
+.redirect-notice-wrapper {
+  background: linear-gradient(135deg, #fdf2f2 0%, #fae8e8 100%);
+  border: 1px solid rgba(114, 47, 55, 0.12);
+  padding: 14px 18px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  width: 100%;
+  box-sizing: border-box;
+  box-shadow: 0 4px 12px rgba(114, 47, 55, 0.04);
+}
+
+.spinner-dot {
+  width: 8px;
+  height: 8px;
+  background-color: #722f37;
+  border-radius: 50%;
+  animation: agnelloBlink 1.2s infinite ease-in-out;
+}
+
+.redirect-notice {
+  color: #722f37;
+  font-size: 0.875rem;
+  font-weight: 600;
+  margin: 0;
+  letter-spacing: 0.01em;
+}
+
+/* ==========================================================
+   ANIMAÇÕES REFINADAS
+   ========================================================== */
+
+@keyframes agnelloFadeIn {
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes agnelloModalScaleUp {
+  from {
+    opacity: 0;
+    transform: scale(0.92) translateY(16px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+@keyframes agnelloPulseGlow {
+  0%, 100% {
+    box-shadow: 0 10px 25px -5px rgba(16, 185, 129, 0.25), 0 0 0 8px rgba(209, 250, 229, 0.4);
+    transform: scale(1);
+  }
+  50% {
+    box-shadow: 0 14px 30px -4px rgba(16, 185, 129, 0.35), 0 0 0 14px rgba(209, 250, 229, 0.15);
+    transform: scale(1.03);
+  }
+}
+
+@keyframes agnelloCheckPop {
+  0% {
+    transform: scale(0);
+    opacity: 0;
+  }
+  70% {
+    transform: scale(1.15);
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+@keyframes agnelloBlink {
+  0%, 100% {
+    opacity: 0.3;
+    transform: scale(0.8);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.2);
+  }
+}

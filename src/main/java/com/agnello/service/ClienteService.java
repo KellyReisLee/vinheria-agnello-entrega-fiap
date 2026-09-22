@@ -120,5 +120,30 @@ public class ClienteService {
         return clienteDAO.buscarPorEmail(email.trim());
     }
     
+    /**
+     * Valida o e-mail de confirmação e executa a exclusão da conta do utilizador.
+     */
+    public void deletarConta(String emailSessao, String emailConfirmacao) throws Exception {
+        if (emailSessao == null || emailSessao.trim().isEmpty()) {
+            throw new Exception("Sessão inválida. Por favor, faça login novamente.");
+        }
+
+        if (emailConfirmacao == null || emailConfirmacao.trim().isEmpty()) {
+            throw new IllegalArgumentException("Por favor, digite o seu e-mail para confirmar a exclusão.");
+        }
+
+        // Garante que o e-mail digitado confere com o utilizador logado
+        if (!emailSessao.trim().equalsIgnoreCase(emailConfirmacao.trim())) {
+            throw new IllegalArgumentException("O e-mail digitado não corresponde à sua conta ativa.");
+        }
+
+        // Executa a exclusão no banco de dados através do DAO
+        boolean deletado = clienteDAO.deletarPorEmail(emailSessao.trim());
+        
+        if (!deletado) {
+            throw new Exception("Não foi possível encontrar o registo para exclusão na base de dados.");
+        }
+    }
+    
     
 }

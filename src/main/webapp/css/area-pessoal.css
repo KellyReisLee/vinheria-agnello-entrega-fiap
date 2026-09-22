@@ -303,6 +303,11 @@
   margin-top: 0.5rem;
 }
 
+@keyframes agnelloFadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
 /* Responsividade */
 @media (max-width: 900px) {
   .account-container {
