@@ -13,7 +13,7 @@ import java.sql.SQLException;
 public class ClienteDAO {
 
     public void cadastrarPF(ClientePF cliente) {
-        String sql = "INSERT INTO cliente (tipo_cliente, nome, sobrenome, cpf, email, telefone, senha) VALUES (?, ?, ?, ?, ?, ?, ?)";
+        String sql = "INSERT INTO clientes (tipo_cliente, nome, sobrenome, cpf, email, telefone, senha) VALUES (?, ?, ?, ?, ?, ?, ?)";
 
         try (Connection conn = ConnectionFactory.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
@@ -34,7 +34,7 @@ public class ClienteDAO {
     }
 
     public void cadastrarPJ(ClientePJ cliente) {
-        String sql = "INSERT INTO cliente (tipo_cliente, razao_social, cnpj, email, telefone, senha) VALUES (?, ?, ?, ?, ?, ?)";
+        String sql = "INSERT INTO clientes (tipo_cliente, razao_social, cnpj, email, telefone, senha) VALUES (?, ?, ?, ?, ?, ?)";
 
         try (Connection conn = ConnectionFactory.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
@@ -54,7 +54,7 @@ public class ClienteDAO {
     }
     
     public Usuario buscarPorEmail(String email) {
-        String sql = "SELECT * FROM cliente WHERE email = ?";
+        String sql = "SELECT * FROM clientes WHERE email = ?";
         Usuario usuario = null;
 
         try (Connection conn = ConnectionFactory.getConnection();
@@ -99,7 +99,7 @@ public class ClienteDAO {
     
     
     public void atualizarSenhaPorEmail(String email, String novaSenha) {
-        String sql = "UPDATE cliente SET senha = ? WHERE email = ?";
+        String sql = "UPDATE clientes SET senha = ? WHERE email = ?";
 
         try (Connection conn = ConnectionFactory.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
@@ -118,5 +118,24 @@ public class ClienteDAO {
         }
     }
     
+    
+    /**
+     * Remove o cliente da base de dados com base no e-mail.
+     */
+    public boolean deletarPorEmail(String email) throws SQLException {
+    	String sql = "DELETE FROM clientes WHERE email = ?";
+        
+        try (Connection conexao = ConnectionFactory.getConnection();
+             PreparedStatement stmt = conexao.prepareStatement(sql)) {
+            
+            stmt.setString(1, email);
+            int linhasAfetadas = stmt.executeUpdate();
+            
+            return linhasAfetadas > 0;
+            
+        } catch (SQLException e) {
+            throw new SQLException("Erro crítico ao tentar remover o utilizador do banco de dados.", e);
+        }
+    }
     
 }
