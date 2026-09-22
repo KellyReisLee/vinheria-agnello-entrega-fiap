@@ -114,7 +114,7 @@ public class ClienteDAO {
             }
 
         } catch (SQLException e) {
-            throw new RuntimeException("Erro ao atualizar a senha no Supabase: " + e.getMessage(), e);
+            throw new RuntimeException("Erro ao atualizar a senha no banco de dados: " + e.getMessage(), e);
         }
     }
     
