@@ -48,10 +48,12 @@ public class CheckoutController extends HttpServlet {
         // =========================================================================
         // CASO 1: Validação de senha do cliente existente
         // =========================================================================
+ 
         if (senhaInformada != null && !senhaInformada.trim().isEmpty() && 
             (request.getParameter("nome") == null && request.getParameter("razao_social") == null)) {
             
             boolean senhaValida = false;
+            String mensagemErro = "E-mail ou senha inválidos.";
             
             try {
                 Usuario usuarioBanco = clienteService.autenticar(email, senhaInformada);
@@ -63,9 +65,12 @@ public class CheckoutController extends HttpServlet {
                 }
             } catch (Exception e) {
                 e.printStackTrace();
+                // Captura a mensagem de erro lançada pelo Service (ex: "A sua conta ainda não foi ativada...")
+                mensagemErro = e.getMessage() != null ? e.getMessage() : "Erro ao autenticar.";
             }
 
-            response.getWriter().write("{\"sucesso\": " + senhaValida + "}");
+            // Retorna o sucesso e a mensagem exata para exibir no box de alerta da interface
+            response.getWriter().write("{\"sucesso\": " + senhaValida + ", \"mensagem\": \"" + mensagemErro + "\"}");
             return;
         }
 
@@ -87,8 +92,11 @@ public class CheckoutController extends HttpServlet {
                 String razaoSocial = request.getParameter("razao_social");
                 String cnpj = request.getParameter("cnpj");
 
-                // Chamada limpa utilizando o método unificado do ClienteService
-                clienteService.cadastrarCliente(tipoCliente, email, senhaInformada, telefone, nome, sobrenome, cpf, razaoSocial, cnpj);
+                // 1. Descobre a URL base dinamicamente para o link de ativação
+                String baseUrl = request.getRequestURL().toString().replace(request.getRequestURI(), "") + request.getContextPath();
+
+                // 2. Chamada corrigida incluindo a baseUrl no final
+                clienteService.cadastrarCliente(tipoCliente, email, senhaInformada, telefone, nome, sobrenome, cpf, razaoSocial, cnpj, baseUrl);
                 sucesso = true;
 
                 // Login automático pós-cadastro

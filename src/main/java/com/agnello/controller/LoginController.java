@@ -2,7 +2,6 @@ package com.agnello.controller;
 
 import com.agnello.model.Usuario;
 import com.agnello.service.ClienteService;
-
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
@@ -45,7 +44,16 @@ public class LoginController extends HttpServlet {
             }
 
         } catch (Exception e) {
-            request.setAttribute("erro", "Erro interno no sistema: " + e.getMessage());
+            e.printStackTrace();
+            // Apanha a mensagem específica lançada pelo Service (ex: conta não ativada)
+            // ou exibe "E-mail ou senha inválidos" se for outro problema
+            String mensagemErro = e.getMessage();
+            
+            if (mensagemErro == null || mensagemErro.trim().isEmpty()) {
+                mensagemErro = "E-mail ou senha inválidos.";
+            }
+            
+            request.setAttribute("erro", mensagemErro);
             request.getRequestDispatcher("/WEB-INF/views/login.jsp").forward(request, response);
         }
     }

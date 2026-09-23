@@ -12,8 +12,10 @@ import java.sql.SQLException;
 
 public class ClienteDAO {
 
-    public void cadastrarPF(ClientePF cliente) {
-        String sql = "INSERT INTO clientes (tipo_cliente, nome, sobrenome, cpf, email, telefone, senha) VALUES (?, ?, ?, ?, ?, ?, ?)";
+    
+	// Atualiza o método de cadastro PF para gerar e guardar o token de ativação
+    public void cadastrarPF(ClientePF cliente, String tokenAtivacao) {
+        String sql = "INSERT INTO clientes (tipo_cliente, nome, sobrenome, cpf, email, telefone, senha, email_verificado, token_ativacao) VALUES (?, ?, ?, ?, ?, ?, ?, false, ?)";
 
         try (Connection conn = ConnectionFactory.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
@@ -25,6 +27,7 @@ public class ClienteDAO {
             stmt.setString(5, cliente.getEmail());
             stmt.setString(6, cliente.getTelefone());
             stmt.setString(7, cliente.getSenha());
+            stmt.setString(8, tokenAtivacao);
 
             stmt.executeUpdate();
 
@@ -33,8 +36,9 @@ public class ClienteDAO {
         }
     }
 
-    public void cadastrarPJ(ClientePJ cliente) {
-        String sql = "INSERT INTO clientes (tipo_cliente, razao_social, cnpj, email, telefone, senha) VALUES (?, ?, ?, ?, ?, ?)";
+    // Atualiza o método de cadastro PJ para gerar e guardar o token de ativação
+    public void cadastrarPJ(ClientePJ cliente, String tokenAtivacao) {
+        String sql = "INSERT INTO clientes (tipo_cliente, razao_social, cnpj, email, telefone, senha, email_verificado, token_ativacao) VALUES (?, ?, ?, ?, ?, ?, false, ?)";
 
         try (Connection conn = ConnectionFactory.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
@@ -45,6 +49,7 @@ public class ClienteDAO {
             stmt.setString(4, cliente.getEmail());
             stmt.setString(5, cliente.getTelefone());
             stmt.setString(6, cliente.getSenha());
+            stmt.setString(7, tokenAtivacao);
 
             stmt.executeUpdate();
 
@@ -52,6 +57,23 @@ public class ClienteDAO {
             throw new RuntimeException("Erro ao cadastrar Cliente PJ no Supabase: " + e.getMessage(), e);
         }
     }
+
+    // Método para ativar a conta pelo token
+    public boolean ativarContaPorToken(String token) {
+        String sql = "UPDATE clientes SET email_verificado = true, token_ativacao = NULL WHERE token_ativacao = ?";
+
+        try (Connection conn = ConnectionFactory.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            stmt.setString(1, token);
+            int linhasAfetadas = stmt.executeUpdate();
+            return linhasAfetadas > 0;
+
+        } catch (SQLException e) {
+            throw new RuntimeException("Erro ao ativar conta por token: " + e.getMessage(), e);
+        }
+    }
+    
     
     public Usuario buscarPorEmail(String email) {
         String sql = "SELECT * FROM clientes WHERE email = ?";
@@ -67,6 +89,7 @@ public class ClienteDAO {
                     int id = rs.getInt("id");
                     String senha = rs.getString("senha");
                     String telefone = rs.getString("telefone");
+                    boolean emailVerificado = rs.getBoolean("email_verificado"); // Lê do banco
 
                     if ("PF".equals(tipo)) {
                         ClientePF pf = new ClientePF();
@@ -77,6 +100,7 @@ public class ClienteDAO {
                         pf.setNome(rs.getString("nome"));
                         pf.setSobrenome(rs.getString("sobrenome"));
                         pf.setCpf(rs.getString("cpf"));
+                        pf.setEmailVerificado(emailVerificado); // Define no objeto
                         usuario = pf;
                     } else if ("PJ".equals(tipo)) {
                         ClientePJ pj = new ClientePJ();
@@ -86,6 +110,7 @@ public class ClienteDAO {
                         pj.setTelefone(telefone);
                         pj.setRazaoSocial(rs.getString("razao_social"));
                         pj.setCnpj(rs.getString("cnpj"));
+                        pj.setEmailVerificado(emailVerificado); // Define no objeto
                         usuario = pj;
                     }
                 }
