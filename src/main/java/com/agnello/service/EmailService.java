@@ -8,24 +8,22 @@ import java.util.concurrent.CompletableFuture;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import com.agnello.util.EmailTemplateUtil;
-
 public class EmailService {
 
     private static final Logger LOGGER = Logger.getLogger(EmailService.class.getName());
 
-    public void enviarEmailAssincrono(String destinatario, String linkRedefinicao) {
+    public void enviarEmailAssincrono(String destinatario, String assunto, String corpoHtml) {
         CompletableFuture.runAsync(() -> {
             try {
-                enviarEmail(destinatario, linkRedefinicao);
+                enviarEmail(destinatario, assunto, corpoHtml);
             } catch (Exception e) {
                 LOGGER.log(Level.SEVERE, "Erro no envio assíncrono para o destinatário: " + destinatario, e);
             }
         });
     }
 
-    public void enviarEmail(String destinatario, String linkRedefinicao) {
-        // Variáveis de ambiente configuradas no Render (ex: EMAIL_USER e EMAIL_PASSWORD)
+    public void enviarEmail(String destinatario, String assunto, String corpoHtml) {
+        // Variáveis de ambiente configuradas no Render
         String remetente = System.getenv("EMAIL_USER");
         String senha = System.getenv("EMAIL_PASSWORD");
 
@@ -39,7 +37,7 @@ public class EmailService {
         props.put("mail.smtp.auth", "true");
         props.put("mail.smtp.host", "smtp.gmail.com");
         props.put("mail.smtp.port", "465");
-        props.put("mail.smtp.ssl.enable", "true"); // Ativa o SSL direto para a porta 465
+        props.put("mail.smtp.ssl.enable", "true");
         props.put("mail.smtp.socketFactory.port", "465");
         props.put("mail.smtp.socketFactory.class", "javax.net.ssl.SSLSocketFactory");
 
@@ -53,11 +51,8 @@ public class EmailService {
             Message message = new MimeMessage(session);
             message.setFrom(new InternetAddress(remetente, "Vinheria Agnello"));
             message.setRecipients(Message.RecipientType.TO, InternetAddress.parse(destinatario));
-            message.setSubject("Redefinição de Senha - Vinheria Agnello");
-            
-            // Utiliza o template HTML refinado que criámos anteriormente
-            String htmlContent = EmailTemplateUtil.getCorpoRecuperacaoSenha(linkRedefinicao);
-            message.setContent(htmlContent, "text/html; charset=utf-8");
+            message.setSubject(assunto);
+            message.setContent(corpoHtml, "text/html; charset=utf-8");
 
             Transport.send(message);
             LOGGER.info("E-mail enviado com sucesso para: " + destinatario);
