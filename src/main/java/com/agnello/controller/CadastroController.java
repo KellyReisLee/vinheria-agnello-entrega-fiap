@@ -1,13 +1,12 @@
 package com.agnello.controller;
 
 import com.agnello.service.ClienteService;
-
-import java.io.IOException;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import java.io.IOException;
 
 @WebServlet(name = "CadastroController", urlPatterns = {"/cadastro"})
 public class CadastroController extends HttpServlet {
@@ -42,10 +41,13 @@ public class CadastroController extends HttpServlet {
         String cnpj = request.getParameter("cnpj");
 
         try {
-            // Delega a regra de negócio e persistência para o Service
-            clienteService.cadastrarCliente(tipoCliente, email, senha, telefone, nome, sobrenome, cpf, razaoSocial, cnpj);
+            // Descobre a URL base dinamicamente para construir o link de ativação no e-mail
+            String baseUrl = request.getRequestURL().toString().replace(request.getRequestURI(), "") + request.getContextPath();
 
-            request.setAttribute("sucesso", "Cadastro realizado com sucesso! Redirecionando para o login em instantes...");
+            // Delega a regra de negócio e persistência para o Service, passando a baseUrl
+            clienteService.cadastrarCliente(tipoCliente, email, senha, telefone, nome, sobrenome, cpf, razaoSocial, cnpj, baseUrl);
+
+            request.setAttribute("sucesso", "Cadastro realizado com sucesso! Verifique o seu e-mail para ativar a conta.");
             request.getRequestDispatcher("/WEB-INF/views/cadastro.jsp").forward(request, response);
 
         } catch (Exception e) {

@@ -47,4 +47,55 @@ public class EmailTemplateUtil {
             "  </table>" +
             "</div>";
     }
+    
+    public static String getCorpoAtivacaoConta(String linkAtivacao) {
+        return 
+            "<div style=\"background-color: #f7f5f0; padding: 50px 0; font-family: Arial, sans-serif; color: #333333;\">" +
+            "  <table align=\"center\" border=\"0\" cellpadding=\"0\" cellspacing=\"0\" width=\"600\" style=\"background-color: #ffffff; border-radius: 8px; overflow: hidden; border: 1px solid #e5e0dc; box-shadow: 0 6px 18px rgba(74,21,37,0.06);\">" +
+            "    <!-- Cabeçalho com Identidade Visual -->" +
+            "    <tr>" +
+            "      <td style=\"background-color: #4A1525; padding: 35px 30px; text-align: center;\">" +
+            "        <span style=\"font-size: 11px; text-transform: uppercase; letter-spacing: 3px; color: #c5a059; display: block; margin-bottom: 10px; font-weight: bold;\">Clube Agnello &bull; Adega Digital</span>" +
+            "        <h1 style=\"color: #ffffff; margin: 0; font-size: 26px; font-weight: normal; font-family: Georgia, serif;\">Vinheria Agnello</h1>" +
+            "      </td>" +
+            "    </tr>" +
+            "    <!-- Corpo da Mensagem -->" +
+            "    <tr>" +
+            "      <td style=\"padding: 45px 35px;\">" +
+            "        <h2 style=\"color: #4A1525; font-size: 21px; margin-top: 0; margin-bottom: 20px; font-family: Georgia, serif;\">Bem-vindo(a) à nossa Adega!</h2>" +
+            "        <p style=\"font-size: 15px; line-height: 1.7; color: #555555; margin-bottom: 20px;\">Olá, ficamos imensamente felizes pelo seu cadastro na <strong>Vinheria Agnello</strong>. Para garantir a segurança da sua conta e concluir o seu acesso, por favor, confirme o seu endereço de e-mail.</p>" +
+            "        <p style=\"font-size: 15px; line-height: 1.7; color: #555555; margin-bottom: 30px;\">Para ativar a sua conta de forma segura, clique no botão abaixo:</p>" +
+            "        <!-- Botão Principal Centralizado -->" +
+            "        <table align=\"center\" border=\"0\" cellspacing=\"0\" cellpadding=\"0\" style=\"margin: 35px auto;\">" +
+            "          <tr>" +
+            "            <td align=\"center\" style=\"border-radius: 6px; background-color: #4A1525;\">" +
+            "              <a href=\"" + linkAtivacao + "\" target=\"_blank\" style=\"font-size: 15px; font-family: Arial, sans-serif; color: #ffffff; text-decoration: none; padding: 14px 32px; border-radius: 6px; border: 1px solid #4A1525; display: inline-block; font-weight: bold; letter-spacing: 0.5px;\">Ativar a Minha Conta</a>" +
+            "            </td>" +
+            "          </tr>" +
+            "        </table>" +
+            "        <!-- Box de Link Alternativo -->" +
+            "        <p style=\"font-size: 13px; line-height: 1.6; color: #777777; margin-top: 25px;\">" +
+            "          Se o botão acima não funcionar, copie e cole o link abaixo diretamente no seu browser:<br>" +
+            "          <a href=\"" + linkAtivacao + "\" style=\"color: #4A1525; word-break: break-all; font-size: 12px;\">" + linkAtivacao + "</a>" +
+            "        </p>" +
+            "        <!-- Box de Observação / Aviso de Spam Refinado -->" +
+            "        <table border=\"0\" cellpadding=\"0\" cellspacing=\"0\" width=\"100%\" style=\"background-color: #fdfbf7; border: 1px solid #e8e1d5; border-left: 4px solid #c5a059; border-radius: 4px; margin: 30px 0 25px 0;\">" +
+            "          <tr>" +
+            "            <td style=\"padding: 16px 18px; font-size: 13px; line-height: 1.6; color: #665555; font-family: Arial, sans-serif;\">" +
+            "              <strong style=\"color: #4A1525;\">Dica importante:</strong> Se não encontrar esta mensagem na sua caixa de entrada principal, por favor verifique também a pasta de <strong style=\"color: #4A1525;\">Spam</strong> ou <strong style=\"color: #4A1525;\">Lixo Eletrônico</strong>." +
+            "            </td>" +
+            "          </tr>" +
+            "        </table>" +
+            "        <p style=\"font-size: 13px; line-height: 1.6; color: #888888; border-top: 1px solid #eeeeee; margin-top: 35px; padding-top: 25px;\">Caso não tenha efetuado este cadastro, pode ignorar esta mensagem em total segurança.</p>" +
+            "      </td>" +
+            "    </tr>" +
+            "    <!-- Rodapé -->" +
+            "    <tr>" +
+            "      <td style=\"background-color: #f9f9f9; padding: 25px 35px; text-align: center; border-top: 1px solid #eeeeee;\">" +
+            "        <p style=\"font-size: 12px; color: #999999; margin: 0; font-family: Arial, sans-serif;\">&copy; 2026 Vinheria Agnello. Todos os direitos reservados.</p>" +
+            "      </td>" +
+            "    </tr>" +
+            "  </table>" +
+            "</div>";
+    }
 }
