@@ -138,4 +138,120 @@ public class ClienteDAO {
         }
     }
     
+    /**
+     * Salva o token de recuperação e a data de expiração para o e-mail correspondente.
+     */
+    public void salvarTokenRecuperacao(String email, String token, java.time.LocalDateTime expiracao) {
+        String sql = "UPDATE clientes SET token_recuperacao = ?, token_expiracao = ? WHERE email = ?";
+
+        try (Connection conn = ConnectionFactory.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            stmt.setString(1, token);
+            stmt.setTimestamp(2, java.sql.Timestamp.valueOf(expiracao));
+            stmt.setString(3, email);
+            stmt.executeUpdate();
+
+        } catch (SQLException e) {
+            throw new RuntimeException("Erro ao salvar o token de recuperação: " + e.getMessage(), e);
+        }
+    }
+
+    public Usuario buscarPorTokenRecuperacao(String token) {
+        // Atenção ao nome correto da tabela ("clientes")
+        String sql = "SELECT * FROM clientes WHERE token_recuperacao = ? AND token_expiracao > ?";
+
+        try (Connection conn = ConnectionFactory.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            stmt.setString(1, token);
+            stmt.setTimestamp(2, java.sql.Timestamp.valueOf(java.time.LocalDateTime.now()));
+            
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) {
+                    // Descobre se é PF ou PJ com base numa coluna da base de dados (ex: 'tipo')
+                    String tipoCliente = rs.getString("tipo_cliente"); 
+                    
+                    Usuario usuario;
+                    if ("PJ".equalsIgnoreCase(tipoCliente)) {
+                        ClientePJ pj = new ClientePJ();
+                        pj.setRazaoSocial(rs.getString("razao_social"));
+                        pj.setCnpj(rs.getString("cnpj"));
+                        usuario = pj;
+                    } else {
+                        ClientePF pf = new ClientePF();
+                        pf.setNome(rs.getString("nome"));
+                        pf.setSobrenome(rs.getString("sobreNome"));
+                        pf.setCpf(rs.getString("cpf"));
+                        usuario = pf;
+                    }
+                    
+                    // Preenche os campos comuns da classe mãe Usuario
+                    usuario.setId(rs.getInt("id"));
+                    usuario.setEmail(rs.getString("email"));
+                    usuario.setSenha(rs.getString("senha"));
+                    usuario.setTelefone(rs.getString("telefone"));
+                    usuario.setEmailVerificado(rs.getBoolean("email_verificado"));
+                    usuario.setTokenAtivacao(rs.getString("token_ativacao"));
+                    usuario.setTokenRecuperacao(rs.getString("token_recuperacao"));
+                    
+                    java.sql.Timestamp timestampExp = rs.getTimestamp("token_expiracao");
+                    if (timestampExp != null) {
+                        usuario.setTokenExpiracao(timestampExp.toLocalDateTime());
+                    }
+                    
+                    return usuario;
+                }
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException("Erro ao buscar utilizador por token de recuperação: " + e.getMessage(), e);
+        }
+        return null;
+    }
+    
+    
+    /**
+     * Valida se o token existe e ainda está dentro do prazo de 30 minutos.
+     */
+    public boolean validarToken(String token) {
+        String sql = "SELECT id FROM clientes WHERE token_recuperacao = ? AND token_expiracao > ?";
+
+        try (Connection conn = ConnectionFactory.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            stmt.setString(1, token);
+            stmt.setTimestamp(2, java.sql.Timestamp.valueOf(java.time.LocalDateTime.now()));
+
+            try (ResultSet rs = stmt.executeQuery()) {
+                return rs.next(); // Retorna true se encontrou um registo válido e não expirado
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException("Erro ao validar o token de recuperação: " + e.getMessage(), e);
+        }
+    }
+
+    /**
+     * Atualiza a senha do cliente usando o token e logo em seguida limpa os campos 
+     * do token (invalidando-o para uso único).
+     */
+    public void atualizarSenhaEInvalidarToken(String token, String novaSenha) {
+        String sql = "UPDATE clientes SET senha = ?, token_recuperacao = NULL, token_expiracao = NULL WHERE token_recuperacao = ?";
+
+        try (Connection conn = ConnectionFactory.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            stmt.setString(1, novaSenha);
+            stmt.setString(2, token);
+
+            int linhasAfetadas = stmt.executeUpdate();
+
+            if (linhasAfetadas == 0) {
+                throw new RuntimeException("Token inválido ou já utilizado.");
+            }
+
+        } catch (SQLException e) {
+            throw new RuntimeException("Erro ao atualizar a senha e invalidar o token: " + e.getMessage(), e);
+        }
+    }
+    
 }

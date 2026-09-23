@@ -8,9 +8,11 @@ import com.agnello.model.Usuario;
 public class ClienteService {
 
     private ClienteDAO clienteDAO;
+    private EmailService emailService;
 
     public ClienteService() {
         this.clienteDAO = new ClienteDAO();
+        this.emailService = new EmailService();
     }
 
     /**
@@ -31,7 +33,7 @@ public class ClienteService {
             pf.setCpf(cpf);
             pf.setEmail(email);
             pf.setTelefone(telefone);
-            pf.setSenha(senha); // Dica futura: aqui você poderia aplicar criptografia de senha (ex: BCrypt)
+            pf.setSenha(senha);
             
             clienteDAO.cadastrarPF(pf);
             
@@ -56,7 +58,6 @@ public class ClienteService {
         Usuario usuarioBanco = clienteDAO.buscarPorEmail(email);
         
         if (usuarioBanco != null && usuarioBanco.getSenha() != null) {
-            // Correção aqui: .trim() correto (sem o 's' no final)
             if (usuarioBanco.getSenha().trim().equals(senhaInformada.trim())) {
                 return usuarioBanco; 
             }
@@ -65,33 +66,61 @@ public class ClienteService {
     }
     
     /**
-     * Valida se o e-mail existe e gera um link/token de recuperação de senha.
+     * Valida o e-mail, gera um token seguro de recuperação, define uma expiração de 30 minutos,
+     * persiste os dados e dispara o e-mail de forma assíncrona.
      */
-    public String solicitarRecuperacaoSenha(String email, String baseUrl) throws Exception {
+    public String solicitarRecuperacaoSenha(String email, String baseUrl) {
         if (email == null || email.trim().isEmpty()) {
             throw new IllegalArgumentException("Por favor, informe um e-mail válido.");
         }
 
-        Usuario usuario = clienteDAO.buscarPorEmail(email.trim());
+        String emailTratado = email.trim().toLowerCase();
+        Usuario usuario = clienteDAO.buscarPorEmail(emailTratado);
+
+        // SEGURANÇA: Se o e-mail não existir, retorna null (proteção contra User Enumeration)
         if (usuario == null) {
-            throw new Exception("E-mail não encontrado em nossa base de dados.");
+            return null;
         }
 
-        // Gera um token seguro aleatório
         String token = java.util.UUID.randomUUID().toString();
-        
-        // Monta o link de redefinição
-        String linkRedefinicao = baseUrl + "?token=" + token;
-        
+        java.time.LocalDateTime expiracao = java.time.LocalDateTime.now().plusMinutes(10);
+
+        // Persiste o token e a expiração na base de dados
+        clienteDAO.salvarTokenRecuperacao(emailTratado, token, expiracao);
+
+        String baseLimpa = baseUrl != null ? baseUrl.replaceAll("/$", "") : "";
+        String linkRedefinicao = baseLimpa + "?token=" + token;
+
+        // DISPARO DO E-MAIL DE RECUPERAÇÃO
+        String assunto = "Recuperação de Senha - Vinheria Agnello";
+        String corpoHtml = com.agnello.util.EmailTemplateUtil.getCorpoRecuperacaoSenha(linkRedefinicao);
+
+        emailService.enviarEmailAssincrono(emailTratado, assunto, corpoHtml);
+
         return linkRedefinicao;
+    }
+    
+    /**
+     * Valida se o token existe e ainda está dentro do prazo de 30 minutos.
+     */
+    public boolean validarTokenRecuperacao(String token) {
+        if (token == null || token.trim().isEmpty()) {
+            return false;
+        }
+        return clienteDAO.validarToken(token.trim());
     }
 
     /**
-     * Realiza a redefinição da senha após validar as regras de negócio.
+     * Realiza a redefinição da senha utilizando o token de forma segura e o invalida após o uso.
      */
-    public void redefinirSenha(String emailDoUsuario, String novaSenha, String confirmaSenha) throws Exception {
-        if (emailDoUsuario == null || emailDoUsuario.trim().isEmpty()) {
-            throw new Exception("O link de recuperação expirou ou é inválido. Solicite um novo.");
+    public void redefinirSenhaComToken(String token, String novaSenha, String confirmaSenha) throws Exception {
+        if (token == null || token.trim().isEmpty()) {
+            throw new Exception("Sessão de recuperação inválida. Solicite um novo link.");
+        }
+
+        // Validação rigorosa de tempo/existência antes de prosseguir
+        if (!validarTokenRecuperacao(token)) {
+            throw new Exception("Este link de recuperação expirou (limite de 10 minutos) ou já foi utilizado. Por favor, solicite um novo.");
         }
 
         if (novaSenha == null || novaSenha.trim().isEmpty() || confirmaSenha == null || confirmaSenha.trim().isEmpty()) {
@@ -106,12 +135,11 @@ public class ClienteService {
             throw new IllegalArgumentException("A nova senha deve conter pelo menos 6 caracteres.");
         }
 
-        // Executa a atualização no banco de dados via DAO
-        clienteDAO.atualizarSenhaPorEmail(emailDoUsuario, novaSenha);
+        // Atualiza a senha e limpa o token na base de dados (Garante o uso único)
+        clienteDAO.atualizarSenhaEInvalidarToken(token.trim(), novaSenha);
     }
-    
     /**
-     * 4. Lógica de negócio para buscar um usuário pelo e-mail
+     * Busca um usuário pelo e-mail com validação prévia.
      */
     public Usuario buscarPorEmail(String email) throws Exception {
         if (email == null || email.trim().isEmpty()) {
@@ -132,18 +160,14 @@ public class ClienteService {
             throw new IllegalArgumentException("Por favor, digite o seu e-mail para confirmar a exclusão.");
         }
 
-        // Garante que o e-mail digitado confere com o utilizador logado
         if (!emailSessao.trim().equalsIgnoreCase(emailConfirmacao.trim())) {
             throw new IllegalArgumentException("O e-mail digitado não corresponde à sua conta ativa.");
         }
 
-        // Executa a exclusão no banco de dados através do DAO
         boolean deletado = clienteDAO.deletarPorEmail(emailSessao.trim());
         
         if (!deletado) {
             throw new Exception("Não foi possível encontrar o registo para exclusão na base de dados.");
         }
     }
-    
-    
 }
