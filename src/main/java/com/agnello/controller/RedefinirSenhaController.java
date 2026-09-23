@@ -5,7 +5,6 @@ import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import jakarta.servlet.http.HttpSession;
 import java.io.IOException;
 
 import com.agnello.service.ClienteService;
@@ -22,10 +21,21 @@ public class RedefinirSenhaController extends HttpServlet {
         
         if (token == null || token.trim().isEmpty()) {
             request.setAttribute("mensagemErro", "Token de recuperação inválido ou ausente.");
-            request.getRequestDispatcher("/WEB-INF/views/esqueci-senha.jsp").forward(request, response);
+            request.getRequestDispatcher("/WEB-INF/views/esqueciSenha.jsp").forward(request, response);
             return;
         }
 
+        // BLINDAGEM: Valida se o token existe e ainda está dentro dos 10 minutos na base de dados
+        boolean tokenValido = clienteService.validarTokenRecuperacao(token);
+
+        if (!tokenValido) {
+            request.setAttribute("mensagemErro", "Este link de recuperação expirou (limite de 10 minutos) ou já foi utilizado. Por favor, solicite um novo.");
+            request.getRequestDispatcher("/WEB-INF/views/esqueciSenha.jsp").forward(request, response);
+            return;
+        }
+
+        // Se estiver válido, envia o token para o JSP e abre a página de redefinição
+        request.setAttribute("token", token);
         request.getRequestDispatcher("/WEB-INF/views/redefinir-senha.jsp").forward(request, response);
     }
 
@@ -39,33 +49,28 @@ public class RedefinirSenhaController extends HttpServlet {
 
         if (token == null || token.trim().isEmpty()) {
             request.setAttribute("mensagemErro", "Sessão de recuperação inválida. Solicite um novo link.");
-            request.getRequestDispatcher("/WEB-INF/views/esqueci-senha.jsp").forward(request, response);
+            request.getRequestDispatcher("/WEB-INF/views/esqueciSenha.jsp").forward(request, response);
             return;
         }
 
         try {
-            HttpSession session = request.getSession();
-            String emailDoUsuario = (String) session.getAttribute("token_" + token);
-
-            if (emailDoUsuario == null && token.contains("@")) {
-                emailDoUsuario = token.trim();
-            }
-
-            // Delega as regras de validação de senha e alteração ao Service
-            clienteService.redefinirSenha(emailDoUsuario, novaSenha, confirmaSenha);
-
-            // Remove o token da sessão após o uso
-            session.removeAttribute("token_" + token);
+            // Delega a redefinição utilizando diretamente o token (valida, atualiza e invalida o token no banco)
+            clienteService.redefinirSenhaComToken(token, novaSenha, confirmaSenha);
 
             request.setAttribute("mensagemSucesso", "Sua senha foi atualizada com sucesso.");
             request.getRequestDispatcher("/WEB-INF/views/redefinir-senha.jsp").forward(request, response);
 
         } catch (IllegalArgumentException e) {
+            // Erros de preenchimento (ex: senhas não coincidem, menos de 6 carateres)
+            // Devolve o token para o request para manter o formulário funcional
+            request.setAttribute("token", token);
             request.setAttribute("mensagemErro", e.getMessage());
             request.getRequestDispatcher("/WEB-INF/views/redefinir-senha.jsp").forward(request, response);
+            
         } catch (Exception e) {
+            // Erros de token expirado, inválido ou já utilizado
             request.setAttribute("mensagemErro", e.getMessage());
-            request.getRequestDispatcher("/WEB-INF/views/esqueci-senha.jsp").forward(request, response);
+            request.getRequestDispatcher("/WEB-INF/views/esqueciSenha.jsp").forward(request, response);
         }
     }
 }
