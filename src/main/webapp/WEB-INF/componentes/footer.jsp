@@ -64,16 +64,26 @@
       </div>
     </div>
 
-    <div class="footer-col">
-      <h4>LINKS RÁPIDOS</h4>
+    <nav class="footer-col" aria-label="A loja">
+      <h4>A LOJA</h4>
       <ul class="footer-links">
         <li><a href="${pageContext.request.contextPath}/catalogo">Nossa Adega</a></li>
-        <li><a href="${pageContext.request.contextPath}/home">Nossa História</a></li>
-        <li><a href="${pageContext.request.contextPath}/home#calculadora">Calculadora de Eventos</a></li>
+        <li><a href="${pageContext.request.contextPath}/sobre">Nossa História</a></li>
         <li><a href="${pageContext.request.contextPath}/quiz">Sommelier Virtual</a></li>
-        <li><a href="#">Política de Privacidade</a></li>
+        <li><a href="${pageContext.request.contextPath}/home#calculadora">Calculadora de Eventos</a></li>
       </ul>
-    </div>
+    </nav>
+
+    <nav class="footer-col" aria-label="Ajuda e políticas">
+      <h4>AJUDA</h4>
+      <ul class="footer-links">
+        <li><a href="${pageContext.request.contextPath}/ajuda">Central de Ajuda</a></li>
+        <li><a href="${pageContext.request.contextPath}/entregas-e-trocas">Entregas e Trocas</a></li>
+        <li><a href="${pageContext.request.contextPath}/contato">Fale Conosco</a></li>
+        <li><a href="${pageContext.request.contextPath}/privacidade">Política de Privacidade</a></li>
+        <li><a href="${pageContext.request.contextPath}/termos">Termos de Uso</a></li>
+      </ul>
+    </nav>
   </div>
 
   <div class="footer-bottom">
