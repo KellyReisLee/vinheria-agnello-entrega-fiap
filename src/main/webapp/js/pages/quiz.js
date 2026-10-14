@@ -1,210 +1,200 @@
+// js/pages/quiz.js
+// Sommelier Virtual: 3 perguntas em que as opções de cada passo dependem das
+// respostas anteriores. No fim, guarda o perfil no localStorage
+// ('vinhoQuizResult') e abre /sugestoes, que lê esse perfil.
 document.addEventListener('DOMContentLoaded', () => {
-  let currentStep = 1;
-  const totalSteps = 3;
-  const userAnswers = {};
+  const form = document.getElementById('quiz-form');
+  if (!form) return;
 
-  // Define o context path de forma segura para o projeto Java Web
   const contextPath = window.CONTEXT_PATH || '';
+  const TOTAL_PASSOS = 3;
 
-  // Define a resposta padrão inicial para a etapa 1
-  userAnswers['etapa1'] = 'carnes-vermelhas';
-
-  function atualizarProgresso(etapaAtual) {
-    const progressFill = document.getElementById('progress-fill');
-    const progressText = document.getElementById('progress-text');
-
-    const porcentagens = { 1: 33, 2: 66, 3: 100 };
-
-    if (progressFill) {
-      progressFill.style.width = `${porcentagens[etapaAtual]}%`;
-    }
-
-    if (progressText) {
-      progressText.textContent = `Passo ${etapaAtual} de ${totalSteps}`;
-    }
-  }
-
-  function mostrarEtapa(etapa) {
-    // Esconde todas as etapas rigorosamente
-    for (let i = 1; i <= totalSteps; i++) {
-      const stepEl = document.getElementById(`step-${i}`);
-      if (stepEl) {
-        stepEl.classList.remove('active');
-      }
-    }
-
-    // Mostra exclusivamente a etapa atual
-    const activeStepEl = document.getElementById(`step-${etapa}`);
-    if (activeStepEl) {
-      activeStepEl.classList.add('active');
-    }
-
-    atualizarProgresso(etapa);
-    vincularEventosPils();
-  }
-
-  function prepararEtapasDinamicas(step) {
-    const resp1 = userAnswers['etapa1'] || 'carnes-vermelhas';
-
-    if (step === 2) {
-      const tituloEtapa2 = document.querySelector('#step-2 .question-title');
-      const grupoEtapa2 = document.querySelector('#step-2 .options-list');
-
-      if (!tituloEtapa2 || !grupoEtapa2) return;
-
-      if (resp1 === 'carnes-vermelhas') {
-        tituloEtapa2.textContent = 'Qual o corte ou intensidade da carne principal?';
-        grupoEtapa2.innerHTML = `
-          <div class="type-btn option-pill selected" data-step="2" data-value="corte-gorduroso">
-            <span>Cortes gordurosos (Picanha, Ribeye)</span>
-            <span class="arrow">›</span>
-          </div>
-          <div class="type-btn option-pill" data-step="2" data-value="corte-magro">
-            <span>Cortes magros (Filé Mignon, Cordeiro)</span>
-            <span class="arrow">›</span>
-          </div>
-        `;
-        userAnswers['etapa2'] = 'corte-gorduroso';
-      } else if (resp1 === 'massas-molhos') {
-        tituloEtapa2.textContent = 'Como é a estrutura predominante do molho?';
-        grupoEtapa2.innerHTML = `
-          <div class="type-btn option-pill selected" data-step="2" data-value="molho-carne-ragu">
-            <span>Ragu de carne ou molhos encorpados à base de tomate</span>
-            <span class="arrow">›</span>
-          </div>
-          <div class="type-btn option-pill" data-step="2" data-value="molho-branco-queijos">
-            <span>Molhos brancos cremosos ou queijos intensos</span>
-            <span class="arrow">›</span>
-          </div>
-        `;
-        userAnswers['etapa2'] = 'molho-carne-ragu';
-      } else if (resp1 === 'peixes-frutos-mar') {
-        tituloEtapa2.textContent = 'O prato possui molhos leves ou estrutura untuosa?';
-        grupoEtapa2.innerHTML = `
-          <div class="type-btn option-pill selected" data-step="2" data-value="peixe-grelhado">
-            <span>Apenas peixe grelhado com limão e azeite</span>
-            <span class="arrow">›</span>
-          </div>
-          <div class="type-btn option-pill" data-step="2" data-value="molho-cremoso">
-            <span>Frutos do mar ao molho cremoso ou comida japonesa</span>
-            <span class="arrow">›</span>
-          </div>
-        `;
-        userAnswers['etapa2'] = 'peixe-grelhado';
-      } else {
-        tituloEtapa2.textContent = 'Qual é a proposta para este momento ao ar livre?';
-        grupoEtapa2.innerHTML = `
-          <div class="type-btn option-pill selected" data-step="2" data-value="sunset-refrescante">
-            <span>Espumantes vibrantes ou brancos leves para um final de tarde</span>
-            <span class="arrow">›</span>
-          </div>
-          <div class="type-btn option-pill" data-step="2" data-value="rose-elegante">
-            <span>Rosés gastronômicos ou tintos frutados e descomplicados</span>
-            <span class="arrow">›</span>
-          </div>
-        `;
-        userAnswers['etapa2'] = 'sunset-refrescante';
-      }
-    }
-    else if (step === 3) {
-      const tituloEtapa3 = document.querySelector('#step-3 .question-title');
-      const grupoEtapa3 = document.querySelector('#step-3 .options-list');
-      
-      if (!tituloEtapa3 || !grupoEtapa3) return;
-      
-      const resp2 = userAnswers['etapa2'] || 'corte-gorduroso';
-
-      if (resp2 === 'corte-gorduroso' || resp2 === 'molho-carne-ragu') {
-        tituloEtapa3.textContent = 'Qual intensidade de tanino e carvalho você prefere?';
-        grupoEtapa3.innerHTML = `
-          <div class="type-btn option-pill selected" data-step="3" data-value="taninos-potentes">
-            <span>Taninos marcantes e passagem prolongada por barrica</span>
-            <span class="arrow">›</span>
-          </div>
-          <div class="type-btn option-pill" data-step="3" data-value="taninos-macios">
-            <span>Taninos macios, redondos e boa fruta</span>
-            <span class="arrow">›</span>
-          </div>
-        `;
-        userAnswers['etapa3'] = 'taninos-potentes';
-      } else {
-        tituloEtapa3.textContent = 'Qual o nível de acidez e frescor ideal para o seu paladar?';
-        grupoEtapa3.innerHTML = `
-          <div class="type-btn option-pill selected" data-step="3" data-value="fresco-mineral">
-            <span>Alta acidez, toque mineral e refrescante</span>
-            <span class="arrow">›</span>
-          </div>
-          <div class="type-btn option-pill" data-step="3" data-value="frutado-equilibrado">
-            <span>Frutado, macio e de perfil mais versátil</span>
-            <span class="arrow">›</span>
-          </div>
-        `;
-        userAnswers['etapa3'] = 'fresco-mineral';
-      }
-    }
-  }
-
-  function vincularEventosPils() {
-    const activeStepElement = document.getElementById(`step-${currentStep}`);
-    if (!activeStepElement) return;
-
-    const activePills = activeStepElement.querySelectorAll('.option-pill');
-
-    activePills.forEach(pill => {
-      pill.removeEventListener('click', handlePillClick);
-      pill.addEventListener('click', handlePillClick);
-    });
-  }
-
-  function handlePillClick(e) {
-    const pill = e.currentTarget;
-    const activeStepElement = document.getElementById(`step-${currentStep}`);
-
-    activeStepElement.querySelectorAll('.option-pill').forEach(p => p.classList.remove('selected'));
-    pill.classList.add('selected');
-
-    const step = parseInt(pill.getAttribute('data-step'));
-    const value = pill.getAttribute('data-value');
-    userAnswers[`etapa${step}`] = value;
-
-    if (step === 1) {
-      prepararEtapasDinamicas(2);
-    } else if (step === 2) {
-      prepararEtapasDinamicas(3);
-    }
-  }
-
-  // Botão Próximo
-  const btnProximo = document.getElementById('btn-proximo');
-  if (btnProximo) {
-    btnProximo.addEventListener('click', () => {
-      if (currentStep < totalSteps) {
-        currentStep++;
-        prepararEtapasDinamicas(currentStep);
-        mostrarEtapa(currentStep);
-      } else {
-        // Salva os dados no localStorage e redireciona dinamicamente para o Servlet de Sugestões
-        localStorage.setItem('vinhoQuizResult', JSON.stringify(userAnswers));
-        window.location.href = contextPath + '/sugestoes';
-      }
-    });
-  }
-
-  // Botão Voltar
+  const elPergunta = document.getElementById('quiz-pergunta');
+  const elOpcoes = document.getElementById('quiz-opcoes');
+  const elFill = document.getElementById('progress-fill');
+  const elTexto = document.getElementById('progress-text');
+  const elTrack = document.querySelector('.progress-bar-track');
   const btnVoltar = document.getElementById('btn-voltar');
-  if (btnVoltar) {
-    btnVoltar.addEventListener('click', () => {
-      if (currentStep > 1) {
-        currentStep--;
-        mostrarEtapa(currentStep);
-      } else {
-        window.location.href = contextPath + '/';
+  const btnVoltarTexto = document.getElementById('btn-voltar-texto');
+  const btnProximoTexto = document.getElementById('btn-proximo-texto');
+
+  // ---------- Árvore de perguntas ----------
+  // Cada passo devolve { pergunta, opcoes: [{ valor, texto }] } conforme as respostas.
+  const PASSOS = {
+    1: () => ({
+      pergunta: 'Qual é a ocasião ou o prato principal do seu momento?',
+      opcoes: [
+        { valor: 'carnes-vermelhas', texto: 'Carnes vermelhas & churrasco nobre' },
+        { valor: 'massas-molhos', texto: 'Massas com molhos intensos ou ragus' },
+        { valor: 'peixes-frutos-mar', texto: 'Peixes, frutos do mar ou comida japonesa' },
+        { valor: 'momento-a-dois', texto: 'Sunset ou coquetel de verão' }
+      ]
+    }),
+
+    2: (r) => ({
+      'carnes-vermelhas': {
+        pergunta: 'Qual o corte ou a intensidade da carne principal?',
+        opcoes: [
+          { valor: 'corte-gorduroso', texto: 'Cortes gordurosos (picanha, ribeye)' },
+          { valor: 'corte-magro', texto: 'Cortes magros (filé mignon, cordeiro)' }
+        ]
+      },
+      'massas-molhos': {
+        pergunta: 'Como é a estrutura predominante do molho?',
+        opcoes: [
+          { valor: 'molho-carne-ragu', texto: 'Ragu de carne ou molhos encorpados de tomate' },
+          { valor: 'molho-branco-queijos', texto: 'Molhos brancos cremosos ou queijos intensos' }
+        ]
+      },
+      'peixes-frutos-mar': {
+        pergunta: 'O prato tem molhos leves ou uma estrutura mais untuosa?',
+        opcoes: [
+          { valor: 'peixe-grelhado', texto: 'Peixe grelhado com limão e azeite' },
+          { valor: 'molho-cremoso', texto: 'Frutos do mar ao molho cremoso ou comida japonesa' }
+        ]
+      },
+      'momento-a-dois': {
+        pergunta: 'Qual é a proposta para este momento ao ar livre?',
+        opcoes: [
+          { valor: 'sunset-refrescante', texto: 'Espumantes vibrantes ou brancos leves' },
+          { valor: 'rose-elegante', texto: 'Rosés gastronômicos ou tintos frutados e leves' }
+        ]
       }
-    });
+    }[r.etapa1]),
+
+    // Pratos de carne (e ragu) perguntam por taninos; os restantes por acidez.
+    // Antes, "cortes magros" (filé mignon) caía na pergunta de acidez por engano.
+    3: (r) => (r.etapa1 === 'carnes-vermelhas' || r.etapa2 === 'molho-carne-ragu'
+      ? {
+        pergunta: 'Que intensidade de tanino e carvalho você prefere?',
+        opcoes: [
+          { valor: 'taninos-potentes', texto: 'Taninos marcantes e passagem longa por barrica' },
+          { valor: 'taninos-macios', texto: 'Taninos macios, redondos e com boa fruta' }
+        ]
+      }
+      : {
+        pergunta: 'Qual o nível de acidez e frescor ideal para o seu paladar?',
+        opcoes: [
+          { valor: 'fresco-mineral', texto: 'Alta acidez, toque mineral e refrescante' },
+          { valor: 'frutado-equilibrado', texto: 'Frutado, macio e de perfil versátil' }
+        ]
+      })
+  };
+
+  // ---------- Estado ----------
+  let passo = 1;
+  const respostas = {};   // { etapa1: 'carnes-vermelhas', ... }
+  const resumo = {};      // { etapa1: 'Carnes vermelhas & churrasco nobre', ... }
+
+  // ---------- Desenho do passo atual ----------
+  function desenhar(focar) {
+    const { pergunta, opcoes } = PASSOS[passo](respostas);
+    const chave = `etapa${passo}`;
+
+    // Se a resposta guardada já não existe neste passo (mudou o passo anterior), usa a 1.ª
+    if (!opcoes.some((o) => o.valor === respostas[chave])) {
+      respostas[chave] = opcoes[0].valor;
+    }
+
+    elPergunta.textContent = pergunta;
+    elOpcoes.setAttribute('role', 'radiogroup');
+    elOpcoes.setAttribute('aria-labelledby', 'quiz-pergunta');
+    elOpcoes.innerHTML = opcoes.map((o) => {
+      const sel = o.valor === respostas[chave];
+      return `
+        <button type="button" class="option-pill${sel ? ' selected' : ''}" role="radio"
+                aria-checked="${sel}" tabindex="${sel ? 0 : -1}" data-value="${o.valor}">
+          <span>${o.texto}</span>
+          <span class="option-check" aria-hidden="true"></span>
+        </button>`;
+    }).join('');
+    guardarResumo();
+
+    // Progresso
+    const pct = Math.round((passo / TOTAL_PASSOS) * 100);
+    elFill.style.width = `${pct}%`;
+    elTexto.textContent = `Passo ${passo} de ${TOTAL_PASSOS}`;
+    if (elTrack) elTrack.setAttribute('aria-valuenow', passo);
+
+    // Textos dos botões
+    btnVoltarTexto.textContent = passo === 1 ? 'Início' : 'Voltar';
+    btnProximoTexto.textContent = passo === TOTAL_PASSOS ? 'Ver sugestões' : 'Próximo';
+
+    // Pequena animação ao trocar de pergunta
+    const etapa = form.querySelector('.quiz-step');
+    etapa.classList.remove('is-entering');
+    void etapa.offsetWidth;
+    etapa.classList.add('is-entering');
+
+    if (focar) elPergunta.focus({ preventScroll: true });
   }
 
-  // Inicialização
-  prepararEtapasDinamicas(2);
-  prepararEtapasDinamicas(3);
-  mostrarEtapa(currentStep);
+  function guardarResumo() {
+    const { opcoes } = PASSOS[passo](respostas);
+    const escolhida = opcoes.find((o) => o.valor === respostas[`etapa${passo}`]);
+    if (escolhida) resumo[`etapa${passo}`] = escolhida.texto;
+  }
+
+  function selecionar(botao) {
+    respostas[`etapa${passo}`] = botao.dataset.value;
+    elOpcoes.querySelectorAll('.option-pill').forEach((b) => {
+      const sel = b === botao;
+      b.classList.toggle('selected', sel);
+      b.setAttribute('aria-checked', String(sel));
+      b.tabIndex = sel ? 0 : -1;
+    });
+    guardarResumo();
+  }
+
+  // ---------- Eventos ----------
+  elOpcoes.addEventListener('click', (e) => {
+    const botao = e.target.closest('.option-pill');
+    if (botao) selecionar(botao);
+  });
+
+  // Setas do teclado percorrem as opções (padrão de "radiogroup")
+  elOpcoes.addEventListener('keydown', (e) => {
+    const botoes = [...elOpcoes.querySelectorAll('.option-pill')];
+    const atual = botoes.indexOf(document.activeElement);
+    if (atual === -1) return;
+    let novo = null;
+    if (e.key === 'ArrowDown' || e.key === 'ArrowRight') novo = (atual + 1) % botoes.length;
+    if (e.key === 'ArrowUp' || e.key === 'ArrowLeft') novo = (atual - 1 + botoes.length) % botoes.length;
+    if (novo !== null) {
+      e.preventDefault();
+      selecionar(botoes[novo]);
+      botoes[novo].focus();
+    }
+  });
+
+  form.addEventListener('submit', (e) => {
+    e.preventDefault();
+    if (passo < TOTAL_PASSOS) {
+      passo++;
+      desenhar(true);
+      return;
+    }
+
+    try {
+      localStorage.setItem('vinhoQuizResult', JSON.stringify({
+        ...respostas,
+        resumo: [resumo.etapa1, resumo.etapa2, resumo.etapa3].filter(Boolean),
+        data: new Date().toISOString()
+      }));
+    } catch (erro) {
+      // Sem localStorage (modo privado): as sugestões mostram todos os vinhos
+    }
+    window.location.href = `${contextPath}/sugestoes`;
+  });
+
+  btnVoltar.addEventListener('click', () => {
+    if (passo > 1) {
+      passo--;
+      desenhar(true);
+    } else {
+      window.location.href = `${contextPath}/home`;
+    }
+  });
+
+  desenhar(false);
 });
