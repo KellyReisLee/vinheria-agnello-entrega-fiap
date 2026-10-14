@@ -6,7 +6,11 @@
 <c:set var="rotaAtual" value="${requestScope['jakarta.servlet.forward.servlet_path']}" />
 
 <%-- Disponibiliza o context path aos scripts em TODAS as páginas com header --%>
-<script>window.CONTEXT_PATH = window.CONTEXT_PATH || '${ctx}';</script>
+<script>
+  window.CONTEXT_PATH = window.CONTEXT_PATH || '${ctx}';
+  // Indica ao CSS que há JavaScript (usado nas animações de scroll)
+  document.documentElement.classList.add('js');
+</script>
 
 <header class="navbar" id="site-navbar">
   <a href="${ctx}/home" class="agnello-logo-link" aria-label="Vinheria Agnello — página inicial">
