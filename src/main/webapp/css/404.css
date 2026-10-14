@@ -1,145 +1,188 @@
-:root {
-  --primary-wine: #390a1c;
-  --deep-wine: #3b111d;
-  --accent-gold: #D4AF37;
-  --text-charcoal: #2b1119;
-  --bg-cream: #F8F7F4;
-}
+/* ==========================================================================
+   PÁGINA DE ERRO (404 e erros internos) — WEB-INF/views/404.jsp
+   Usa as cores de variables.css (antes redefinia a paleta com outros tons).
+   ========================================================================== */
 
-body {
-  margin: 0;
-  padding: 0;
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  background-color: var(--deep-wine);
-  color: var(--text-charcoal);
+.erro-body {
   display: flex;
   align-items: center;
   justify-content: center;
-  height: 100vh;
-  overflow: hidden;
-  background-image:
-    radial-gradient(circle at 10% 20%, rgba(39, 3, 14, 0.04) 0%, transparent 40%),
-    radial-gradient(circle at 90% 80%, rgba(212, 175, 55, 0.06) 0%, transparent 40%);
+  min-height: 100vh;
+  min-height: 100dvh;
+  padding: 1.5rem var(--page-gutter);
+  background:
+    radial-gradient(circle at 15% 20%, rgba(212, 175, 55, 0.12), transparent 40%),
+    radial-gradient(circle at 85% 85%, rgba(212, 175, 55, 0.08), transparent 45%),
+    var(--primary-wine-dark);
 }
 
-.error-wrapper {
-  position: relative;
-  background: #FFFFFF;
-  padding: 4.5rem 3.5rem;
-  border-radius: 20px;
-  border: 1px solid rgba(39, 3, 14, 0.08);
-  box-shadow: 0 30px 60px rgba(39, 3, 14, 0.12);
-  text-align: center;
-  max-width: 580px;
-  width: 90%;
-  box-sizing: border-box;
-}
-
-.error-wrapper::before {
-  content: '';
-  position: absolute;
-  top: -1px;
-  left: 0;
+.erro-card {
   width: 100%;
-  height: 15px;
-  background: linear-gradient(90deg, var(--primary-wine), var(--deep-wine), var(--accent-gold), var(--primary-wine));
-  border-top-left-radius: 20px;
-  border-top-right-radius: 20px;
-  border: 2px solid var(--bg-cream);
-  box-sizing: border-box;
+  max-width: 560px;
+  padding: clamp(2rem, 6vw, 3.5rem) clamp(1.5rem, 5vw, 3rem);
+  border: 1px solid rgba(212, 175, 55, 0.35);
+  border-radius: 20px;
+  background: #FFFFFF;
+  box-shadow: 0 30px 60px rgba(0, 0, 0, 0.35);
+  text-align: center;
+  animation: erroEntrada 0.6s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-.error-badge {
-  display: inline-block;
-  font-size: 0.75rem;
-  text-transform: uppercase;
-  letter-spacing: 2.5px;
+@keyframes erroEntrada {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.erro-logo {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  margin-bottom: 1.75rem;
   color: var(--primary-wine);
+  font-family: var(--font-heading);
+  font-size: 0.95rem;
   font-weight: 700;
-  margin-bottom: 1.2rem;
-  background: rgba(39, 3, 14, 0.05);
-  padding: 6px 16px;
-  border-radius: 30px;
-  border: 1px solid rgba(39, 3, 14, 0.1);
+  letter-spacing: 2px;
+  text-decoration: none;
 }
 
-.error-icon-box {
-  width: 90px;
-  height: 90px;
-  background: linear-gradient(135deg, rgba(39, 3, 14, 0.08), rgba(212, 175, 55, 0.15));
-  border: 1px solid var(--accent-gold);
-  border-radius: 50%;
+.erro-logo img {
+  width: 18px;
+  height: 46px;
+  object-fit: cover;
+}
+
+/* Taça desenhada em SVG, com o vinho em dourado */
+.erro-icone {
+  display: block;
+  width: 72px;
+  height: 72px;
+  margin: 0 auto 0.75rem;
+  fill: none;
+  stroke: var(--primary-wine);
+  stroke-width: 2.5;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.erro-icone-vinho {
+  stroke: var(--accent-gold);
+  stroke-width: 3;
+}
+
+.erro-codigo {
+  color: var(--accent-gold);
+  font-family: var(--font-heading);
+  font-size: clamp(3.5rem, 2.5rem + 5vw, 5rem);
+  font-weight: 700;
+  line-height: 1;
+}
+
+.erro-card h1 {
+  margin: 0.75rem 0 0.75rem;
+  color: var(--primary-wine);
+  font-size: clamp(1.5rem, 1.2rem + 1.2vw, 1.9rem);
+  text-wrap: balance;
+}
+
+.erro-texto {
+  margin-bottom: 1.75rem;
+  color: var(--text-muted);
+  line-height: 1.65;
+  text-wrap: pretty;
+}
+
+/* Pesquisa */
+.erro-busca {
   display: flex;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.erro-busca input {
+  flex: 1;
+  min-width: 0;
+  min-height: 48px;
+  padding: 0.7rem 1rem;
+  border: 1px solid #DDD3C5;
+  border-radius: 8px;
+  background: var(--bg-offwhite);
+  font-size: 1rem;
+}
+
+.erro-busca input:focus {
+  outline: none;
+  border-color: var(--accent-gold);
+  box-shadow: 0 0 0 3px rgba(212, 175, 55, 0.18);
+}
+
+.erro-busca button {
+  min-height: 48px;
+  padding: 0 1.25rem;
+  border: none;
+  border-radius: 8px;
+  background: var(--primary-wine);
+  color: #FFFFFF;
+  font-weight: 600;
+}
+
+/* Botões */
+.erro-acoes {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.75rem;
+  margin-bottom: 1.5rem;
+}
+
+.erro-btn {
+  display: inline-flex;
   align-items: center;
   justify-content: center;
-  margin: 1.5rem auto 1.5rem auto;
-  box-shadow: 0 12px 25px rgba(39, 3, 14, 0.08);
-}
-
-.error-icon {
-  width: 60px;
-  height: 60px;
-  fill: var(--primary-wine);
-  animation: float 3s ease-in-out infinite;
-}
-
-@keyframes float {
-
-  0%,
-  100% {
-    transform: translateY(0) rotate(0deg);
-  }
-
-  50% {
-    transform: translateY(-8px) rotate(-10deg);
-  }
-}
-
-.error-code {
-  font-family: serif;
-  font-size: 6.5rem;
-  color: var(--primary-wine);
-  margin: 0;
-  line-height: 1;
-  font-weight: 700;
-  letter-spacing: -3px;
-  text-shadow: 2px 2px 0px rgba(212, 175, 55, 0.2);
-}
-
-.error-title {
-  font-family: serif;
-  font-size: 1.75rem;
-  color: var(--primary-wine);
-  margin-top: 0.8rem;
-  margin-bottom: 1rem;
-  font-weight: 600;
-}
-
-.error-message {
-  font-size: 0.98rem;
-  color: #555;
-  margin-bottom: 2.8rem;
-  line-height: 1.7;
-}
-
-.btn-home {
-  background-color: var(--primary-wine);
-  color: #FFF;
-  padding: 1rem 3rem;
+  min-height: 48px;
+  padding: 0.7rem 1rem;
+  border: 1px solid #DDD3C5;
   border-radius: 8px;
-  text-decoration: none;
+  color: var(--primary-wine);
   font-weight: 600;
-  font-size: 0.95rem;
-  letter-spacing: 0.5px;
-  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-  display: inline-block;
-  box-shadow: 0 10px 25px rgba(39, 3, 14, 0.25);
-  border: 1px solid var(--accent-gold);
+  text-decoration: none;
+  transition: background-color 0.2s, border-color 0.2s, transform 0.2s;
 }
 
-.btn-home:hover {
-  background-color: var(--deep-wine);
-  color: var(--accent-gold);
-  transform: translateY(-3px);
-  box-shadow: 0 15px 35px rgba(39, 3, 14, 0.35);
+.erro-btn:hover {
+  border-color: var(--primary-wine);
+  transform: translateY(-1px);
+}
+
+.erro-btn--primario {
+  border-color: var(--accent-gold);
+  background: var(--accent-gold);
+  color: #1E0A10;
+}
+
+.erro-btn--primario:hover {
+  border-color: #E0BE4E;
+  background: #E0BE4E;
+}
+
+.erro-ajuda {
+  color: var(--text-muted);
+  font-size: 0.9rem;
+}
+
+.erro-ajuda a {
+  color: var(--primary-wine);
+  font-weight: 600;
+}
+
+@media (max-width: 480px) {
+  .erro-acoes {
+    grid-template-columns: minmax(0, 1fr);
+  }
 }
