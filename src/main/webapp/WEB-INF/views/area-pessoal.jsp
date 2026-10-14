@@ -1,213 +1,166 @@
-<%@ page language="java" contentType="text/html; charset=UTF-8"
-	pageEncoding="UTF-8"%>
-<%@ taglib prefix="c" uri="jakarta.tags.core"%>
-<%@ taglib prefix="fn" uri="jakarta.tags.functions"%>
+<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
+<%@ taglib prefix="c" uri="jakarta.tags.core" %>
+<%@ taglib prefix="fn" uri="jakarta.tags.functions" %>
+<c:set var="ctx" value="${pageContext.request.contextPath}" />
+
+<%-- Dados do cliente (ClientePF ou ClientePJ) preparados uma só vez --%>
+<c:set var="ehPF" value="${clienteLogado['class'].simpleName eq 'ClientePF'}" />
+<c:set var="ehPJ" value="${clienteLogado['class'].simpleName eq 'ClientePJ'}" />
+<c:choose>
+  <c:when test="${ehPF}">
+    <c:set var="nomeExibicao" value="${clienteLogado.nome} ${clienteLogado.sobrenome}" />
+    <c:set var="primeiroNome" value="${clienteLogado.nome}" />
+    <c:set var="iniciais" value="${fn:toUpperCase(fn:substring(clienteLogado.nome, 0, 1))}${fn:toUpperCase(fn:substring(clienteLogado.sobrenome, 0, 1))}" />
+    <c:set var="documento" value="${clienteLogado.cpf}" />
+  </c:when>
+  <c:when test="${ehPJ}">
+    <c:set var="nomeExibicao" value="${clienteLogado.razaoSocial}" />
+    <c:set var="primeiroNome" value="${clienteLogado.razaoSocial}" />
+    <c:set var="iniciais" value="${fn:toUpperCase(fn:substring(clienteLogado.razaoSocial, 0, 2))}" />
+    <c:set var="documento" value="${clienteLogado.cnpj}" />
+  </c:when>
+  <c:otherwise>
+    <c:set var="nomeExibicao" value="Cliente Agnello" />
+    <c:set var="primeiroNome" value="Cliente" />
+    <c:set var="iniciais" value="AG" />
+  </c:otherwise>
+</c:choose>
+
 <!DOCTYPE html>
 <html lang="pt-BR">
-
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Minha Adega Pessoal — Vinheria Agnello</title>
-<link rel="stylesheet" href="<c:url value='/css/variables.css'/>">
-<link rel="stylesheet" href="<c:url value='/css/global.css'/>">
-<link rel="stylesheet" href="<c:url value='/css/home.css'/>">
-<link rel="stylesheet" href="<c:url value='/css/animations.css'/>">
-<link rel="stylesheet" href="<c:url value='/css/sections/_chat.css'/>">
-<link rel="stylesheet" href="<c:url value='/css/area-pessoal.css'/>">
-<link rel="stylesheet" href="<c:url value='/css/sections/_modal-deletar.css'/>">
-<link rel="stylesheet" href="<c:url value='/css/sections/modal-delecao-sucesso.css'/>">
-<link
-	href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400..900;1,400..900&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap"
-	rel="stylesheet">
-
-<script>
-	// Detecta se a página foi carregada do cache do navegador (botão voltar)
-	window.addEventListener("pageshow", function(event) {
-		if (event.persisted) {
-			// Força a recarga da página a partir do servidor
-			window.location.reload();
-		}
-	});
-</script>
-
-
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Minha conta | Vinheria Agnello</title>
+  <meta name="robots" content="noindex">
+  <meta name="theme-color" content="#4A1525">
+  <link rel="icon" type="image/png" href="${ctx}/assets/images/logo-bg-white.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400..900;1,400..900&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="${ctx}/css/variables.css">
+  <link rel="stylesheet" href="${ctx}/css/global.css">
+  <link rel="stylesheet" href="${ctx}/css/area-pessoal.css">
+  <script>
+    window.CONTEXT_PATH = '${ctx}';
+    // Ao voltar com o botão "Voltar" depois de sair, não mostra a página em cache
+    window.addEventListener('pageshow', (e) => { if (e.persisted) location.reload(); });
+  </script>
 </head>
 
-<body class="agnello-account-body">
+<body class="conta-body">
+  <jsp:include page="/WEB-INF/componentes/header.jsp" />
 
-	<!-- HEADER MODULAR (Protegido em WEB-INF) -->
-	<jsp:include page="/WEB-INF/componentes/header.jsp" />
+  <main class="conta-main" id="conteudo" data-email="<c:out value='${clienteLogado.email}' />">
+    <div class="conta-container">
 
-	<main class="agnello-account-main">
-		<div class="account-container">
+      <!-- ===================== MENU LATERAL ===================== -->
+      <aside class="conta-sidebar" aria-label="Menu da conta">
+        <div class="conta-perfil">
+          <span class="conta-avatar" aria-hidden="true"><c:out value="${iniciais}" /></span>
+          <div>
+            <strong class="conta-nome"><c:out value="${nomeExibicao}" /></strong>
+            <span class="conta-email"><c:out value="${clienteLogado.email}" /></span>
+          </div>
+        </div>
 
-			<!-- Sidebar de Navegação Interna -->
-			<aside class="account-sidebar">
-				<div class="user-profile-card">
-					<div class="avatar-wrapper">
-						<span class="avatar-initials"> <c:choose>
-								<%-- Se for instância de Pessoa Física --%>
-								<c:when
-									test="${clienteLogado['class'].name eq 'com.agnello.model.ClientePF'}">
-									<c:set var="primeiro"
-										value="${not empty clienteLogado.nome ? fn:substring(clienteLogado.nome, 0, 1) : 'A'}" />
-									<c:set var="segundo"
-										value="${not empty clienteLogado.sobrenome ? fn:substring(clienteLogado.sobrenome, 0, 1) : 'G'}" />
-                  ${fn:toUpperCase(primeiro)}${fn:toUpperCase(segundo)}
-                </c:when>
-								<%-- Se for Pessoa Jurídica --%>
-								<c:when
-									test="${clienteLogado['class'].name eq 'com.agnello.model.ClientePJ'}">
-									<c:set var="razao"
-										value="${not empty clienteLogado.razaoSocial ? clienteLogado.razaoSocial : 'AG'}" />
-                  ${fn:toUpperCase(fn:substring(razao, 0, 2))}
-                </c:when>
-								<c:otherwise>
-                  AG
-                </c:otherwise>
-							</c:choose>
-						</span> <span class="loyalty-badge">Elite</span>
-					</div>
-					<h3>
-						<c:choose>
-							<c:when
-								test="${clienteLogado['class'].name eq 'com.agnello.model.ClientePF'}">
-                ${clienteLogado.nome} ${clienteLogado.sobrenome}
-              </c:when>
-							<c:when
-								test="${clienteLogado['class'].name eq 'com.agnello.model.ClientePJ'}">
-                ${clienteLogado.razaoSocial}
-              </c:when>
-							<c:otherwise>
-                Cliente Agnello
-              </c:otherwise>
-						</c:choose>
-					</h3>
-					<p>${clienteLogado.email}</p>
-				</div>
+        <nav class="conta-nav" aria-label="Seções da conta">
+          <a href="#visao-geral" class="conta-nav-item" data-secao="visao-geral">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 10.5 12 3l9 7.5V21H3z"></path></svg>Visão geral</a>
+          <a href="#pedidos" class="conta-nav-item" data-secao="pedidos">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M21 8 12 3 3 8v8l9 5 9-5z"></path><path d="M3 8l9 5 9-5M12 13v8"></path></svg>Meus pedidos</a>
+          <a href="#dados" class="conta-nav-item" data-secao="dados">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="4"></circle><path d="M4 21a8 8 0 0 1 16 0"></path></svg>Meus dados</a>
+          <a href="${ctx}/logout" class="conta-nav-item conta-nav-item--sair">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"></path></svg>Encerrar sessão</a>
+        </nav>
+      </aside>
 
-				<nav class="account-nav-menu">
-					<a href="#" class="nav-item active">Visão Geral</a> <a href="#"
-						class="nav-item">Meus Pedidos</a> <a href="#" class="nav-item">Minha
-						Adega (Desejos)</a> <a href="#" class="nav-item">Clube Agnello</a> <a
-						href="#" class="nav-item">Endereços & Pagamento</a> <a href="#"
-						id="linkDeletarConta" class="nav-item">Deletar Conta</a> <a
-						href="<c:url value='/logout'/>" class="nav-item logout">Encerrar
-						Sessão</a>
-				</nav>
-			</aside>
+      <div class="conta-conteudo">
 
-			<!-- Conteúdo Principal Dinâmico -->
-			<section class="account-content">
+        <!-- ===================== VISÃO GERAL ===================== -->
+        <section class="conta-secao" id="visao-geral" aria-labelledby="titulo-visao" tabindex="-1">
+          <div class="conta-boas-vindas">
+            <span class="conta-eyebrow">Espaço do apreciador</span>
+            <h1 id="titulo-visao">Olá, <c:out value="${primeiroNome}" />!</h1>
+            <p id="resumo-conta">Bem-vindo à sua adega particular.</p>
+            <div class="conta-ultimo-pedido" id="ultimo-pedido" hidden></div>
+          </div>
 
-				<!-- Boas-Vindas & Status de Consumo -->
-				<div class="welcome-banner-card">
-					<div class="welcome-text">
-						<span class="sub-tag">ESPAÇO DO APRECIADOR</span>
-						<h1>
-							Olá,
-							<c:choose>
-								<c:when
-									test="${clienteLogado['class'].name eq 'com.agnello.model.ClientePF'}">${clienteLogado.nome}</c:when>
-								<c:when
-									test="${clienteLogado['class'].name eq 'com.agnello.model.ClientePJ'}">${clienteLogado.razaoSocial}</c:when>
-								<c:otherwise>Cliente</c:otherwise>
-							</c:choose>
-							! Sua adega particular está em ordem.
-						</h1>
-						<p>
-							Você possui <strong>12 rótulos</strong> em seu histórico e <strong>R$
-								150,00</strong> em créditos de cashback disponíveis.
-						</p>
-					</div>
-					<div class="last-order-preview">
-						<span class="preview-label">Último Pedido #7842</span>
-						<p class="preview-status">A caminho de São Paulo — Previsão
-							amanhã</p>
-					</div>
-				</div>
+          <div class="conta-atalhos">
+            <a href="#pedidos" class="conta-atalho" data-secao="pedidos">
+              <img src="${ctx}/assets/icons/truck.svg" alt="" width="24" height="24">
+              <h2>Meus pedidos</h2>
+              <p>Acompanhe o estado das suas compras</p>
+            </a>
+            <a href="${ctx}/catalogo" class="conta-atalho">
+              <img src="${ctx}/assets/icons/wine.svg" alt="" width="24" height="24">
+              <h2>Nossa adega</h2>
+              <p>Explore todos os rótulos</p>
+            </a>
+            <a href="${ctx}/quiz" class="conta-atalho">
+              <img src="${ctx}/assets/icons/star-check.svg" alt="" width="24" height="24">
+              <h2>Sommelier Virtual</h2>
+              <p>Receba sugestões para o seu paladar</p>
+            </a>
+            <a href="#dados" class="conta-atalho" data-secao="dados">
+              <img src="${ctx}/assets/icons/user.svg" alt="" width="24" height="24">
+              <h2>Meus dados</h2>
+              <p>Informações da sua conta</p>
+            </a>
+          </div>
+        </section>
 
-				<!-- Atalhos Rápidos (Grid de Ações) -->
-				<div class="quick-actions-grid">
-					<a href="#" class="action-card">
-						<div class="icon-box">
-							<img src="<c:url value='/assets/icons/truck.svg'/>" alt="">
-						</div>
-						<h4>Rastrear Pedidos</h4>
-						<p>Acompanhe entregas e notas fiscais</p>
-					</a> <a href="#" class="action-card">
-						<div class="icon-box">
-							<img src="<c:url value='/assets/icons/credit-card.svg'/>" alt="">
-						</div>
-						<h4>Cartões & Carteira</h4>
-						<p>Gerencie formas de pagamento</p>
-					</a> <a href="#" class="action-card">
-						<div class="icon-box">
-							<img src="<c:url value='/assets/icons/wine.svg'/>" alt="">
-						</div>
-						<h4>Clube de Assinatura</h4>
-						<p>Modifique sua caixa mensal</p>
-					</a> <a href="#" class="action-card">
-						<div class="icon-box">
-							<img src="<c:url value='/assets/icons/map-pin.svg'/>" alt="">
-						</div>
-						<h4>Meus Endereços</h4>
-						<p>Locais de entrega salvos</p>
-					</a>
-				</div>
+        <!-- ===================== PEDIDOS ===================== -->
+        <section class="conta-secao" id="pedidos" aria-labelledby="titulo-pedidos" tabindex="-1" hidden>
+          <h1 class="conta-secao-titulo" id="titulo-pedidos">Meus pedidos</h1>
+          <%-- Lista preenchida pelo area-pessoal.js a partir dos pedidos feitos no checkout --%>
+          <div id="lista-pedidos" class="conta-pedidos"></div>
+        </section>
 
-				<!-- Vitrine de Recomendações e Desejos -->
-				<div class="recommendation-section">
-					<div class="section-header-flex">
-						<h3>Sugestões para o seu paladar</h3>
-						<a href="<c:url value='/catalogo'/>" class="see-more-link">Ver
-							catálogo completo →</a>
-					</div>
-					<div class="wine-suggestions-grid">
-						<div class="wine-card-mini">
-							<span class="tag-rare">Safra Rara</span>
-							<h4>Barolo DOCG 2018</h4>
-							<p>Piemonte, Itália</p>
-							<span class="price">R$ 380,00</span>
-						</div>
-						<div class="wine-card-mini">
-							<span class="tag-rare">Exclusivo</span>
-							<h4>Brunello di Montalcino</h4>
-							<p>Toscana, Itália</p>
-							<span class="price">R$ 490,00</span>
-						</div>
-					</div>
-				</div>
+        <!-- ===================== DADOS ===================== -->
+        <section class="conta-secao" id="dados" aria-labelledby="titulo-dados" tabindex="-1" hidden>
+          <h1 class="conta-secao-titulo" id="titulo-dados">Meus dados</h1>
+          <dl class="conta-dados">
+            <div><dt>${ehPJ ? 'Razão social' : 'Nome'}</dt><dd><c:out value="${nomeExibicao}" /></dd></div>
+            <div><dt>E-mail</dt><dd><c:out value="${clienteLogado.email}" /></dd></div>
+            <div><dt>Telefone</dt><dd><c:out value="${not empty clienteLogado.telefone ? clienteLogado.telefone : '—'}" /></dd></div>
+            <c:if test="${not empty documento}">
+              <%-- Mostra só os últimos dígitos do documento (privacidade) --%>
+              <div><dt>${ehPJ ? 'CNPJ' : 'CPF'}</dt>
+                <dd>•••••••${fn:substring(documento, fn:length(documento) - 5, fn:length(documento))}</dd></div>
+            </c:if>
+            <div><dt>Tipo de conta</dt><dd>${ehPJ ? 'Pessoa jurídica' : 'Pessoa física'}</dd></div>
+          </dl>
 
-			</section>
+          <div class="conta-perigo">
+            <div>
+              <h2>Excluir conta</h2>
+              <p>Apaga a sua conta e os seus dados de forma permanente.</p>
+            </div>
+            <button type="button" class="conta-btn-perigo" id="linkDeletarConta">Excluir conta</button>
+          </div>
+        </section>
 
-		</div>
-	</main>
+      </div>
+    </div>
+  </main>
 
-
-	
-
-	<!-- FOOTER MODULAR (Protegido em WEB-INF) -->
-	<jsp:include page="/WEB-INF/componentes/footer.jsp" />
-	
-	<!-- IMPORTAÇÃO DOS MODAIS DE EXCLUSÃO DE CONTA -->
+  <jsp:include page="/WEB-INF/componentes/footer.jsp" />
   <jsp:include page="/WEB-INF/componentes/modalDeletarConta.jsp" />
-  <jsp:include page="/WEB-INF/componentes/modalSucessoDelecao.jsp" />
 
-	<!-- CARRINHO DRAWER -->
-	<div id="agnello-cart-overlay" class="agnello-cart-overlay"></div>
-	<div id="agnello-cart-drawer" class="agnello-cart-drawer">
-		<div class="agnello-cart-header">
-			<button id="agnello-cart-close" class="agnello-cart-back-btn">←</button>
-			<h2 id="agnello-cart-title">Carrinho (0)</h2>
-		</div>
-		<div id="agnello-cart-body" class="agnello-cart-body"></div>
-	</div>
+  <div id="agnello-cart-overlay" class="agnello-cart-overlay"></div>
+  <div id="agnello-cart-drawer" class="agnello-cart-drawer">
+    <div class="agnello-cart-header">
+      <button type="button" id="agnello-cart-close" class="agnello-cart-back-btn">←</button>
+      <h2 id="agnello-cart-title">Carrinho (0)</h2>
+    </div>
+    <div id="agnello-cart-body" class="agnello-cart-body"></div>
+  </div>
 
-	<script src="<c:url value='/js/components/carrinho.js'/>"></script>
-	<script src="<c:url value='/js/components/chat.js'/>"></script>
-	<script src="<c:url value='/js/components/modal-deletar-conta.js'/>"></script>
+  <script src="${ctx}/js/pages/area-pessoal.js"></script>
+  <script src="${ctx}/js/components/modal-deletar-conta.js"></script>
+  <script src="${ctx}/js/components/carrinho.js"></script>
+  <script src="${ctx}/js/components/chat.js"></script>
 </body>
-
 </html>
