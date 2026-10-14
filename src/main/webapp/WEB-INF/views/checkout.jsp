@@ -22,8 +22,6 @@ String emailLogado = jaLogado ? userCheckout.getEmail() : "";
 	href="${pageContext.request.contextPath}/css/global.css">
 <link rel="stylesheet"
 	href="${pageContext.request.contextPath}/css/checkout.css">
-<link rel="stylesheet"
-	href="${pageContext.request.contextPath}/css/footer.css">
 
 <link rel="icon" type="image/png"
 	href="${pageContext.request.contextPath}/assets/images/logo-bg-white.png">
@@ -417,8 +415,6 @@ String emailLogado = jaLogado ? userCheckout.getEmail() : "";
 
 	<jsp:include page="/WEB-INF/componentes/footer.jsp" />
 
-	<script
-		src="${pageContext.request.contextPath}/js/components/componentes.js"></script>
 	<script src="${pageContext.request.contextPath}/js/components/chat.js"></script>
 	<script src="${pageContext.request.contextPath}/js/pages/checkout.js"></script>
 </body>

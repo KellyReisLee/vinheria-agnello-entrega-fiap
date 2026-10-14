@@ -1,4 +1,3 @@
-@import url('./sections/_variables.css');
 @import url('./sections/_header.css');
 @import url('./sections/_buttons.css');
 @import url('./sections/_hero.css');
@@ -10,7 +9,6 @@
 @import url('./sections/_responsive.css');
 @import url('./sections/_carrinho.css');
 @import url('./sections/_chat.css');
-@import url('./login.css');
 
 /* Estilos Exclusivos da Página de Login - Vinheria Agnello (Versão Clara e Elegante) */
 .agnello-login-body {
