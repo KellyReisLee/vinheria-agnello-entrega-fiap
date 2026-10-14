@@ -1,291 +1,320 @@
 /**
- * Calculadora de Eventos Profissional - Vinheria Agnello
+ * Calculadora de Eventos — Vinheria Agnello
  * Baseada em métricas de sommelier: consumo médio por convidado/hora,
- * fator de ajuste por tipo de evento e proporções ideais.
+ * fator por tipo de evento e proporções ideais entre tintos, brancos e espumantes.
+ *
+ * A caixa tem 4 "ecrãs" que se alternam SEM recarregar a página:
+ *   calculadora -> parecer do sommelier -> formulário de orçamento -> confirmação
+ * A aparência está em css/sections/_calculator.css (nada de estilos inline).
  */
 document.addEventListener('DOMContentLoaded', () => {
   const section = document.querySelector('.unique-events-calc-section');
   if (!section) return;
 
-  // Estado da Calculadora Dinâmico
-  let estadoCalculadora = {
-    convidados: 12,
-    duracao: 4,
-    estilo: 'jantar' // 'jantar', 'festa', 'coquetel'
+  const box = section.querySelector('.unique-calculator-box');
+  const vistaCalculadora = section.querySelector('.calc-view');
+  if (!box || !vistaCalculadora) return;
+
+  // Painel onde aparecem os ecrãs seguintes (criado uma única vez)
+  const painel = document.createElement('div');
+  painel.className = 'calc-panel';
+  painel.hidden = true;
+  painel.setAttribute('aria-live', 'polite');
+  box.appendChild(painel);
+
+  // ---------- Estado ----------
+  const LIMITES = {
+    convidados: { min: 1, max: 500 },
+    duracao: { min: 1, max: 24 }
   };
 
-  // Referências dos elementos visuais de controle
-  const spanConvidados = document.getElementById('valor-convidados');
-  const spanDuracao = document.getElementById('valor-duracao');
+  const estado = {
+    convidados: 12,
+    duracao: 4,
+    estilo: 'jantar' // 'jantar' | 'festa' | 'coquetel'
+  };
 
-  const btnMenosConvidados = document.getElementById('btn-menos-convidados');
-  const btnMaisConvidados = document.getElementById('btn-mais-convidados');
-  const btnMenosDuracao = document.getElementById('btn-menos-duracao');
-  const btnMaisDuracao = document.getElementById('btn-mais-duracao');
-
-  const btnJantar = section.querySelector('[data-estilo="jantar"]');
-  const btnFesta = section.querySelector('[data-estilo="festa"]');
-  const btnCoquetel = section.querySelector('[data-estilo="coquetel"]');
-  const btnMontarKit = section.querySelector('.unique-btn-calc-action');
-
-  // Parâmetros de Sommelier profissionais atualizados
   const metricasSommelier = {
     jantar: {
+      nome: 'Jantar',
       proporcao: { tinto: 0.60, branco: 0.30, espumante: 0.10 },
       consumoPorHora: 0.35,
-      descricao: "Ideal para harmonizações estruturadas com pratos principais, valorizando vinhos tintos encorpados e brancos elegantes."
+      descricao: 'Ideal para harmonizações estruturadas com pratos principais, valorizando vinhos tintos encorpados e brancos elegantes.'
     },
     festa: {
+      nome: 'Festa',
       proporcao: { tinto: 0.30, branco: 0.20, espumante: 0.50 },
       consumoPorHora: 0.50,
-      descricao: "Foco em celebrações dinâmicas, alta rotação de espumantes para brindar e rótulos refrescantes."
+      descricao: 'Foco em celebrações dinâmicas, alta rotação de espumantes para brindar e rótulos refrescantes.'
     },
     coquetel: {
+      nome: 'Coquetel',
       proporcao: { tinto: 0.20, branco: 0.35, espumante: 0.45 },
       consumoPorHora: 0.40,
-      descricao: "Foco em recepções sofisticadas, com forte presença de espumantes e vinhos brancos aromáticos que harmonizam com finger foods."
+      descricao: 'Foco em recepções sofisticadas, com forte presença de espumantes e vinhos brancos aromáticos que harmonizam com finger foods.'
     }
   };
 
-  // Controles de Convidados
-  if (btnMenosConvidados && btnMaisConvidados && spanConvidados) {
-    btnMenosConvidados.addEventListener('click', () => {
-      if (estadoCalculadora.convidados > 1) {
-        estadoCalculadora.convidados--;
-        spanConvidados.textContent = estadoCalculadora.convidados;
-        atualizarUI();
-      }
-    });
+  // ---------- Utilitários ----------
+  const escapar = (texto) => String(texto ?? '').replace(/[&<>"']/g, (c) => ({
+    '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+  }[c]));
 
-    btnMaisConvidados.addEventListener('click', () => {
-      estadoCalculadora.convidados++;
-      spanConvidados.textContent = estadoCalculadora.convidados;
-      atualizarUI();
-    });
-  }
+  const plural = (n, um, varios) => `${n} ${n === 1 ? um : varios}`;
 
-  // Controles de Duração (Horas)
-  if (btnMenosDuracao && btnMaisDuracao && spanDuracao) {
-    btnMenosDuracao.addEventListener('click', () => {
-      if (estadoCalculadora.duracao > 1) {
-        estadoCalculadora.duracao--;
-        spanDuracao.textContent = estadoCalculadora.duracao;
-        atualizarUI();
-      }
-    });
-
-    btnMaisDuracao.addEventListener('click', () => {
-      estadoCalculadora.duracao++;
-      spanDuracao.textContent = estadoCalculadora.duracao;
-      atualizarUI();
-    });
-  }
-
-  // Função Principal de Cálculo Profissional
   function calcularGarrafas() {
-    const { convidados, duracao, estilo } = estadoCalculadora;
+    const { convidados, duracao, estilo } = estado;
     const config = metricasSommelier[estilo];
 
     const totalLitros = convidados * duracao * config.consumoPorHora;
-    const totalGarrafas = Math.ceil(totalLitros / 0.75);
+    const total = Math.ceil(totalLitros / 0.75); // garrafa de 750 ml
 
-    let qteTinto = Math.round(totalGarrafas * config.proporcao.tinto);
-    let qteBranco = Math.round(totalGarrafas * config.proporcao.branco);
-    let qteEspumante = totalGarrafas - (qteTinto + qteBranco);
+    const tinto = Math.round(total * config.proporcao.tinto);
+    const branco = Math.round(total * config.proporcao.branco);
+    const espumante = Math.max(0, total - (tinto + branco));
 
-    if (qteEspumante < 0) qteEspumante = 0;
-
-    return {
-      total: totalGarrafas,
-      tinto: qteTinto,
-      branco: qteBranco,
-      espumante: qteEspumante,
-      detalhes: config.descricao
-    };
+    return { total, tinto, branco, espumante, detalhes: config.descricao };
   }
 
-  // Atualiza a Interface Visual Dinamicamente
+  // ---------- Ecrã 1: calculadora ----------
+  const spanConvidados = document.getElementById('valor-convidados');
+  const spanDuracao = document.getElementById('valor-duracao');
+
   function atualizarUI() {
-    const resultado = calcularGarrafas();
+    const r = calcularGarrafas();
+
+    if (spanConvidados) spanConvidados.textContent = estado.convidados;
+    if (spanDuracao) spanDuracao.textContent = estado.duracao;
 
     const totalElem = section.querySelector('.unique-result-total');
     if (totalElem) {
-      totalElem.innerHTML = `${resultado.total} <span aria-hidden="true">Garrafas</span>`;
+      totalElem.innerHTML = `${r.total} <span>${r.total === 1 ? 'Garrafa' : 'Garrafas'}</span>`;
     }
 
-    const itensBreakdown = section.querySelectorAll('.unique-breakdown-item strong');
-    if (itensBreakdown.length >= 3) {
-      itensBreakdown[0].textContent = resultado.tinto;
-      itensBreakdown[1].textContent = resultado.branco;
-      itensBreakdown[2].textContent = resultado.espumante;
+    const itens = section.querySelectorAll('.unique-breakdown-item strong');
+    if (itens.length >= 3) {
+      itens[0].textContent = r.tinto;
+      itens[1].textContent = r.branco;
+      itens[2].textContent = r.espumante;
     }
+
+    // Desativa "−" e "+" quando se atinge o limite
+    const ajustarBotoes = (campo, idMenos, idMais) => {
+      const menos = document.getElementById(idMenos);
+      const mais = document.getElementById(idMais);
+      if (menos) menos.disabled = estado[campo] <= LIMITES[campo].min;
+      if (mais) mais.disabled = estado[campo] >= LIMITES[campo].max;
+    };
+    ajustarBotoes('convidados', 'btn-menos-convidados', 'btn-mais-convidados');
+    ajustarBotoes('duracao', 'btn-menos-duracao', 'btn-mais-duracao');
   }
 
-  // Controle de Seleção do Estilo do Evento
-  function selecionarEstilo(estiloSelecionado, botaoAtivo) {
-    estadoCalculadora.estilo = estiloSelecionado;
-
-    section.querySelectorAll('.unique-type-btn').forEach(btn => btn.classList.remove('active'));
-    botaoAtivo.classList.add('active');
-
+  function alterar(campo, delta) {
+    const { min, max } = LIMITES[campo];
+    estado[campo] = Math.min(max, Math.max(min, estado[campo] + delta));
     atualizarUI();
   }
 
-  if (btnJantar) btnJantar.addEventListener('click', (e) => selecionarEstilo('jantar', e.currentTarget));
-  if (btnFesta) btnFesta.addEventListener('click', (e) => selecionarEstilo('festa', e.currentTarget));
-  if (btnCoquetel) btnCoquetel.addEventListener('click', (e) => selecionarEstilo('coquetel', e.currentTarget));
+  const ligar = (id, fn) => {
+    const el = document.getElementById(id);
+    if (el) el.addEventListener('click', fn);
+  };
+  ligar('btn-menos-convidados', () => alterar('convidados', -1));
+  ligar('btn-mais-convidados', () => alterar('convidados', 1));
+  ligar('btn-menos-duracao', () => alterar('duracao', -1));
+  ligar('btn-mais-duracao', () => alterar('duracao', 1));
 
-  // Ação do Botão Principal: Exibe o card com o Planejamento Sob Medida e o botão para Consultar Orçamento
-  if (btnMontarKit) {
-    btnMontarKit.addEventListener('click', () => {
-      const resultadoFinal = calcularGarrafas();
-      const calculatorBox = section.querySelector('.unique-calculator-box');
+  section.querySelectorAll('.unique-type-btn').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      estado.estilo = btn.dataset.estilo;
+      section.querySelectorAll('.unique-type-btn').forEach((b) => {
+        const ativo = b === btn;
+        b.classList.toggle('active', ativo);
+        b.setAttribute('aria-pressed', String(ativo));
+      });
+      atualizarUI();
+    });
+  });
 
-      if (!calculatorBox) return;
+  // ---------- Troca de ecrã com transição suave ----------
+  // aoMostrar: função opcional chamada depois de o novo HTML estar na página
+  function mostrarPainel(html, focarSeletor, aoMostrar) {
+    box.classList.add('is-switching');
+    setTimeout(() => {
+      vistaCalculadora.hidden = true;
+      painel.innerHTML = html;
+      painel.hidden = false;
+      box.classList.remove('is-switching');
+      if (aoMostrar) aoMostrar();
+      const alvo = painel.querySelector(focarSeletor || 'h3');
+      if (alvo) {
+        if (alvo.tagName === 'H3') alvo.setAttribute('tabindex', '-1');
+        alvo.focus({ preventScroll: true });
+      }
+    }, 200);
+  }
 
-      calculatorBox.style.opacity = '0';
-      calculatorBox.style.transform = 'translateY(10px)';
-      calculatorBox.style.transition = 'all 0.3s ease';
+  function voltarCalculadora() {
+    box.classList.add('is-switching');
+    setTimeout(() => {
+      painel.hidden = true;
+      painel.innerHTML = '';
+      vistaCalculadora.hidden = false;
+      box.classList.remove('is-switching');
+      const botao = section.querySelector('.unique-btn-calc-action');
+      if (botao) botao.focus({ preventScroll: true });
+    }, 200);
+  }
 
-      setTimeout(() => {
-        calculatorBox.innerHTML = `
-          <div class="unique-sommelier-result-card" style="text-align: left; animation: uniqueFadeIn 0.5s ease-out;">
-            <span class="unique-result-label" style="text-align: center; display: block;">PARECER TÉCNICO DO SOMMELIER</span>
-            <h3 style="font-family: var(--font-heading); font-size: 1.8rem; color: #FFF; margin-bottom: 1rem; text-align: center;">Planejamento Sob Medida</h3>
-            
-            <p style="color: #D1CDCD; font-size: 0.9rem; line-height: 1.5; margin-bottom: 1.5rem;">
-              ${resultadoFinal.detalhes} O volume foi calculado para <strong>${estadoCalculadora.convidados} convidados</strong> ao longo de <strong>${estadoCalculadora.duracao} horas</strong> de evento (${estadoCalculadora.estilo.toUpperCase()}).
-            </p>
+  // ---------- Ecrã 2: parecer do sommelier ----------
+  function mostrarParecer() {
+    const r = calcularGarrafas();
+    const nomeEstilo = metricasSommelier[estado.estilo].nome;
 
-            <div style="background: rgba(0, 0, 0, 0.3); border: 1px solid rgba(212, 175, 55, 0.3); border-radius: 8px; padding: 1.2rem; margin-bottom: 1.5rem;">
-              <div style="display: flex; justify-content: space-between; margin-bottom: 0.6rem; font-size: 0.9rem;">
-                <span style="color: #AAA;">Volume Recomendado Total:</span>
-                <strong style="color: var(--accent-gold);">${resultadoFinal.total} Garrafas (750ml)</strong>
-              </div>
-              <div style="display: flex; justify-content: space-between; margin-bottom: 0.4rem; font-size: 0.85rem;">
-                <span style="color: #CCC;">• Vinhos Tintos:</span>
-                <strong style="color: #FFF;">${resultadoFinal.tinto} garrafas</strong>
-              </div>
-              <div style="display: flex; justify-content: space-between; margin-bottom: 0.4rem; font-size: 0.85rem;">
-                <span style="color: #CCC;">• Vinhos Brancos:</span>
-                <strong style="color: #FFF;">${resultadoFinal.branco} garrafas</strong>
-              </div>
-              <div style="display: flex; justify-content: space-between; font-size: 0.85rem;">
-                <span style="color: #CCC;">• Espumantes:</span>
-                <strong style="color: #FFF;">${resultadoFinal.espumante} garrafas</strong>
-              </div>
-            </div>
+    mostrarPainel(`
+      <span class="unique-result-label">PARECER TÉCNICO DO SOMMELIER</span>
+      <h3 class="calc-panel-title">Planejamento Sob Medida</h3>
+      <p class="calc-panel-text">
+        ${r.detalhes} O volume foi calculado para
+        <strong>${plural(estado.convidados, 'convidado', 'convidados')}</strong> ao longo de
+        <strong>${plural(estado.duracao, 'hora', 'horas')}</strong> de evento (${nomeEstilo}).
+      </p>
 
-            <div style="display: flex; gap: 1rem;">
-              <button type="button" id="unique-btn-voltar-calc" style="flex: 1; background: transparent; border: 1px solid rgba(255,255,255,0.2); color: #FFF; padding: 0.9rem; border-radius: 6px; font-weight: 600; cursor: pointer; transition: background 0.2s;">
-                ← Refazer Cálculo
-              </button>
-              <button type="button" id="unique-btn-abre-form" style="flex: 1; background-color: var(--accent-gold); color: var(--text-charcoal, #1e0a10); border: none; padding: 0.9rem; border-radius: 6px; font-weight: 600; cursor: pointer; transition: opacity 0.2s;">
-                Consulte Orçamento →
-              </button>
-            </div>
-          </div>
-        `;
+      <dl class="calc-summary">
+        <div class="calc-summary-total">
+          <dt>Volume recomendado</dt>
+          <dd>${plural(r.total, 'garrafa', 'garrafas')} <small>(750 ml)</small></dd>
+        </div>
+        <div><dt>Vinhos tintos</dt><dd>${plural(r.tinto, 'garrafa', 'garrafas')}</dd></div>
+        <div><dt>Vinhos brancos</dt><dd>${plural(r.branco, 'garrafa', 'garrafas')}</dd></div>
+        <div><dt>Espumantes</dt><dd>${plural(r.espumante, 'garrafa', 'garrafas')}</dd></div>
+      </dl>
 
-        calculatorBox.style.opacity = '1';
-        calculatorBox.style.transform = 'translateY(0)';
+      <div class="calc-actions">
+        <button type="button" class="calc-btn-secondary" data-calc="voltar">
+          <span aria-hidden="true">←</span> Refazer cálculo
+        </button>
+        <button type="button" class="calc-btn-primary" data-calc="orcamento">
+          Pedir orçamento <span class="btn-arrow" aria-hidden="true">→</span>
+        </button>
+      </div>
+    `);
+  }
 
-        // Ação para refazer o cálculo e retornar ao início
-        const btnVoltarCalc = document.getElementById('unique-btn-voltar-calc');
-        if (btnVoltarCalc) {
-          btnVoltarCalc.addEventListener('click', () => {
-            location.reload();
-          });
+  // ---------- Ecrã 3: formulário de orçamento ----------
+  function mostrarFormulario() {
+    const r = calcularGarrafas();
+
+    mostrarPainel(`
+      <span class="unique-result-label">SOLICITAÇÃO DE ORÇAMENTO</span>
+      <h3 class="calc-panel-title">Fale com um Consultor</h3>
+      <p class="calc-panel-text calc-panel-text--center">
+        Evento de ${plural(estado.convidados, 'convidado', 'convidados')}
+        (${plural(r.total, 'garrafa', 'garrafas')}). Preencha seus dados:
+      </p>
+
+      <form class="calc-form" id="unique-form-consultor" novalidate>
+        <div class="calc-field">
+          <label for="cli-nome">Nome</label>
+          <input type="text" id="cli-nome" name="nome" autocomplete="name" required>
+        </div>
+        <div class="calc-field">
+          <label for="cli-email">E-mail</label>
+          <input type="email" id="cli-email" name="email" autocomplete="email" required>
+        </div>
+        <div class="calc-field">
+          <label for="cli-telefone">WhatsApp / Telefone <span class="calc-optional">(opcional)</span></label>
+          <input type="tel" id="cli-telefone" name="telefone" autocomplete="tel" inputmode="tel">
+        </div>
+        <div class="calc-field">
+          <label for="cli-orcamento">Orçamento estimado <span class="calc-optional">(opcional)</span></label>
+          <input type="text" id="cli-orcamento" name="orcamento" inputmode="decimal" placeholder="R$">
+        </div>
+        <div class="calc-field calc-field--full">
+          <label for="cli-obs">Detalhes do evento <span class="calc-optional">(opcional)</span></label>
+          <textarea id="cli-obs" name="observacoes" rows="3"
+            placeholder="Cardápio, preferências de vinhos, data e local..."></textarea>
+        </div>
+        <p class="calc-form-error" role="alert" hidden></p>
+        <div class="calc-actions calc-field--full">
+          <button type="button" class="calc-btn-secondary" data-calc="parecer">
+            <span aria-hidden="true">←</span> Voltar
+          </button>
+          <button type="submit" class="calc-btn-primary">
+            Enviar pedido <span class="btn-arrow" aria-hidden="true">→</span>
+          </button>
+        </div>
+      </form>
+    `, '#cli-nome', () => ligarFormulario(r));
+  }
+
+  function ligarFormulario(r) {
+    const form = painel.querySelector('#unique-form-consultor');
+    if (!form) return;
+    form.addEventListener('submit', (ev) => {
+      ev.preventDefault();
+      const erro = form.querySelector('.calc-form-error');
+      const nome = form.nome.value.trim();
+      const email = form.email.value.trim();
+
+      if (!nome || !form.email.checkValidity() || !email) {
+        erro.textContent = 'Informe seu nome e um e-mail válido.';
+        erro.hidden = false;
+        (nome ? form.email : form.nome).focus();
+        return;
+      }
+
+      const dadosEnvio = {
+        cliente: {
+          nome,
+          email,
+          telefone: form.telefone.value.trim(),
+          orcamento: form.orcamento.value.trim(),
+          observacoes: form.observacoes.value.trim()
+        },
+        calculoEvento: {
+          estilo: estado.estilo,
+          convidados: estado.convidados,
+          duracaoHoras: estado.duracao,
+          garrafasTotais: r.total,
+          distribuicao: { tintos: r.tinto, brancos: r.branco, espumantes: r.espumante }
         }
+      };
 
-        // Ação para abrir o formulário ao clicar em "Consulte Orçamento"
-        const btnAbreForm = document.getElementById('unique-btn-abre-form');
-        if (btnAbreForm) {
-          btnAbreForm.addEventListener('click', () => {
-            calculatorBox.innerHTML = `
-              <div class="unique-sommelier-result-card" style="text-align: left; animation: uniqueFadeIn 0.5s ease-out;">
-                <span class="unique-result-label" style="text-align: center; display: block;">SOLICITAÇÃO DE ORÇAMENTO</span>
-                <h3 style="font-family: var(--font-heading); font-size: 1.5rem; color: #FFF; margin-bottom: 0.8rem; text-align: center;">Fale com um Consultor</h3>
-                
-                <p style="color: #D1CDCD; font-size: 0.8rem; line-height: 1.4; margin-bottom: 1rem; text-align: center;">
-                  Baseado no seu evento de ${estadoCalculadora.convidados} convidados (${resultadoFinal.total} garrafas), preencha os dados abaixo:
-                </p>
+      // TODO: enviar para um Servlet (ex.: POST /orcamento) quando existir no back-end
+      console.log('Pedido de orçamento (simulação):', dadosEnvio);
 
-                <form id="unique-form-consultor" style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.8rem; align-items: stretch;">
-                  <!-- Coluna da Esquerda: Dados de Contato -->
-                  <div style="display: flex; flex-direction: column; gap: 0.7rem;">
-                    <input type="text" id="cli-nome" placeholder="Seu Nome" required style="background: rgba(255,255,255,0.07); border: 1px solid rgba(255,255,255,0.15); padding: 0.6rem; border-radius: 6px; color: #FFF; font-size: 0.85rem; width: 100%; box-sizing: border-box;">
-                    <input type="email" id="cli-email" placeholder="Seu E-mail" required style="background: rgba(255,255,255,0.07); border: 1px solid rgba(255,255,255,0.15); padding: 0.6rem; border-radius: 6px; color: #FFF; font-size: 0.85rem; width: 100%; box-sizing: border-box;">
-                    <input type="text" id="cli-telefone" placeholder="WhatsApp / Telefone" style="background: rgba(255,255,255,0.07); border: 1px solid rgba(255,255,255,0.15); padding: 0.6rem; border-radius: 6px; color: #FFF; font-size: 0.85rem; width: 100%; box-sizing: border-box;">
-                    <input type="text" id="cli-orcamento" placeholder="Orçamento Estimado (R$)" style="background: rgba(255,255,255,0.07); border: 1px solid rgba(255,255,255,0.15); padding: 0.6rem; border-radius: 6px; color: #FFF; font-size: 0.85rem; width: 100%; box-sizing: border-box;">
-                  </div>
-
-                  <!-- Coluna da Direita: Textarea Ampliado na Vertical -->
-                  <div style="display: flex; flex-direction: column;">
-                    <textarea id="cli-obs" class="unique-form-textarea" placeholder="Detalhes adicionais do evento (Ex: Cardápio, preferências de vinhos, data e local)..." style="background: rgba(255,255,255,0.07); border: 1px solid rgba(255,255,255,0.15); padding: 0.7rem; border-radius: 6px; color: #FFF; font-size: 0.85rem; resize: none; width: 100%; min-height: 180px; box-sizing: border-box; font-family: inherit;"></textarea>
-                  </div>
-
-                  <!-- Botões de Ação na Largura Total -->
-                  <div style="grid-column: span 2; display: flex; gap: 0.8rem; margin-top: 0.3rem;">
-                    <button type="button" onclick="location.reload()" style="flex: 1; background: transparent; border: 1px solid rgba(255,255,255,0.2); color: #FFF; padding: 0.7rem; border-radius: 6px; font-weight: 600; cursor: pointer; font-size: 0.85rem;">
-                      ← Voltar
-                    </button>
-                    <button type="submit" style="flex: 1; background-color: var(--accent-gold); color: var(--text-charcoal, #1e0a10); border: none; padding: 0.7rem; border-radius: 6px; font-weight: 600; cursor: pointer; font-size: 0.85rem;">
-                      Enviar Proposta →
-                    </button>
-                  </div>
-                </form>
-              </div>
-            `;
-
-            // Submissão do formulário do consultor com captura completa
-            const formConsultor = document.getElementById('unique-form-consultor');
-            if (formConsultor) {
-              formConsultor.addEventListener('submit', (ev) => {
-                ev.preventDefault();
-
-                const dadosEnvio = {
-                  cliente: {
-                    nome: document.getElementById('cli-nome').value,
-                    email: document.getElementById('cli-email').value,
-                    telefone: document.getElementById('cli-telefone').value,
-                    orcamento: document.getElementById('cli-orcamento').value,
-                    observacoes: document.getElementById('cli-obs').value
-                  },
-                  calculoEvento: {
-                    estilo: estadoCalculadora.estilo,
-                    convidados: estadoCalculadora.convidados,
-                    duracaoHoras: estadoCalculadora.duracao,
-                    garrafasTotais: resultadoFinal.total,
-                    distribuicao: {
-                      tintos: resultadoFinal.tinto,
-                      brancos: resultadoFinal.branco,
-                      espumantes: resultadoFinal.espumante
-                    }
-                  }
-                };
-
-                console.log("Dados consolidados para o consultor:", dadosEnvio);
-
-                calculatorBox.innerHTML = `
-                  <div style="text-align: center; padding: 2rem 0; animation: uniqueFadeIn 0.5s ease-out;">
-                    <h3 style="font-family: var(--font-heading); font-size: 1.8rem; color: var(--accent-gold); margin-bottom: 1rem;">Solicitação Enviada!</h3>
-                    <p style="color: #D1CDCD; font-size: 0.95rem; line-height: 1.6; margin-bottom: 1.5rem;">
-                      Obrigado, <strong>${dadosEnvio.cliente.nome}</strong>! Nossa equipe de sommeliers recebeu os parâmetros do seu evento e entrará em contato em breve.
-                    </p>
-                    <button type="button" onclick="location.reload()" style="background-color: #FFF; color: var(--primary-wine); border: none; padding: 0.8rem 1.5rem; border-radius: 6px; font-weight: 600; cursor: pointer;">
-                      Fazer Novo Cálculo
-                    </button>
-                  </div>
-                `;
-              });
-            }
-          });
-        }
-
-      }, 300);
+      mostrarConfirmacao(nome);
     });
   }
+
+  // ---------- Ecrã 4: confirmação ----------
+  function mostrarConfirmacao(nome) {
+    mostrarPainel(`
+      <div class="calc-success">
+        <span class="calc-success-icon" aria-hidden="true">✓</span>
+        <h3 class="calc-panel-title">Pedido enviado!</h3>
+        <p class="calc-panel-text calc-panel-text--center">
+          Obrigado, <strong>${escapar(nome)}</strong>! Nossa equipe de sommeliers recebeu os
+          detalhes do seu evento e entrará em contato em breve.
+        </p>
+        <button type="button" class="calc-btn-light" data-calc="voltar">Fazer novo cálculo</button>
+      </div>
+    `);
+  }
+
+  // ---------- Botões dos painéis (um único ouvinte) ----------
+  painel.addEventListener('click', (e) => {
+    const acao = e.target.closest('[data-calc]');
+    if (!acao) return;
+    const destino = acao.dataset.calc;
+    if (destino === 'voltar') voltarCalculadora();
+    if (destino === 'parecer') mostrarParecer();
+    if (destino === 'orcamento') mostrarFormulario();
+  });
+
+  const btnMontarKit = section.querySelector('.unique-btn-calc-action');
+  if (btnMontarKit) btnMontarKit.addEventListener('click', mostrarParecer);
 
   atualizarUI();
 });
