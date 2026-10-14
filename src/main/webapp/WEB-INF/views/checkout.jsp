@@ -323,7 +323,8 @@
             <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="11" width="16" height="10" rx="2"></rect><path d="M8 11V7a4 4 0 0 1 8 0v4"></path></svg>
             <span>Concluir pedido</span>
           </button>
-          <p class="terms-notice">Ao concluir, você concorda com a Política de Privacidade da Vinheria Agnello
+          <p class="terms-notice">Ao concluir, você concorda com os <a href="${ctx}/termos" target="_blank">Termos de Uso</a>
+            e a <a href="${ctx}/privacidade" target="_blank">Política de Privacidade</a> da Vinheria Agnello
             e confirma ter 18 anos ou mais.</p>
         </div>
 
