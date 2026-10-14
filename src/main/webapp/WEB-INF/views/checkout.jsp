@@ -1,422 +1,342 @@
-<%@ page language="java" contentType="text/html; charset=UTF-8"
-	pageEncoding="UTF-8"%>
-<%@ taglib prefix="c" uri="jakarta.tags.core"%>
-
-<%
-// Recupera o usuário injetado pelo CheckoutController (se houver)
-com.agnello.model.Usuario userCheckout = (com.agnello.model.Usuario) request.getAttribute("usuarioLogado");
-boolean jaLogado = (userCheckout != null);
-String emailLogado = jaLogado ? userCheckout.getEmail() : "";
-%>
+<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
+<%@ taglib prefix="c" uri="jakarta.tags.core" %>
+<c:set var="ctx" value="${pageContext.request.contextPath}" />
+<%-- "usuarioLogado" é posto no request pelo CheckoutController quando há sessão --%>
+<c:set var="logado" value="${not empty usuarioLogado}" />
 <!DOCTYPE html>
 <html lang="pt-BR">
-
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Finalizar Compra — Vinheria Agnello</title>
-
-<link rel="stylesheet"
-	href="${pageContext.request.contextPath}/css/variables.css">
-<link rel="stylesheet"
-	href="${pageContext.request.contextPath}/css/global.css">
-<link rel="stylesheet"
-	href="${pageContext.request.contextPath}/css/checkout.css">
-
-<link rel="icon" type="image/png"
-	href="${pageContext.request.contextPath}/assets/images/logo-bg-white.png">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link
-	href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400..900;1,400..900&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap"
-	rel="stylesheet">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Finalizar compra | Vinheria Agnello</title>
+  <meta name="robots" content="noindex">
+  <meta name="theme-color" content="#4A1525">
+  <link rel="icon" type="image/png" href="${ctx}/assets/images/logo-bg-white.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400..900;1,400..900&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="${ctx}/css/variables.css">
+  <link rel="stylesheet" href="${ctx}/css/global.css">
+  <link rel="stylesheet" href="${ctx}/css/checkout.css">
+  <script>window.CONTEXT_PATH = '${ctx}';</script>
 </head>
 
-<body class="agnello-checkout-body">
+<body class="checkout-body">
 
-	<!-- INPUTS OCULTOS PARA O JAVASCRIPT LER O ESTADO DE LOGIN -->
-	<input type="hidden" id="server-is-logged" value="<%=jaLogado%>">
-	<input type="hidden" id="server-user-email" value="<%=emailLogado%>">
+  <%-- Estado da sessão para o checkout.js (sem scriptlets; c:out escapa o e-mail) --%>
+  <div id="checkout-estado" hidden
+       data-logado="${logado}"
+       data-email="<c:out value='${usuarioLogado.email}' />"></div>
 
-	<!-- Header Simplificado de Checkout -->
-	<header class="checkout-top-bar">
-		<div class="checkout-brand">
+  <%-- Header reduzido: no checkout tiramos a navegação para a pessoa não se distrair --%>
+  <header class="checkout-top-bar">
+    <a href="${ctx}/home" class="checkout-logo" aria-label="Vinheria Agnello — voltar à loja">
+      <img src="${ctx}/assets/images/logo-no-bg.png" alt="" width="22" height="56">
+      <span>
+        <span class="checkout-logo-title">VINHERIA AGNELLO</span>
+        <span class="checkout-logo-sub">DESDE 1978</span>
+      </span>
+    </a>
+    <span class="secure-badge">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="11" width="16" height="10" rx="2"></rect><path d="M8 11V7a4 4 0 0 1 8 0v4"></path></svg>
+      Compra segura
+    </span>
+  </header>
 
-			<a href="${pageContext.request.contextPath}/home"
-				class="agnello-logo-link"
-				style="text-decoration: none; display: inline-flex; align-items: center;">
-				<div class="logo">
-					<img class="logo-img"
-						src="${pageContext.request.contextPath}/assets/images/logo-no-bg.png"
-						alt="Ícone Vinheria Agnello">
-					<div>
-						<span class="logo-title">VINHERIA AGNELLO</span> <span
-							class="logo-subtitle">DESDE 1978</span>
-					</div>
-				</div>
-			</a><span class="secure-badge">🔒 Ambiente 100% Seguro</span>
-		</div>
-	</header>
+  <main class="checkout-main" id="conteudo">
 
-	<main class="agnello-checkout-main">
-		<div class="checkout-container">
+    <%-- Carrinho vazio (mostrado pelo checkout.js) --%>
+    <section class="checkout-vazio" id="checkout-vazio" hidden>
+      <img src="${ctx}/assets/icons/wine.svg" alt="" width="56" height="56">
+      <h1>O seu carrinho está vazio</h1>
+      <p>Escolha os seus rótulos na nossa adega e volte aqui para finalizar.</p>
+      <a href="${ctx}/catalogo" class="checkout-btn-primary">Ver os vinhos</a>
+    </section>
 
-			<!-- Coluna Esquerda: Formulários de Etapas -->
-			<div class="checkout-steps-wrapper">
+    <%-- Confirmação do pedido (preenchida pelo checkout.js) --%>
+    <section class="checkout-confirmacao" id="checkout-confirmacao" hidden tabindex="-1"
+             aria-labelledby="confirmacao-titulo"></section>
 
-				<!-- ETAPA: Identificação / Acesso Rápido -->
-				<section class="checkout-card" id="identification-card">
-					<div class="step-header">
-						<span class="step-number">1</span>
-						<h2>Identificação</h2>
-					</div>
-					<form class="checkout-form" id="form-identification"
-						onsubmit="event.preventDefault();">
+    <div class="checkout-container" id="checkout-conteudo">
+      <h1 class="checkout-title">Finalizar compra</h1>
 
-						<!-- ADICIONADO: Input oculto para garantir que o Servlet receba o tipo_cliente -->
-						<input type="hidden" id="tipo_cliente" name="tipo_cliente"
-							value="PF">
+      <div class="checkout-steps">
 
-						<div class="input-row-grid single-col">
-							<!-- Box estilizado para erros de e-mail -->
-							<div id="email-error-box"
-								style="display: none; background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; padding: 0.75rem; border-radius: 6px; font-size: 0.85rem; margin-top: 10px;">
-								Por favor, informe um e-mail válido.</div>
-							<div class="input-group">
-								<label for="checkout-email">E-mail para acompanhamento
-									do pedido</label>
-								<div class="input-with-action">
-									<input type="email" id="checkout-email" name="email"
-										placeholder="seu.email@exemplo.com" required>
-									<button type="button" id="btn-check-email"
-										class="btn-secondary-action">Continuar</button>
-								</div>
-							</div>
-						</div>
-						<!-- Bloco condicional para senha (exibido caso o e-mail já exista ou usuário esteja logado) -->
-						<div id="password-group" class="conditional-auth-box"
-							style="display: none;">
-							<p class="auth-msg">Detectamos uma conta com este e-mail.
-								Digite sua senha para recuperar seus dados salvos:</p>
+        <!-- ===================== 1. IDENTIFICAÇÃO ===================== -->
+        <section class="checkout-card" id="identification-card" aria-labelledby="passo1">
+          <div class="step-header">
+            <span class="step-number" aria-hidden="true">1</span>
+            <h2 id="passo1">Identificação</h2>
+            <span class="step-ok" id="passo1-ok" ${logado ? '' : 'hidden'}>✓ Concluído</span>
+          </div>
 
-							<!-- Caixa de Erro para Senha Incorreta -->
-							<div id="senha-error-box"
-								style="display: none; background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; padding: 0.75rem; border-radius: 6px; font-size: 0.85rem; margin-bottom: 1rem;">
-								<strong>Senha incorreta!</strong> Por favor, verifique sua senha
-								e tente novamente.
-							</div>
+          <c:choose>
+            <c:when test="${logado}">
+              <div class="checkout-logado">
+                <span class="checkout-logado-avatar" aria-hidden="true">✓</span>
+                <div>
+                  <strong>Você está conectado</strong>
+                  <span><c:out value="${usuarioLogado.email}" /></span>
+                </div>
+                <a href="${ctx}/logout" class="checkout-link">Não é você? Sair</a>
+              </div>
+            </c:when>
 
-							<div class="input-row-grid">
-								<!-- Coluna 1: Label, Input e o Link -->
-								<div class="input-group">
-									<label for="checkout-senha">Senha</label> <input
-										type="password" id="checkout-senha" name="senha"
-										placeholder="Sua senha de acesso">
-									<div style="text-align: right;">
-										<a href="${pageContext.request.contextPath}/esqueci-senha"
-											style="font-size: 0.8rem; color: #4a1525; text-decoration: none; font-weight: 500;">Esqueceu
-											sua senha?</a>
-									</div>
-								</div>
+            <c:otherwise>
+              <%-- Os "name" destes campos são os que o CheckoutController lê --%>
+              <form class="checkout-form" id="form-identification" novalidate>
+                <input type="hidden" id="tipo_cliente" name="tipo_cliente" value="PF">
 
-								<!-- Coluna 2: Botão alinhado perfeitamente com o input -->
-								<div class="input-group"
-									style="display: flex; flex-direction: column; justify-content: flex-end;">
-									<button type="button" id="btn-entrar-senha"
-										class="btn-secondary-action" style="margin-top: 0 !important;">Entrar</button>
-								</div>
-							</div>
+                <div class="checkout-alert checkout-alert--erro" id="email-error-box" role="alert" hidden></div>
 
-						</div>
-						<!-- Bloco condicional para novo cadastro (exibido caso o e-mail NÃO exista) -->
-						<div id="register-group" class="conditional-auth-box"
-							style="display: none;">
-							<div class="alert-box-info"
-								style="background: rgba(74, 21, 37, 0.05); border: 1px dashed #4a1525; padding: 1rem; border-radius: 8px; margin-bottom: 1.2rem;">
-								<p class="auth-msg"
-									style="margin: 0; color: #4a1525; font-weight: 600;">Não
-									encontramos cadastro com este e-mail.</p>
-								<span style="font-size: 0.85rem; color: #7a6e70;">Complete
-									seus dados abaixo para finalizar o pedido e criar sua conta:</span>
-							</div>
+                <div class="field">
+                  <label for="checkout-email">E-mail para acompanhar o pedido</label>
+                  <div class="input-with-action">
+                    <input type="email" id="checkout-email" name="email" autocomplete="email"
+                           inputmode="email" placeholder="seu@email.com" required>
+                    <button type="button" id="btn-check-email" class="checkout-btn-secondary">Continuar</button>
+                  </div>
+                </div>
 
-							<!-- CAIXA DE SUCESSO ESTILIZADA -->
-							<div id="register-success-box"
-								style="display: none; background: #d4edda; color: #155724; border: 1px solid #c3e6cb; padding: 1rem; border-radius: 8px; margin-bottom: 1.2rem; text-align: center;">
-								<h4 style="margin: 0 0 5px 0; font-size: 1.1rem;">🎉
-									Cadastro realizado com sucesso!</h4>
-								<p style="margin: 0; font-size: 0.9rem;">Sua conta foi
-									criada e você já está logado. Redirecionando...</p>
-							</div>
+                <%-- Já tem conta: pede a senha --%>
+                <div id="password-group" class="auth-box" hidden>
+                  <p class="auth-msg">Encontramos uma conta com este e-mail. Digite a sua senha para continuar:</p>
+                  <div class="checkout-alert checkout-alert--erro" id="senha-error-box" role="alert" hidden></div>
+                  <div class="input-with-action">
+                    <div class="field field--grow">
+                      <label for="checkout-senha" class="sr-only">Senha</label>
+                      <input type="password" id="checkout-senha" name="senha"
+                             autocomplete="current-password" placeholder="Sua senha">
+                    </div>
+                    <button type="button" id="btn-entrar-senha" class="checkout-btn-secondary">Entrar</button>
+                  </div>
+                  <a href="${ctx}/esqueci-senha" class="checkout-link">Esqueceu a sua senha?</a>
+                </div>
 
-							<!-- CAIXA DE ERRO ESTILIZADA -->
-							<div id="register-error-box"
-								style="display: none; background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; padding: 1rem; border-radius: 8px; margin-bottom: 1.2rem;">
-								<h4 style="margin: 0 0 5px 0; font-size: 1.05rem;">⚠️
-									Atenção ao cadastro</h4>
-								<p id="register-error-msg" style="margin: 0; font-size: 0.9rem;">Ocorreu
-									um erro. Verifique os dados e tente novamente.</p>
-							</div>
+                <%-- Ainda não tem conta: cadastro rápido --%>
+                <div id="register-group" class="auth-box" hidden>
+                  <p class="auth-msg"><strong>Ainda não tem conta.</strong> Complete os seus dados para criar a conta e finalizar o pedido:</p>
 
-							<!-- Abas de Tipo de Pessoa (Física / Jurídica) -->
-							<div class="tipo-pessoa-tabs"
-								style="display: flex; gap: 2rem; margin-bottom: 1.2rem; border-bottom: 1px solid #e0e0e0; padding-bottom: 0.5rem;">
-								<button type="button" class="tab-pf active" data-tipo="pf"
-									style="background: none; border: none; font-weight: 600; color: #4a1525; cursor: pointer; font-size: 0.95rem; border-bottom: 2px solid #4a1525; padding-bottom: 0.3rem;">PESSOA
-									FÍSICA</button>
-								<button type="button" class="tab-pj" data-tipo="pj"
-									style="background: none; border: none; font-weight: 600; color: #999; cursor: pointer; font-size: 0.95rem;">PESSOA
-									JURÍDICA</button>
-							</div>
+                  <div class="checkout-alert checkout-alert--sucesso" id="register-success-box" role="status" hidden>
+                    <strong>Conta criada!</strong> Você já está conectado. Atualizando a página…
+                  </div>
+                  <div class="checkout-alert checkout-alert--erro" id="register-error-box" role="alert" hidden>
+                    <span id="register-error-msg"></span>
+                  </div>
 
-							<!-- Campos comuns: Telefone -->
-							<div class="input-row-grid" style="margin-bottom: 1rem;">
-								<div class="input-group">
-									<label for="novo-telefone">Telefone / WhatsApp</label> <input
-										type="text" id="novo-telefone" name="telefone"
-										placeholder="(11) 99999-9999">
-								</div>
-							</div>
+                  <div class="tipo-pessoa-tabs" role="tablist" aria-label="Tipo de conta">
+                    <button type="button" class="tipo-tab" role="tab" data-tipo="PF" aria-selected="true" aria-controls="fields-pf">Pessoa física</button>
+                    <button type="button" class="tipo-tab" role="tab" data-tipo="PJ" aria-selected="false" aria-controls="fields-pj" tabindex="-1">Pessoa jurídica</button>
+                  </div>
 
-							<!-- Campos de PESSOA FÍSICA -->
-							<div id="fields-pf" class="pessoa-fields">
-								<div class="input-row-grid"
-									style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem;">
-									<div class="input-group">
-										<label for="novo-nome">Nome</label> <input type="text"
-											id="novo-nome" name="nome" placeholder="Seu nome">
-									</div>
-									<div class="input-group">
-										<label for="novo-sobrenome">Sobrenome</label> <input
-											type="text" id="novo-sobrenome" name="sobrenome"
-											placeholder="Seu sobrenome">
-									</div>
-								</div>
-								<div class="input-row-grid" style="margin-bottom: 1rem;">
-									<div class="input-group">
-										<label for="novo-cpf">CPF</label> <input type="text"
-											id="novo-cpf" name="cpf" placeholder="000.000.000-00">
-									</div>
-								</div>
-							</div>
+                  <div id="fields-pf" class="pessoa-fields" role="tabpanel">
+                    <div class="grid-2">
+                      <div class="field">
+                        <label for="novo-nome">Nome</label>
+                        <input type="text" id="novo-nome" name="nome" autocomplete="given-name">
+                      </div>
+                      <div class="field">
+                        <label for="novo-sobrenome">Sobrenome</label>
+                        <input type="text" id="novo-sobrenome" name="sobrenome" autocomplete="family-name">
+                      </div>
+                    </div>
+                    <div class="field">
+                      <label for="novo-cpf">CPF</label>
+                      <input type="text" id="novo-cpf" name="cpf" inputmode="numeric" data-mascara="cpf"
+                             placeholder="000.000.000-00" maxlength="14">
+                    </div>
+                  </div>
 
-							<!-- Campos de PESSOA JURÍDICA (Oculto por padrão) -->
-							<div id="fields-pj" class="pessoa-fields" style="display: none;">
-								<div class="input-row-grid" style="margin-bottom: 1rem;">
-									<div class="input-group">
-										<label for="novo-razao">Razão Social</label> <input
-											type="text" id="novo-razao" name="razao_social"
-											placeholder="Nome da Empresa LTDA">
-									</div>
-								</div>
-								<div class="input-row-grid" style="margin-bottom: 1rem;">
-									<div class="input-group">
-										<label for="novo-cnpj">CNPJ</label> <input type="text"
-											id="novo-cnpj" name="cnpj" placeholder="00.000.000/0001-00">
-									</div>
-								</div>
-							</div>
+                  <div id="fields-pj" class="pessoa-fields" role="tabpanel" hidden>
+                    <div class="field">
+                      <label for="novo-razao">Razão social</label>
+                      <input type="text" id="novo-razao" name="razao_social" autocomplete="organization" disabled>
+                    </div>
+                    <div class="field">
+                      <label for="novo-cnpj">CNPJ</label>
+                      <input type="text" id="novo-cnpj" name="cnpj" inputmode="numeric" data-mascara="cnpj"
+                             placeholder="00.000.000/0001-00" maxlength="18" disabled>
+                    </div>
+                  </div>
 
-							<!-- Senha e Botão Final de Cadastro -->
-							<div class="input-row-grid" style="margin-bottom: 1rem;">
-								<div class="input-group">
-									<label for="novo-senha">Crie uma Senha</label> <input
-										type="password" id="novo-senha" name="senha"
-										placeholder="Mínimo de 6 caracteres">
-								</div>
-							</div>
+                  <div class="grid-2">
+                    <div class="field">
+                      <label for="novo-telefone">Telefone / WhatsApp</label>
+                      <input type="tel" id="novo-telefone" name="telefone" autocomplete="tel-national"
+                             data-mascara="telefone" placeholder="(11) 99999-9999" maxlength="15">
+                    </div>
+                    <div class="field">
+                      <label for="novo-senha">Crie uma senha</label>
+                      <input type="password" id="novo-senha" autocomplete="new-password" placeholder="Mínimo de 6 caracteres">
+                    </div>
+                  </div>
 
-							<button type="button" id="btn-finalizar-cadastro"
-								class="btn-secondary-action mt-2"
-								style="width: 100%; background: #4a1525; color: #fff; padding: 0.8rem; border-radius: 6px; border: none; font-weight: 600; cursor: pointer;">Cadastrar
-								e Continuar</button>
-						</div>
-					</form>
-				</section>
+                  <button type="button" id="btn-finalizar-cadastro" class="checkout-btn-secondary checkout-btn-block">
+                    Criar conta e continuar
+                  </button>
+                </div>
+              </form>
+            </c:otherwise>
+          </c:choose>
+        </section>
 
-				<!-- Etapa 2: Endereço de Entrega -->
-				<section class="checkout-card">
-					<div class="step-header">
-						<span class="step-number">2</span>
-						<h2>Endereço de Entrega</h2>
-					</div>
-					<form class="checkout-form" onsubmit="event.preventDefault();">
-						<div class="input-row-grid">
-							<div class="input-group">
-								<label for="cep">CEP</label> <input type="text" id="cep"
-									placeholder="00000-000" required>
-							</div>
-							<div class="input-group span-2">
-								<label for="logradouro">Endereço / Rua</label> <input
-									type="text" id="logradouro"
-									placeholder="Ex: Av. Brigadeiro Luís Antônio" required>
-							</div>
-						</div>
-						<div class="input-row-grid three-cols">
-							<div class="input-group">
-								<label for="numero">Número</label> <input type="text"
-									id="numero" placeholder="1978" required>
-							</div>
-							<div class="input-group span-2">
-								<label for="complemento">Complemento</label> <input type="text"
-									id="complemento" placeholder="Apto 42, Bloco B">
-							</div>
-						</div>
-						<div class="input-row-grid">
-							<div class="input-group">
-								<label for="bairro">Bairro</label> <input type="text"
-									id="bairro" placeholder="Jardim Paulista" required>
-							</div>
-							<div class="input-group">
-								<label for="cidade">Cidade / UF</label> <input type="text"
-									id="cidade" value="São Paulo - SP" required>
-							</div>
-						</div>
-					</form>
-				</section>
+        <!-- ===================== 2. ENDEREÇO ===================== -->
+        <section class="checkout-card" aria-labelledby="passo2">
+          <div class="step-header">
+            <span class="step-number" aria-hidden="true">2</span>
+            <h2 id="passo2">Endereço de entrega</h2>
+          </div>
 
-				<!-- Etapa 3: Método de Frete -->
-				<section class="checkout-card">
-					<div class="step-header">
-						<span class="step-number">3</span>
-						<h2>Método de Envio</h2>
-					</div>
-					<div class="shipping-options-grid">
-						<label class="shipping-option selected"> <input
-							type="radio" name="shipping" value="25.00" checked>
-							<div class="shipping-info">
-								<span class="ship-name">Frete Térmico Agnello (Especial)</span>
-								<span class="ship-time">Entrega em até 48h com controle
-									de temperatura</span>
-							</div> <span class="ship-price">R$ 25,00</span>
-						</label> <label class="shipping-option"> <input type="radio"
-							name="shipping" value="0.00">
-							<div class="shipping-info">
-								<span class="ship-name">Retirada na Adega Física</span> <span
-									class="ship-time">Disponível em 3 horas (Jardins, SP)</span>
-							</div> <span class="ship-price free">Grátis</span>
-						</label>
-					</div>
-				</section>
+          <form class="checkout-form" id="form-endereco" novalidate>
+            <div class="grid-cep">
+              <div class="field">
+                <label for="cep">CEP</label>
+                <input type="text" id="cep" inputmode="numeric" autocomplete="postal-code"
+                       data-mascara="cep" placeholder="00000-000" maxlength="9" required>
+                <span class="field-hint" id="cep-status" aria-live="polite"></span>
+              </div>
+              <div class="field">
+                <label for="logradouro">Rua / avenida</label>
+                <input type="text" id="logradouro" autocomplete="address-line1" required>
+              </div>
+            </div>
+            <div class="grid-numero">
+              <div class="field">
+                <label for="numero">Número</label>
+                <input type="text" id="numero" inputmode="numeric" required>
+              </div>
+              <div class="field">
+                <label for="complemento">Complemento <span class="opcional">(opcional)</span></label>
+                <input type="text" id="complemento" autocomplete="address-line2" placeholder="Apto, bloco…">
+              </div>
+            </div>
+            <div class="grid-2">
+              <div class="field">
+                <label for="bairro">Bairro</label>
+                <input type="text" id="bairro" required>
+              </div>
+              <div class="field">
+                <label for="cidade">Cidade / UF</label>
+                <input type="text" id="cidade" autocomplete="address-level2" required>
+              </div>
+            </div>
+          </form>
+        </section>
 
-				<!-- Etapa 4: Forma de Pagamento -->
-				<section class="checkout-card">
-					<div class="step-header">
-						<span class="step-number">4</span>
-						<h2>Forma de Pagamento</h2>
-					</div>
+        <!-- ===================== 3. ENVIO ===================== -->
+        <section class="checkout-card" aria-labelledby="passo3">
+          <div class="step-header">
+            <span class="step-number" aria-hidden="true">3</span>
+            <h2 id="passo3">Método de envio</h2>
+          </div>
+          <fieldset class="shipping-options">
+            <legend class="sr-only">Escolha o envio</legend>
+            <label class="shipping-option">
+              <input type="radio" name="shipping" value="25.00" data-nome="Frete Térmico Agnello" checked>
+              <span class="shipping-info">
+                <span class="ship-name">Frete Térmico Agnello</span>
+                <span class="ship-time">Entrega em até 48h com controle de temperatura</span>
+              </span>
+              <span class="ship-price">R$ 25,00</span>
+            </label>
+            <label class="shipping-option">
+              <input type="radio" name="shipping" value="0" data-nome="Retirada na adega">
+              <span class="shipping-info">
+                <span class="ship-name">Retirada na adega</span>
+                <span class="ship-time">Disponível em 3 horas (Jardins, SP)</span>
+              </span>
+              <span class="ship-price ship-price--gratis">Grátis</span>
+            </label>
+          </fieldset>
+        </section>
 
-					<div class="payment-tabs">
-						<button type="button" class="pay-tab active" data-target="pix">Pix</button>
-						<button type="button" class="pay-tab" data-target="credit">Cartão
-							de Crédito</button>
-						<button type="button" class="pay-tab" data-target="boleto">Boleto
-							Bancário</button>
-					</div>
+        <!-- ===================== 4. PAGAMENTO ===================== -->
+        <section class="checkout-card" aria-labelledby="passo4">
+          <div class="step-header">
+            <span class="step-number" aria-hidden="true">4</span>
+            <h2 id="passo4">Forma de pagamento</h2>
+          </div>
 
-					<div id="pix" class="pay-content active">
-						<div class="pix-box-msg">
-							<p>
-								✨ <strong>5% de desconto extra</strong> aplicado para pagamentos
-								via Pix à vista.
-							</p>
-							<span class="pix-code-hint">O QR Code será gerado
-								imediatamente após a confirmação do pedido na próxima tela.</span>
-						</div>
-					</div>
+          <div class="payment-tabs" role="tablist" aria-label="Forma de pagamento">
+            <button type="button" class="pay-tab" role="tab" id="tab-pix" data-target="pix" aria-controls="pix" aria-selected="true">Pix <small>−5%</small></button>
+            <button type="button" class="pay-tab" role="tab" id="tab-credit" data-target="credit" aria-controls="credit" aria-selected="false" tabindex="-1">Cartão</button>
+            <button type="button" class="pay-tab" role="tab" id="tab-boleto" data-target="boleto" aria-controls="boleto" aria-selected="false" tabindex="-1">Boleto</button>
+          </div>
 
-					<div id="credit" class="pay-content">
-						<form class="checkout-form" onsubmit="event.preventDefault();">
-							<div class="input-group">
-								<label for="card-num">Número do Cartão</label> <input
-									type="text" id="card-num" placeholder="4532 •••• •••• 1978">
-							</div>
-							<div class="input-row-grid">
-								<div class="input-group">
-									<label for="card-exp">Validade</label> <input type="text"
-										id="card-exp" placeholder="MM/AA">
-								</div>
-								<div class="input-group">
-									<label for="card-cvv">CVV</label> <input type="password"
-										id="card-cvv" placeholder="123">
-								</div>
-							</div>
-							<div class="input-group">
-								<label for="card-name">Nome Impresso no Cartão</label> <input
-									type="text" id="card-name" placeholder="PAULO OLIVEIRA">
-							</div>
-						</form>
-					</div>
+          <div id="pix" class="pay-content" role="tabpanel" aria-labelledby="tab-pix">
+            <p class="pay-note pay-note--destaque"><strong>5% de desconto</strong> no pagamento via Pix à vista.
+              O código Pix aparece logo após confirmar o pedido.</p>
+          </div>
 
-					<div id="boleto" class="pay-content">
-						<div class="boleto-msg">
-							<p>
-								📄 O boleto bancário terá vencimento em <strong>2 dias
-									úteis</strong>. A liberação do pedido ocorre após a compensação
-								bancária.
-							</p>
-						</div>
-					</div>
-				</section>
+          <div id="credit" class="pay-content" role="tabpanel" aria-labelledby="tab-credit" hidden>
+            <form class="checkout-form" id="form-cartao" novalidate>
+              <div class="field">
+                <label for="card-num">Número do cartão</label>
+                <input type="text" id="card-num" inputmode="numeric" autocomplete="cc-number"
+                       data-mascara="cartao" placeholder="0000 0000 0000 0000" maxlength="19" required>
+              </div>
+              <div class="grid-2">
+                <div class="field">
+                  <label for="card-exp">Validade</label>
+                  <input type="text" id="card-exp" inputmode="numeric" autocomplete="cc-exp"
+                         data-mascara="validade" placeholder="MM/AA" maxlength="5" required>
+                </div>
+                <div class="field">
+                  <label for="card-cvv">CVV</label>
+                  <input type="password" id="card-cvv" inputmode="numeric" autocomplete="cc-csc"
+                         placeholder="123" maxlength="4" required>
+                </div>
+              </div>
+              <div class="field">
+                <label for="card-name">Nome impresso no cartão</label>
+                <input type="text" id="card-name" autocomplete="cc-name" required>
+              </div>
+              <div class="field">
+                <label for="card-parcelas">Parcelas</label>
+                <select id="card-parcelas"></select>
+              </div>
+            </form>
+          </div>
 
-			</div>
+          <div id="boleto" class="pay-content" role="tabpanel" aria-labelledby="tab-boleto" hidden>
+            <p class="pay-note">O boleto vence em <strong>2 dias úteis</strong>. O pedido é liberado após a compensação bancária.</p>
+          </div>
+        </section>
+      </div>
 
-			<!-- Coluna Direita: Resumo do Pedido -->
-			<aside class="checkout-summary-sidebar">
-				<div class="summary-card">
-					<h3>Resumo da Compra</h3>
+      <!-- ===================== RESUMO ===================== -->
+      <aside class="checkout-summary" aria-labelledby="resumo-titulo">
+        <div class="summary-card">
+          <h2 id="resumo-titulo">Resumo da compra</h2>
+          <ul class="summary-items-list" id="summary-items"></ul>
 
-					<div class="summary-items-list"></div>
+          <dl class="summary-totals">
+            <div class="calc-row"><dt>Subtotal</dt><dd id="total-subtotal">R$ 0,00</dd></div>
+            <div class="calc-row"><dt>Envio</dt><dd id="total-frete">R$ 25,00</dd></div>
+            <div class="calc-row calc-row--desconto" id="row-discount"><dt>Desconto Pix (5%)</dt><dd id="total-desconto">− R$ 0,00</dd></div>
+            <div class="calc-row calc-row--total"><dt>Total</dt><dd id="total-final">R$ 0,00</dd></div>
+          </dl>
 
-					<div class="summary-totals">
-						<div class="calc-row">
-							<span>Subtotal</span> <span>R$ 0,00</span>
-						</div>
-						<div class="calc-row">
-							<span>Frete Térmico</span> <span>R$ 25,00</span>
-						</div>
-						<div class="calc-row discount" id="row-discount">
-							<span>Desconto Pix (5%)</span> <span>- R$ 0,00</span>
-						</div>
-						<div class="calc-row total">
-							<span>Total a Pagar</span> <span class="final-price">R$
-								0,00</span>
-						</div>
-					</div>
+          <div class="checkout-alert checkout-alert--erro" id="pedido-erro" role="alert" hidden></div>
 
-					<button type="button"
-						class="btn-agnello-primary checkout-action-btn"
-						onclick="alert('Pedido realizado com sucesso! Bem-vindo à família Agnello.'); window.location.href='${pageContext.request.contextPath}/catalogo';">
-						Concluir Pedido com Segurança</button>
+          <button type="button" class="checkout-btn-primary checkout-btn-block" id="btn-concluir">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="11" width="16" height="10" rx="2"></rect><path d="M8 11V7a4 4 0 0 1 8 0v4"></path></svg>
+            <span>Concluir pedido</span>
+          </button>
+          <p class="terms-notice">Ao concluir, você concorda com a Política de Privacidade da Vinheria Agnello
+            e confirma ter 18 anos ou mais.</p>
+        </div>
 
-					<p class="terms-notice">Ao finalizar, você concorda com os
-						termos do Clube de Assinatura e Política de Privacidade da
-						Vinheria Agnello.</p>
-				</div>
-			</aside>
+        <div class="checkout-links">
+          <a href="${ctx}/catalogo" class="checkout-link">← Continuar comprando</a>
+        </div>
+      </aside>
+    </div>
+  </main>
 
-		</div>
-	</main>
+  <jsp:include page="/WEB-INF/componentes/footer.jsp" />
 
-	<div class="checkout-navigation-footer">
-		<div class="nav-footer-inner">
-			<%
-			com.agnello.model.Usuario userSessao = (com.agnello.model.Usuario) session.getAttribute("clienteLogado");
-			String urlAdega = request.getContextPath() + "/login";
-			if (userSessao != null) {
-				urlAdega = request.getContextPath() + "/area-pessoal?id=" + userSessao.getId();
-			}
-			%>
-			<a href="<%=urlAdega%>" class="return-link">← Voltar para Minha
-				Adega</a> <a href="${pageContext.request.contextPath}/catalogo"
-				class="catalog-link">Continuar comprando no catálogo</a>
-		</div>
-	</div>
-
-	<jsp:include page="/WEB-INF/componentes/footer.jsp" />
-
-	<script src="${pageContext.request.contextPath}/js/components/chat.js"></script>
-	<script src="${pageContext.request.contextPath}/js/pages/checkout.js"></script>
+  <script src="${ctx}/js/components/chat.js"></script>
+  <script src="${ctx}/js/pages/checkout.js"></script>
 </body>
-
 </html>
