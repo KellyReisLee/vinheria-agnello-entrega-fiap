@@ -1,301 +1,225 @@
-/* ==========================================
-   ESTILOS DA PÁGINA DE SUGESTÕES (sugestoes.css)
-   ========================================== */
+/* ==========================================================================
+   SUGESTÕES DO SOMMELIER (WEB-INF/views/sugestoesSommelier.jsp)
+   A grelha e os cards vêm do catalogo.css (carregado antes deste ficheiro).
+   ========================================================================== */
 
-@import url('./sections/_header.css');
-@import url('./sections/_buttons.css');
-@import url('./sections/_hero.css');
-@import url('./sections/_family.css');
-@import url('./sections/_calculator.css');
-@import url('./sections/_vitrini.css');
-@import url('./sections/_footer-intern.css');
-@import url('./sections/_footer-completed.css');
-@import url('./sections/_responsive.css');
-@import url('./sections/_carrinho.css');
-@import url('./sections/_chat.css');
-
-.sugestoes-page-body-unique {
-  background-color: var(--primary-wine, #27030E);
-  color: #1E0A10;
-  font-family: var(--font-base, sans-serif);
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-}
-
-.sugestoes-main-wrapper-unique {
-  margin-top: 6rem;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  padding: 4rem 1.5rem;
-  min-height: 80vh;
-}
-
-.sugestoes-container-unique {
-  width: 100%;
-  max-width: 1200px;
-  /* Expandido para acomodar múltiplos produtos como e-commerce */
-  background: #FFFFFF;
-  border: 1px solid rgba(212, 175, 55, 0.25);
-  border-radius: 16px;
-  padding: 3.5rem 3rem;
-  box-shadow: 0 25px 50px rgba(0, 0, 0, 0.35);
-  position: relative;
-  overflow: hidden;
-  box-sizing: border-box;
-}
-
-.sugestoes-container-unique::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 4px;
-  background: linear-gradient(90deg, var(--primary-wine, #27030E), var(--accent-gold, #D4AF37));
-}
-
-.sugestoes-header-unique {
-  text-align: center;
-  margin-bottom: 3.5rem;
-}
-
-.sugestoes-header-unique .calc-tag-unique {
-  display: inline-block;
-  font-size: 1rem;
-  font-weight: 700;
-  letter-spacing: 1.5px;
-  color: var(--accent-gold, #D4AF37);
-  text-transform: uppercase;
-  margin-bottom: 0.75rem;
-}
-
-.sugestoes-title-unique {
-  font-family: var(--font-heading, serif);
-  font-size: 2.4rem;
-  color: #1E0A10;
-  margin: 0 0 0.75rem 0;
-  line-height: 1.25;
-}
-
-.sugestoes-subtitle-unique {
-  font-size: 1.05rem;
-  color: #555555;
-  margin: 0;
-}
-
-/* Grid de Vinhos Estilo E-commerce */
-.vinhos-grid-unique {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  /* 3 colunas imponentes */
-  gap: 2rem;
-  margin-bottom: 3.5rem;
-}
-
-.vinho-card-unique {
-  background: #FAFAFA;
-  border: 1px solid #E5E2DC;
-  border-radius: 12px;
-  padding: 1.5rem;
+.sugestoes-page-body {
   display: flex;
   flex-direction: column;
-  justify-content: space-between;
-  position: relative;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.02);
+  min-height: 100vh;
+  background:
+    radial-gradient(ellipse at 50% 0%, rgba(212, 175, 55, 0.1), transparent 55%),
+    var(--primary-wine);
 }
 
-.vinho-card-unique:hover {
-  border-color: var(--accent-gold, #D4AF37);
-  background-color: #FFF;
-  transform: translateY(-4px);
-  box-shadow: 0 12px 25px rgba(39, 3, 14, 0.08);
-}
-
-/* Banner de Desconto */
-.vinho-badge-desconto-unique {
-  position: absolute;
-  top: 1rem;
-  right: 1rem;
-  background-color: #C0392B;
-  color: #FFFFFF;
-  font-size: 0.7rem;
-  font-weight: 700;
-  padding: 0.3rem 0.6rem;
-  border-radius: 6px;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  z-index: 2;
-}
-
-/* Imagem do Produto */
-.vinho-img-wrapper-unique {
+.sugestoes-main {
+  flex: 1;
   width: 100%;
-  height: 220px;
-  /* Define uma altura padrão para a caixa */
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background-color: #fcfcfc;
-  /* Fundo leve enquanto a imagem carrega */
-  overflow: hidden;
+  padding: calc(var(--header-height) + clamp(1.5rem, 4vw, 3rem)) var(--page-gutter) clamp(3rem, 6vw, 5rem);
+}
+
+.sugestoes-container {
   position: relative;
+  max-width: 1240px;
+  margin: 0 auto;
+  padding: clamp(1.75rem, 4vw, 3.25rem);
+  overflow: hidden;
+  border: 1px solid rgba(212, 175, 55, 0.25);
+  border-radius: 16px;
+  background: var(--bg-offwhite);
+  box-shadow: 0 25px 50px rgba(0, 0, 0, 0.3);
 }
 
-.vinho-img-unique {
-  max-height: 100%;
-  max-width: 100%;
-  object-fit: contain;
-  /* Garante que a garrafa apareça inteira sem distorcer */
-  transition: transform 0.3s ease;
+/* Linha vinho -> dourado no topo do cartão */
+.sugestoes-container::before {
+  content: '';
+  position: absolute;
+  inset: 0 0 auto 0;
+  height: 4px;
+  background: linear-gradient(90deg, var(--primary-wine), var(--accent-gold));
 }
 
-.vinho-card-unique:hover .vinho-img-unique {
-  transform: scale(1.05);
+/* ---------- Cabeçalho ---------- */
+.sugestoes-header {
+  max-width: 720px;
+  margin: 0 auto clamp(2rem, 4vw, 3rem);
+  text-align: center;
 }
 
-.vinho-meta-topo-unique {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 0.4rem;
-}
-
-.vinho-tipo-unique {
-  font-size: 0.7rem;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.8px;
-  color: var(--accent-gold, #D4AF37);
-}
-
-.vinho-pontuacao-unique {
-  font-size: 0.72rem;
+.sugestoes-eyebrow {
+  display: inline-block;
+  margin-bottom: 0.6rem;
+  color: #A8861F;
+  font-size: 0.75rem;
   font-weight: 600;
-  color: #8C7355;
-  background: rgba(212, 175, 55, 0.1);
-  padding: 0.2rem 0.5rem;
-  border-radius: 4px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
 }
 
-.vinho-origem-unique {
-  display: block;
+.sugestoes-title {
+  margin-bottom: 0.75rem;
+  color: var(--primary-wine);
+  font-family: var(--font-heading);
+  font-size: clamp(1.9rem, 1.4rem + 2vw, 2.6rem);
+  line-height: 1.2;
+}
+
+.sugestoes-subtitle {
+  color: var(--text-muted);
+  font-size: clamp(0.97rem, 0.9rem + 0.3vw, 1.05rem);
+  line-height: 1.65;
+  text-wrap: pretty;
+}
+
+/* As 3 respostas do quiz em "chips" */
+.sugestoes-perfil {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.5rem;
+  margin-top: 1.25rem;
+  list-style: none;
+}
+
+.sugestoes-perfil[hidden] {
+  display: none;
+}
+
+.sugestoes-perfil li {
+  padding: 0.35rem 0.85rem;
+  border: 1px solid rgba(212, 175, 55, 0.45);
+  border-radius: 999px;
+  background: #FFFDF6;
+  color: #6B5A1E;
   font-size: 0.8rem;
-  color: #777777;
-  margin-bottom: 0.4rem;
+  font-weight: 500;
 }
 
-.vinho-nome-unique {
-  font-family: var(--font-heading, serif);
-  font-size: 1.15rem;
-  color: #1E0A10;
-  margin: 0 0 0.6rem 0;
-  line-height: 1.3;
+/* ---------- Sem quiz ---------- */
+.sugestoes-sem-quiz {
+  max-width: 520px;
+  margin: 0 auto 1rem;
+  padding: 2rem 1.5rem;
+  border: 1px dashed #DCD5D0;
+  border-radius: var(--radius-md);
+  background: #FFFFFF;
+  text-align: center;
 }
 
-.vinho-desc-unique {
-  font-size: 0.85rem;
-  color: #666666;
-  line-height: 1.45;
-  margin: 0 0 1.2rem 0;
+.sugestoes-sem-quiz[hidden] {
+  display: none;
+}
+
+.sugestoes-sem-quiz p {
+  margin-bottom: 1.25rem;
+  color: var(--text-muted);
+  line-height: 1.6;
+}
+
+.agnello-wine-grid[hidden] {
+  display: none;
+}
+
+/* ---------- Cards: descrição e destaque ---------- */
+.product-desc {
+  margin: -0.35rem 0 0.85rem;
+  color: var(--text-muted);
+  font-size: 0.84rem;
+  line-height: 1.5;
+  /* no máximo 3 linhas */
   display: -webkit-box;
+  -webkit-line-clamp: 3;
   -webkit-box-orient: vertical;
   overflow: hidden;
 }
 
-.vinho-footer-unique {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  border-top: 1px solid #EFECE6;
-  padding-top: 1rem;
-  margin-top: auto;
+.product-card.is-destaque {
+  border-color: var(--accent-gold);
+  box-shadow: 0 10px 30px rgba(212, 175, 55, 0.18);
 }
 
-.vinho-precos-unique {
-  display: flex;
-  flex-direction: column;
-}
-
-.preco-antigo-unique {
-  font-size: 0.75rem;
-  color: #999999;
-  text-decoration: line-through;
-}
-
-.vinho-preco-unique {
-  font-family: var(--font-heading, serif);
-  font-size: 1.15rem;
+.sugestao-destaque-selo {
+  position: absolute;
+  top: -11px;
+  left: 50%;
+  z-index: 3;
+  padding: 0.25rem 0.8rem;
+  border-radius: 999px;
+  background: var(--accent-gold);
+  color: #1E0A10;
+  font-size: 0.7rem;
   font-weight: 700;
-  color: var(--primary-wine, #27030E);
+  letter-spacing: 0.5px;
+  white-space: nowrap;
+  transform: translateX(-50%);
+  box-shadow: 0 4px 10px rgba(212, 175, 55, 0.35);
 }
 
-.btn-comprar-unique {
-  background-color: var(--primary-wine, #27030E);
-  color: #FFFFFF;
-  border: none;
-  padding: 0.65rem 1rem;
-  border-radius: 8px;
-  font-size: 0.85rem;
+/* Espaço para o selo que fica por cima da 1.ª linha de cards */
+.sugestoes-container .agnello-wine-grid {
+  padding-top: 12px;
+}
+
+/* ---------- Ações ---------- */
+.sugestoes-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+  gap: 1rem 2rem;
+  margin-top: clamp(2rem, 4vw, 3rem);
+}
+
+.sugestoes-link-catalogo {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  color: var(--primary-wine);
   font-weight: 600;
-  cursor: pointer;
-  transition: background-color 0.2s ease, transform 0.2s ease;
-}
-
-.btn-comprar-unique:hover {
-  background-color: #3e0618;
-  transform: translateY(-1px);
-}
-
-/* Ações Inferiores (Refazer Quiz) */
-.sugestoes-actions-unique {
-  text-align: center;
-}
-
-.btn-refazer-unique {
-  display: inline-block;
-  background: transparent;
-  color: var(--primary-wine, #27030E);
-  border: 1px solid var(--primary-wine, #27030E);
-  padding: 0.75rem 2.5rem;
-  border-radius: 8px;
-  font-weight: 600;
-  font-size: 0.95rem;
   text-decoration: none;
-  transition: all 0.2s ease;
+  border-bottom: 1px solid transparent;
+  transition: border-color 0.3s;
 }
 
-.btn-refazer-unique:hover {
-  background-color: var(--primary-wine, #27030E);
-  color: #FFFFFF;
+.sugestoes-link-catalogo:hover {
+  border-color: var(--accent-gold);
 }
 
-/* Responsividade Adaptativa E-commerce */
-@media (max-width: 1024px) {
-	.sugestoes-main-wrapper-unique {
-  margin-top: 5rem;
-	}
-  .vinhos-grid-unique {
-    grid-template-columns: repeat(2, 1fr);
-  }
-  
+.sugestoes-link-catalogo:hover .btn-arrow {
+  transform: translateX(4px);
 }
 
-@media (max-width: 650px) {
-	.sugestoes-main-wrapper-unique {
-  margin-top: 4rem;
-	}
-  .sugestoes-container-unique {
-    padding: 2rem 1rem;
+/* ---------- Telemóvel ---------- */
+@media (max-width: 640px) {
+  .sugestoes-main {
+    padding-left: 0.75rem;
+    padding-right: 0.75rem;
   }
 
-  .vinhos-grid-unique {
-    grid-template-columns: 1fr;
+  .sugestoes-container {
+    padding: 1.75rem 0.9rem;
   }
 
-  .sugestoes-title-unique {
-    font-size: 1.8rem;
+  .product-desc {
+    font-size: 0.78rem;
+    -webkit-line-clamp: 2;
   }
+
+  .sugestao-destaque-selo {
+    font-size: 0.62rem;
+    padding: 0.2rem 0.6rem;
+  }
+
+  .sugestoes-actions {
+    flex-direction: column;
+  }
+
+  .sugestoes-actions .btn-outline-dark {
+    width: 100%;
+    justify-content: center;
+  }
+}
+
+.sugestoes-actions [hidden] {
+  display: none;
 }

@@ -1,121 +1,89 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <%@ taglib prefix="c" uri="jakarta.tags.core" %>
+<c:set var="ctx" value="${pageContext.request.contextPath}" />
 <!DOCTYPE html>
 <html lang="pt-BR">
 
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Quiz do Sommelier — Vinheria Agnello</title>
+  <title>Sommelier Virtual | Vinheria Agnello</title>
+  <meta name="description" content="Responda a 3 perguntas e o Sommelier Virtual da Vinheria Agnello indica os rótulos ideais para o seu momento.">
+  <meta name="theme-color" content="#4A1525">
+  <link rel="icon" type="image/png" href="${ctx}/assets/images/logo-bg-white.png">
 
-  <!-- Favicon -->
-  <link rel="icon" type="image/png" href="${pageContext.request.contextPath}/assets/images/logo-bg-white.png">
-
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/variables.css">
-  <link rel="stylesheet" href="${pageContext.request.contextPath}/css/global.css">
-  <link rel="stylesheet" href="${pageContext.request.contextPath}/css/home.css">
-  <link rel="stylesheet" href="${pageContext.request.contextPath}/css/animations.css">
-  <link rel="stylesheet" href="${pageContext.request.contextPath}/css/sections/_chat.css">
-   <link rel="stylesheet" href="${pageContext.request.contextPath}/css/quiz.css">
-  
-  <!-- Importação das fontes do Google Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link
     href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400..900;1,400..900&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap"
     rel="stylesheet">
-    
+
+  <link rel="stylesheet" href="${ctx}/css/variables.css">
+  <link rel="stylesheet" href="${ctx}/css/global.css">
+  <link rel="stylesheet" href="${ctx}/css/quiz.css">
+
   <script>
-    window.CONTEXT_PATH = '${pageContext.request.contextPath}';
+    window.CONTEXT_PATH = '${ctx}';
   </script>
 </head>
 
-<body class="agnello-quiz-body quiz-page-body">
+<body class="quiz-page-body">
 
-  <!-- HEADER MODULAR -->
   <jsp:include page="/WEB-INF/componentes/header.jsp" />
 
-  <main class="agnello-quiz-main quiz-main-wrapper">
-    <div id="sommelier-card" class="sommelier-card calculator-box quiz-container">
-
-      <!-- CABEÇALHO DO SOMMELIER -->
-      <h2 class="sommelier-title">Sommelier Virtual</h2>
-
-      <!-- BARRA DE PROGRESSO IDÊNTICA À REFERÊNCIA -->
-      <div class="progress-container">
-        <div class="progress-bar-track">
-          <div class="progress-bar-fill" id="progress-fill" style="width: 33%;"></div>
-        </div>
-        <span class="progress-text" id="progress-text">Passo ${passoAtual} de 3</span>
-      </div>
-
-      <!-- ETAPA 1: OCASIÃO E HARMONIZAÇÃO -->
-      <div class="quiz-step active" id="step-1">
-        <h2 class="quiz-title question-title">Qual é a ocasião ou o prato principal do seu momento?</h2>
-
-        <div class="estilo-evento-group options-list">
-          <div class="type-btn option-pill selected" data-step="1" data-value="carnes-vermelhas">
-            <span>Carnes Vermelhas & Churrasco Nobre</span>
-            <span class="arrow">›</span>
-          </div>
-          <div class="type-btn option-pill" data-step="1" data-value="massas-molhos">
-            <span>Massas com Molhos Intensos ou Ragus</span>
-            <span class="arrow">›</span>
-          </div>
-          <div class="type-btn option-pill" data-step="1" data-value="peixes-frutos-mar">
-            <span>Peixes, Frutos do Mar ou Comida Japonesa</span>
-            <span class="arrow">›</span>
-          </div>
-          <div class="type-btn option-pill" data-step="1" data-value="momento-a-dois">
-            <span>Sunset ou Coquetel de Verão</span>
-            <span class="arrow">›</span>
-          </div>
-        </div>
-      </div>
-
-      <!-- ETAPA 2: DINÂMICA (Preenchida via JavaScript) -->
-      <div class="quiz-step" id="step-2">
-        <h2 class="quiz-title question-title">Carregando perfil...</h2>
-        <div class="estilo-evento-group options-list">
-          <!-- Os botões desta etapa são injetados dinamicamente pelo quiz.js -->
-        </div>
-      </div>
-
-      <!-- ETAPA 3: DINÂMICA (Preenchida via JavaScript) -->
-      <div class="quiz-step" id="step-3">
-        <h2 class="quiz-title question-title">Carregando estrutura...</h2>
-        <div class="estilo-evento-group options-list">
-          <!-- Os botões desta etapa são injetados dinamicamente pelo quiz.js -->
-        </div>
-      </div>
-
-      <!-- RODAPÉ DO CARD (Voltar / Próximo) -->
-      <div class="sommelier-footer">
-        <button type="button" id="btn-voltar" class="btn-text-voltar">Voltar</button>
-        <button type="button" id="btn-proximo" class="btn-proximo-vinho btn-agnello-primary">Próximo</button>
-      </div>
-
+  <main class="quiz-main" id="conteudo">
+    <div class="quiz-intro">
+      <span class="quiz-eyebrow">Sommelier Virtual</span>
+      <h1 class="quiz-intro-title">Encontre o vinho ideal em 3 perguntas</h1>
     </div>
+
+    <%-- As perguntas (e as opções de cada passo) são desenhadas pelo quiz.js --%>
+    <section class="sommelier-card" aria-labelledby="quiz-pergunta">
+      <div class="progress-container">
+        <div class="progress-bar-track" role="progressbar" aria-label="Progresso do quiz"
+             aria-valuemin="1" aria-valuemax="3" aria-valuenow="1">
+          <div class="progress-bar-fill" id="progress-fill"></div>
+        </div>
+        <span class="progress-text" id="progress-text">Passo 1 de 3</span>
+      </div>
+
+      <form id="quiz-form" novalidate>
+        <fieldset class="quiz-step">
+          <legend class="question-title" id="quiz-pergunta" tabindex="-1">Carregando…</legend>
+          <div class="options-list" id="quiz-opcoes"></div>
+        </fieldset>
+
+        <div class="sommelier-footer">
+          <button type="button" id="btn-voltar" class="btn-text-voltar">
+            <span aria-hidden="true">←</span> <span id="btn-voltar-texto">Início</span>
+          </button>
+          <button type="submit" id="btn-proximo" class="btn-proximo-vinho">
+            <span id="btn-proximo-texto">Próximo</span> <span class="btn-arrow" aria-hidden="true">→</span>
+          </button>
+        </div>
+      </form>
+    </section>
+
+    <noscript>
+      <p class="quiz-noscript">O Sommelier Virtual precisa de JavaScript ativo.
+        Você também pode <a href="${ctx}/catalogo">ver todos os nossos rótulos</a>.</p>
+    </noscript>
   </main>
 
-  <!-- FOOTER MODULAR (Protegido em WEB-INF) -->
   <jsp:include page="/WEB-INF/componentes/footer.jsp" />
 
-  <!-- Carrinho -->
   <div id="agnello-cart-overlay" class="agnello-cart-overlay"></div>
   <div id="agnello-cart-drawer" class="agnello-cart-drawer">
     <div class="agnello-cart-header">
-      <button id="agnello-cart-close" class="agnello-cart-back-btn">←</button>
+      <button type="button" id="agnello-cart-close" class="agnello-cart-back-btn">←</button>
       <h2 id="agnello-cart-title">Carrinho (0)</h2>
     </div>
     <div id="agnello-cart-body" class="agnello-cart-body"></div>
   </div>
 
-  <!-- Scripts com Context Path -->
-  <script src="${pageContext.request.contextPath}/js/pages/quiz.js"></script>
-  <script src="${pageContext.request.contextPath}/js/components/carrinho.js"></script>
-  <script src="${pageContext.request.contextPath}/js/components/chat.js"></script>
-
+  <script src="${ctx}/js/pages/quiz.js"></script>
+  <script src="${ctx}/js/components/carrinho.js"></script>
+  <script src="${ctx}/js/components/chat.js"></script>
 </body>
 
 </html>
