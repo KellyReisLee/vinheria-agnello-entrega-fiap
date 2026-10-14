@@ -137,7 +137,7 @@
 
 					<div class="unique-calc-notice" role="note">
 						<span> <img
-							src="${pageContext.request.contextPath}/assets/icons/icons-home/circle-alert.svg"
+							src="${pageContext.request.contextPath}/assets/icons/circle-alert.svg"
 							alt="" aria-hidden="true">
 						</span>
 						<p>O cálculo baseia-se em métricas de sommelier profissional,
@@ -311,12 +311,8 @@
 	</div>
 
 	<!-- IMPORTAÇÃO DE SCRIPTS COM CONTEXT PATH -->
-	<script src="${pageContext.request.contextPath}/js/catalogo-vinhos.js"></script>
-	<script src="${pageContext.request.contextPath}/js/componentes.js"></script>
 	<script
 		src="${pageContext.request.contextPath}/js/components/calculadora.js"></script>
-	<script
-		src="${pageContext.request.contextPath}/js/data/achados-da-semana.js"></script>
 	<script src="${pageContext.request.contextPath}/js/pages/home.js"></script>
 	<script
 		src="${pageContext.request.contextPath}/js/components/carrinho.js"></script>

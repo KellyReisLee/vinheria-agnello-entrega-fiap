@@ -11,7 +11,6 @@
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/variables.css">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/global.css">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/cadastro.css">
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/footer.css">
 
     <link rel="icon" type="image/png" href="${pageContext.request.contextPath}/assets/images/logo-bg-white.png">
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -163,8 +162,6 @@
   <jsp:include page="/WEB-INF/componentes/footer.jsp" />
 
     <!-- Scripts com Caminhos Dinâmicos -->
-    <script src="${pageContext.request.contextPath}/js/catalogo.js"></script>
-    <script src="${pageContext.request.contextPath}/js/components/componentes.js"></script>
     <script src="${pageContext.request.contextPath}/js/components/carrinho.js"></script>
     <script src="${pageContext.request.contextPath}/js/components/chat.js"></script>
     <script src="${pageContext.request.contextPath}/js/pages/cadastro.js"></script>

@@ -1,16 +1,18 @@
-/* Overlay */
+/* ==========================================================================
+   GAVETA DO CARRINHO (partilhada)
+   O HTML dos itens é gerado em js/components/carrinho.js com estas classes.
+   ========================================================================== */
+
+/* Fundo escuro por trás da gaveta */
 .agnello-cart-overlay {
   position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
+  inset: 0;
+  z-index: var(--z-overlay, 2000);
   background-color: rgba(0, 0, 0, 0.5);
   backdrop-filter: blur(3px);
-  z-index: 2000;
   opacity: 0;
   visibility: hidden;
-  transition: all 0.3s ease;
+  transition: opacity 0.3s ease, visibility 0.3s ease;
 }
 
 .agnello-cart-overlay.ativo {
@@ -18,148 +20,217 @@
   visibility: visible;
 }
 
-/* Drawer Lateral */
+/* Gaveta lateral: fechada fica 100% para fora à direita (translateX),
+   por isso funciona em qualquer largura de ecrã. */
 .agnello-cart-drawer {
   position: fixed;
   top: 0;
-  right: -420px;
-  width: 100%;
-  max-width: 400px;
-  height: 100%;
-  background-color: #F9F8F6;
-  z-index: 2001;
-  box-shadow: -5px 0 25px rgba(0, 0, 0, 0.15);
+  right: 0;
+  z-index: var(--z-drawer, 2001);
+  width: min(400px, 100%);         /* no telemóvel ocupa o ecrã todo */
+  height: 100vh;
+  height: 100dvh;                  /* altura real no mobile (barra do browser) */
   display: flex;
   flex-direction: column;
-  transition: right 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+  background-color: var(--bg-offwhite);
+  box-shadow: -5px 0 25px rgba(0, 0, 0, 0.15);
+  transform: translateX(100%);
+  visibility: hidden;              /* fechada não recebe foco do teclado */
+  transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1), visibility 0.35s;
 }
 
 .agnello-cart-drawer.ativo {
-  right: 0;
+  transform: translateX(0);
+  visibility: visible;
 }
 
-/* Header do Carrinho */
+/* ---------- Cabeçalho ---------- */
 .agnello-cart-header {
   display: flex;
   align-items: center;
-  padding: 1.2rem 1.5rem;
+  gap: 0.75rem;
+  padding: 1rem 1.25rem;
   background-color: #FFFFFF;
   border-bottom: 1px solid #EFECE6;
 }
 
 .agnello-cart-back-btn {
-  background: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
   border: none;
+  border-radius: 50%;
+  background: none;
   font-size: 1.2rem;
+  color: var(--text-charcoal);
   cursor: pointer;
-  margin-right: 1rem;
-  color: #2C2C2C;
 }
 
+.agnello-cart-back-btn:hover {
+  background: rgba(74, 21, 37, 0.06);
+}
+
+.agnello-cart-header h2,
 #agnello-cart-title {
-  font-family: var(--font-heading, 'Playfair Display', serif);
-  color: #3c3c3c;
-}
-
-.agnello-cart-header h2 {
-  font-family: var(--font-heading, 'Playfair Display', serif);
-  font-size: 1.2rem;
-  color: #2C2C2C;
   margin: 0;
+  font-family: var(--font-heading);
+  font-size: 1.2rem;
+  color: var(--text-charcoal);
 }
 
-/* Corpo do Carrinho */
+/* ---------- Corpo ---------- */
 .agnello-cart-body {
   flex: 1;
-  overflow-y: auto;
-  padding: 1.5rem;
+  min-height: 0;                   /* permite o scroll interno dentro do flex */
   display: flex;
   flex-direction: column;
 }
 
-/* Estado Vazio */
+.agnello-cart-list {
+  flex: 1;
+  overflow-y: auto;
+  list-style: none;
+  padding: 1rem 1.25rem;
+}
+
+/* Estado vazio */
 .agnello-cart-empty {
+  flex: 1;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  height: 100%;
+  gap: 0.5rem;
+  padding: 2rem 1.5rem;
   text-align: center;
-  color: #777777;
+  color: var(--text-muted);
 }
 
 .agnello-cart-empty-icon {
-  font-size: 3rem;
-  color: #CCCCCC;
-  margin-bottom: 1rem;
-  font-weight: 300;
-}
-
-.agnello-cart-empty h3 {
-  font-family: var(--font-heading, 'Playfair Display', serif);
-  font-size: 1.25rem;
-  color: #2C2C2C;
+  width: 48px;
+  height: 48px;
+  opacity: 0.35;
   margin-bottom: 0.5rem;
 }
 
-/* Estado com Produtos (Item Card) */
+.agnello-cart-empty h3 {
+  font-size: 1.25rem;
+  color: var(--text-charcoal);
+}
+
+.agnello-cart-empty p {
+  font-size: 0.9rem;
+}
+
+/* ---------- Item ---------- */
 .agnello-cart-item {
-  background: #FFFFFF;
-  border-radius: 8px;
-  padding: 1rem;
+  position: relative;
   display: flex;
   gap: 1rem;
-  margin-bottom: 1rem;
-  border: 1px solid #EFECE6;
-  position: relative;
+  align-items: center;
+  padding: 1rem 0;
+  border-bottom: 1px solid #EFECE6;
 }
 
 .agnello-cart-item img {
-  width: 60px;
+  flex-shrink: 0;
+  width: 56px;
   height: 90px;
   object-fit: contain;
+  padding: 4px;
+  border-radius: var(--radius-sm);
+  background: #F4F1EA;
 }
 
 .agnello-cart-item-details {
   flex: 1;
+  min-width: 0;                    /* deixa o nome longo quebrar em vez de empurrar o layout */
 }
 
 .agnello-cart-item-title {
-  font-size: 0.9rem;
-  font-weight: 700;
-  color: #4A1525;
-  margin-bottom: 0.2rem;
+  padding-right: 1.75rem;          /* espaço para o botão × */
+  font-size: 0.88rem;
+  font-weight: 600;
+  line-height: 1.3;
+  color: var(--text-charcoal);
 }
 
 .agnello-cart-item-origin {
+  margin: 2px 0 0.6rem;
   font-size: 0.75rem;
-  color: #777777;
-  margin-bottom: 0.5rem;
+  color: var(--text-muted);
+}
+
+.agnello-cart-item-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
 }
 
 .agnello-cart-item-price {
   font-weight: 700;
-  color: #4A1525;
+  font-size: 0.95rem;
+  color: var(--primary-wine);
+  white-space: nowrap;
+}
+
+/* Seletor de quantidade */
+.agnello-qty {
+  display: inline-flex;
+  align-items: center;
+  border: 1px solid #DCD6CD;
+  border-radius: var(--radius-sm);
+  background: #FFF;
+}
+
+.agnello-qty button {
+  width: 32px;
+  height: 32px;
+  border: none;
+  background: none;
   font-size: 1rem;
+  color: #555;
+  cursor: pointer;
+}
+
+.agnello-qty button:hover {
+  background: #F4F1EA;
+}
+
+.agnello-qty span {
+  min-width: 1.75rem;
+  text-align: center;
+  font-size: 0.85rem;
+  font-weight: 600;
 }
 
 .agnello-cart-remove {
   position: absolute;
-  top: 10px;
-  right: 10px;
-  background: none;
+  top: 0.6rem;
+  right: -0.25rem;
+  width: 32px;
+  height: 32px;
   border: none;
+  border-radius: 50%;
+  background: none;
+  font-size: 1.2rem;
   color: #999;
   cursor: pointer;
-  font-size: 1rem;
 }
 
-/* Rodapé com Total e Botão Finalizar */
+.agnello-cart-remove:hover {
+  color: var(--primary-wine);
+  background: rgba(74, 21, 37, 0.06);
+}
+
+/* ---------- Rodapé com total ---------- */
 .agnello-cart-footer-box {
-  margin-top: auto;
+  padding: 1.1rem 1.25rem calc(1.1rem + env(safe-area-inset-bottom));
   background: #FFFFFF;
   border-top: 1px solid #EFECE6;
-  padding: 1.2rem 1.5rem;
 }
 
 .agnello-cart-total-row {
@@ -167,30 +238,32 @@
   justify-content: space-between;
   align-items: center;
   margin-bottom: 1rem;
-  font-size: 1.2rem;
+  font-size: 1.1rem;
   font-weight: 700;
-  color: #2C2C2C;
+  color: var(--text-charcoal);
 }
 
 .agnello-cart-total-row span:last-child {
-  color: #4A1525;
-  font-size: 1.4rem;
+  font-size: 1.3rem;
+  color: var(--primary-wine);
 }
 
+/* Botão com as cores da marca (antes era laranja/verde, fora da paleta) */
 .agnello-btn-finalizar {
-  letter-spacing: 1px;
   width: 100%;
-  background-color: #78B13F;
-  color: #FFFFFF;
+  padding: 0.95rem;
   border: none;
-  padding: 0.9rem;
   border-radius: 6px;
+  background-color: var(--primary-wine);
+  color: #FFFFFF;
   font-size: 1rem;
   font-weight: 700;
+  letter-spacing: 0.5px;
   cursor: pointer;
-  transition: background 0.3s ease;
+  transition: background-color 0.3s ease, transform 0.2s ease;
 }
 
 .agnello-btn-finalizar:hover {
-  background-color: #689E33;
+  background-color: var(--primary-wine-dark);
+  transform: translateY(-1px);
 }
