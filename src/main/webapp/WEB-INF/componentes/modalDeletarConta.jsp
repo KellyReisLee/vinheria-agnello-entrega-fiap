@@ -1,48 +1,50 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <%@ taglib prefix="c" uri="jakarta.tags.core" %>
+<%-- Modais de exclusão de conta. Usam o elemento nativo <dialog>:
+     fica fechado por padrão, prende o foco do teclado lá dentro e fecha com Esc.
+     Comportamento em js/components/modal-deletar-conta.js --%>
 
-<!-- MODAL DE CONFIRMAÇÃO DE EXCLUSÃO DE CONTA -->
-<div id="modalDeletarConta" class="agnello-modal-overlay">
-  <div class="agnello-modal-card">
-    <div class="agnello-modal-header">
-      <span class="sub-tag-alert">ZONA DE PERIGO</span>
-      <h2>Deseja realmente encerrar sua conta?</h2>
-    </div>
-    
-    <div class="agnello-modal-body">
-      <p>Esta ação é <strong>irreversível</strong>. Ao prosseguir com a exclusão:</p>
-      <ul class="modal-warning-list">
-        <li>Perderá o acesso permanente ao seu histórico de pedidos e rótulos favoritos.</li>
-        <li>O saldo de cashback e vantagens do Clube Agnello serão eliminados.</li>
-      </ul>
+<!-- 1) Confirmação -->
+<dialog id="modalDeletarConta" class="conta-modal" aria-labelledby="modal-deletar-titulo">
+  <form method="dialog" class="conta-modal-fechar-form">
+    <button class="conta-modal-x" aria-label="Fechar">&times;</button>
+  </form>
 
-      <!-- Aviso Importante sobre Pedidos em Andamento -->
-      <div class="modal-alert-warning">
-        <strong>Aviso Importante:</strong> Se você possuir algum pedido em andamento ou a caminho, é estritamente necessário que aguarde o recebimento do produto para finalizar o cancelamento da conta.
-      </div>
+  <span class="conta-modal-eyebrow">Zona de perigo</span>
+  <h2 id="modal-deletar-titulo">Deseja realmente excluir sua conta?</h2>
 
-      <!-- Formulário de Confirmação por E-mail -->
-      <form action="<c:url value='/deletar-conta'/>" method="POST" class="modal-form">
-        <div class="modal-input-group">
-          <label for="emailConfirmacao" class="modal-label-main">Confirme seu e-mail cadastrado:</label>
-          <span class="modal-label-sub">Para prosseguir, digite: <strong>${clienteLogado.email}</strong></span>
-          
-          <input type="email" id="emailConfirmacao" name="emailConfirmacao" 
-                 class="modal-input-field" required 
-                 placeholder="Digite o seu e-mail aqui"
-                 data-email-esperado="${clienteLogado.email}">
-                 
-          <!-- Caixa de mensagem unificada (serve para Copy/Paste e para Erros do Servidor) -->
-          <div id="avisoCopyPaste" class="modal-inline-warning" style="display: none;">
-            Por razões de segurança, não é permitido copiar e colar. Por favor, digite o seu e-mail manualmente.
-          </div>
-        </div>
-       
-        <div class="modal-actions">
-          <button type="button" id="btnCancelarModal" class="btn-secondary-agnello">Cancelar</button>
-          <button type="submit" class="btn-danger-agnello">Deletar Conta</button>
-        </div>
-      </form>
-    </div>
+  <p>Esta ação é <strong>irreversível</strong>. Ao continuar:</p>
+  <ul class="conta-modal-lista">
+    <li>Você perde o acesso ao histórico de pedidos e rótulos favoritos.</li>
+    <li>O saldo de cashback e as vantagens do Clube Agnello são eliminados.</li>
+  </ul>
+
+  <div class="conta-modal-aviso">
+    <strong>Pedidos em andamento:</strong> se tiver algum pedido a caminho,
+    aguarde a entrega antes de excluir a conta.
   </div>
-</div>
+
+  <form action="${pageContext.request.contextPath}/deletar-conta" method="POST" class="modal-form" novalidate>
+    <label for="emailConfirmacao" class="conta-modal-label">Para confirmar, digite o seu e-mail:</label>
+    <span class="conta-modal-sub"><c:out value="${clienteLogado.email}" /></span>
+    <input type="email" id="emailConfirmacao" name="emailConfirmacao" class="conta-modal-input"
+           autocomplete="off" required placeholder="Digite o seu e-mail"
+           data-email-esperado="<c:out value='${clienteLogado.email}' />"
+           aria-describedby="avisoCopyPaste">
+    <p id="avisoCopyPaste" class="conta-modal-erro" role="alert" hidden></p>
+
+    <div class="conta-modal-acoes">
+      <button type="button" id="btnCancelarModal" class="conta-btn-secundario">Cancelar</button>
+      <button type="submit" class="conta-btn-perigo" id="btnConfirmarExclusao" disabled>Excluir conta</button>
+    </div>
+  </form>
+</dialog>
+
+<!-- 2) Sucesso -->
+<dialog id="modalSucessoDelecao" class="conta-modal conta-modal--sucesso" aria-labelledby="modal-sucesso-titulo">
+  <div class="conta-modal-icone" aria-hidden="true">✓</div>
+  <h2 id="modal-sucesso-titulo">Conta excluída</h2>
+  <p>Lamentamos ver você partir. Enviamos um e-mail de confirmação com os detalhes.</p>
+  <p class="conta-modal-redirect"><span class="spinner-dot" aria-hidden="true"></span>
+    Voltando para a página inicial em <span id="segundos-saida">4</span> s…</p>
+</dialog>
