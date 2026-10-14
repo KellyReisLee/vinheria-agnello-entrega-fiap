@@ -1,0 +1,577 @@
+/* ==========================================================================
+   PÁGINA DO PRODUTO (WEB-INF/views/produto.jsp)
+   Desktop: foto | informações · Telemóvel: tudo numa coluna + barra de compra fixa.
+   Os cards de "Você também pode gostar" usam o visual de sections/_vitrini.css.
+   ========================================================================== */
+@import url('./sections/_header.css');
+@import url('./sections/_buttons.css');
+@import url('./sections/_vitrini.css');
+@import url('./sections/_footer-completed.css');
+@import url('./sections/_carrinho.css');
+@import url('./sections/_chat.css');
+
+.pdp-body {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+.pdp-main {
+  flex: 1;
+  width: 100%;
+  max-width: 1250px;
+  margin: 0 auto;
+  padding: calc(var(--header-height) + 1.5rem) var(--page-gutter) clamp(2rem, 5vw, 3rem);
+}
+
+/* ---------- Trilha ---------- */
+.pdp-trilha ol {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  margin-bottom: clamp(1.25rem, 3vw, 2rem);
+  list-style: none;
+  color: var(--text-muted);
+  font-size: 0.83rem;
+}
+
+.pdp-trilha li + li::before {
+  content: '›';
+  margin-right: 0.4rem;
+  opacity: 0.6;
+}
+
+.pdp-trilha a {
+  color: var(--text-muted);
+  text-decoration: none;
+}
+
+.pdp-trilha a:hover {
+  color: var(--primary-wine);
+}
+
+.pdp-trilha li[aria-current] {
+  color: var(--text-charcoal);
+  font-weight: 600;
+}
+
+/* ---------- Bloco principal ---------- */
+.pdp-produto {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  align-items: start;
+  gap: clamp(2rem, 5vw, 4.5rem);
+}
+
+.pdp-galeria {
+  position: sticky;
+  top: calc(var(--header-height) + 1.5rem);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  aspect-ratio: 1 / 1;
+  padding: clamp(1.5rem, 4vw, 3rem);
+  border-radius: 16px;
+  background:
+    radial-gradient(circle at 50% 70%, rgba(255, 255, 255, 0.9), transparent 60%),
+    #F2EEE6;
+  overflow: hidden;
+}
+
+.pdp-galeria img {
+  max-height: 100%;
+  width: auto;
+  object-fit: contain;
+  filter: drop-shadow(0 22px 26px rgba(46, 12, 23, 0.22));
+  transition: transform 0.5s ease;
+}
+
+.pdp-galeria:hover img {
+  transform: scale(1.03);
+}
+
+.pdp-selo {
+  position: absolute;
+  top: 1rem;
+  left: 1rem;
+  padding: 0.35rem 0.75rem;
+  border-radius: 999px;
+  background: var(--primary-wine);
+  color: #FFFFFF;
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.3px;
+}
+
+.pdp-selo--esgotado {
+  background: #6B6567;
+}
+
+.pdp-info {
+  padding-top: 0.5rem;
+}
+
+.pdp-meta {
+  display: block;
+  margin-bottom: 0.6rem;
+  color: #A8861F;
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+}
+
+.pdp-nome {
+  color: var(--primary-wine);
+  font-size: clamp(1.9rem, 1.4rem + 2vw, 2.7rem);
+  line-height: 1.15;
+  text-wrap: balance;
+}
+
+.pdp-pontuacao {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  margin-top: 0.9rem;
+  padding: 0.35rem 0.75rem;
+  border: 1px solid rgba(212, 175, 55, 0.5);
+  border-radius: 999px;
+  background: rgba(212, 175, 55, 0.08);
+  color: var(--text-charcoal);
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+/* ---------- Preços ---------- */
+.pdp-precos {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  margin: 1.75rem 0 1.25rem;
+  padding-bottom: 1.5rem;
+  border-bottom: 1px solid var(--border-soft);
+}
+
+.pdp-preco-antigo {
+  color: var(--text-muted);
+  font-size: 0.95rem;
+  text-decoration: line-through;
+}
+
+.pdp-preco {
+  color: var(--text-charcoal);
+  font-size: clamp(2rem, 1.7rem + 1.2vw, 2.5rem);
+  font-weight: 700;
+  line-height: 1.1;
+  letter-spacing: -0.5px;
+}
+
+.pdp-parcelas {
+  color: var(--text-muted);
+  font-size: 0.93rem;
+}
+
+.pdp-pix {
+  display: inline-flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  margin-top: 0.35rem;
+  color: #24553A;
+  font-size: 0.95rem;
+}
+
+.pdp-pix-tag {
+  padding: 0.1rem 0.5rem;
+  border-radius: 999px;
+  background: #E3F1E6;
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+/* ---------- Estoque e compra ---------- */
+.pdp-estoque {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+  color: #24553A;
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+.pdp-ponto {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #2F8F55;
+  box-shadow: 0 0 0 4px rgba(47, 143, 85, 0.15);
+}
+
+.pdp-estoque--esgotado {
+  color: #8C2F2F;
+}
+
+.pdp-compra {
+  display: flex;
+  gap: 0.75rem;
+}
+
+.pdp-qtd {
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+  border: 1px solid #DDD3C5;
+  border-radius: 10px;
+  background: #FFFFFF;
+}
+
+.pdp-qtd-btn {
+  width: 44px;
+  height: 54px;
+  border: none;
+  background: transparent;
+  color: var(--primary-wine);
+  font-size: 1.3rem;
+}
+
+.pdp-qtd-btn:disabled {
+  color: #C9C2B8;
+  cursor: not-allowed;
+}
+
+.pdp-qtd-valor {
+  width: 2.75rem;
+  height: 54px;
+  border: none;
+  background: transparent;
+  font-size: 1.05rem;
+  font-weight: 600;
+  text-align: center;
+  -moz-appearance: textfield;
+  appearance: textfield;
+}
+
+.pdp-qtd-valor::-webkit-inner-spin-button,
+.pdp-qtd-valor::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+.pdp-qtd-valor:focus {
+  outline: none;
+}
+
+.pdp-qtd:focus-within {
+  border-color: var(--accent-gold);
+  box-shadow: 0 0 0 3px rgba(212, 175, 55, 0.18);
+}
+
+.pdp-btn-comprar {
+  flex: 1;
+  min-height: 56px;
+  padding: 0 1.5rem;
+  border: none;
+  border-radius: 10px;
+  background: linear-gradient(135deg, #6E2236, var(--primary-wine-dark));
+  color: #FFFFFF;
+  font-size: 1rem;
+  font-weight: 600;
+  box-shadow: 0 10px 22px rgba(74, 21, 37, 0.25);
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.pdp-btn-comprar:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 14px 28px rgba(74, 21, 37, 0.3);
+}
+
+.pdp-btn-comprar.adicionado {
+  background: #2F6B47;
+}
+
+.pdp-btn-secundario {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  min-height: 54px;
+  border: 1px solid var(--primary-wine);
+  border-radius: 10px;
+  color: var(--primary-wine);
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.pdp-btn-secundario:hover {
+  background: var(--primary-wine);
+  color: #FFFFFF;
+}
+
+.pdp-garantias {
+  display: grid;
+  gap: 0.85rem;
+  margin-top: 1.75rem;
+  padding: 1.25rem;
+  border: 1px solid var(--border-soft);
+  border-radius: 12px;
+  background: #FFFFFF;
+  list-style: none;
+  font-size: 0.9rem;
+  line-height: 1.5;
+}
+
+.pdp-garantias li {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  color: var(--text-muted);
+}
+
+.pdp-garantias img {
+  flex-shrink: 0;
+  margin-top: 0.1rem;
+}
+
+.pdp-garantias strong {
+  color: var(--text-charcoal);
+}
+
+.pdp-garantias a {
+  color: var(--primary-wine);
+  font-weight: 600;
+}
+
+/* ---------- Descrição e ficha técnica ---------- */
+.pdp-detalhes {
+  display: grid;
+  grid-template-columns: minmax(0, 1.2fr) minmax(0, 0.8fr);
+  gap: clamp(2rem, 5vw, 4rem);
+  margin-top: clamp(3rem, 7vw, 5rem);
+  padding-top: clamp(2.5rem, 5vw, 3.5rem);
+  border-top: 1px solid var(--border-soft);
+}
+
+.pdp-detalhes h2 {
+  margin-bottom: 1rem;
+  color: var(--primary-wine);
+  font-size: clamp(1.4rem, 1.2rem + 0.8vw, 1.8rem);
+}
+
+.pdp-descricao > p {
+  max-width: 65ch;
+  color: var(--text-charcoal);
+  font-size: 1.02rem;
+  line-height: 1.8;
+  white-space: pre-line;           /* respeita as quebras de linha vindas da base de dados */
+}
+
+.pdp-dica {
+  margin-top: 1.75rem;
+  padding: 1.1rem 1.25rem;
+  border-left: 3px solid var(--accent-gold);
+  border-radius: 0 10px 10px 0;
+  background: rgba(212, 175, 55, 0.08);
+}
+
+.pdp-dica strong {
+  display: block;
+  margin-bottom: 0.25rem;
+  color: var(--primary-wine);
+  font-family: var(--font-heading);
+  font-size: 1.05rem;
+}
+
+.pdp-dica p {
+  color: var(--text-charcoal);
+  font-size: 0.95rem;
+  line-height: 1.65;
+}
+
+.pdp-ficha dl {
+  border: 1px solid var(--border-soft);
+  border-radius: 12px;
+  background: #FFFFFF;
+  overflow: hidden;
+}
+
+.pdp-ficha dl div {
+  display: grid;
+  grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
+  gap: 1rem;
+  padding: 0.85rem 1.1rem;
+  font-size: 0.92rem;
+}
+
+.pdp-ficha dl div:nth-child(odd) {
+  background: #FAF8F4;
+}
+
+.pdp-ficha dt {
+  color: var(--text-muted);
+}
+
+.pdp-ficha dd {
+  color: var(--text-charcoal);
+  font-weight: 600;
+}
+
+/* ---------- Relacionados ---------- */
+.pdp-relacionados {
+  max-width: none;
+  margin-top: clamp(2rem, 5vw, 3rem);
+  padding-inline: 0;
+  padding-bottom: 0;
+}
+
+.pdp-relacionados .product-name a {
+  color: inherit;
+  text-decoration: none;
+}
+
+.pdp-relacionados .product-name a::after {
+  /* o card inteiro fica clicável, mas o botão "Selecionar" continua por cima */
+  content: '';
+  position: absolute;
+  inset: 0;
+}
+
+.pdp-relacionados .agnello-btn-comprar {
+  position: relative;
+  z-index: 1;
+}
+
+.pdp-relacionados .agnello-btn-comprar:disabled {
+  background-color: #D9D4D0;
+  color: #6B6567;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* ---------- Vinho não encontrado ---------- */
+.pdp-vazio {
+  max-width: 520px;
+  margin: clamp(2rem, 8vw, 5rem) auto;
+  text-align: center;
+}
+
+.pdp-vazio-icone {
+  display: block;
+  margin-bottom: 1rem;
+  font-size: 3rem;
+}
+
+.pdp-vazio h1 {
+  color: var(--primary-wine);
+  font-size: clamp(1.7rem, 1.4rem + 1.2vw, 2.2rem);
+  text-wrap: balance;
+}
+
+.pdp-vazio p {
+  margin: 0.9rem 0 1.75rem;
+  color: var(--text-muted);
+  line-height: 1.7;
+}
+
+/* ---------- Barra de compra fixa (telemóvel) ---------- */
+.pdp-barra {
+  display: none;
+}
+
+/* ==========================================================================
+   RESPONSIVO
+   ========================================================================== */
+@media (max-width: 900px) {
+  .pdp-produto,
+  .pdp-detalhes {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .pdp-galeria {
+    position: relative;
+    top: auto;
+    max-width: 520px;
+    width: 100%;
+    margin-inline: auto;
+    aspect-ratio: 4 / 3.4;
+  }
+
+  .pdp-info {
+    padding-top: 0;
+  }
+}
+
+@media (max-width: 600px) {
+  .pdp-galeria {
+    aspect-ratio: 1 / 1;
+  }
+
+  .pdp-compra {
+    flex-direction: column;
+  }
+
+  .pdp-qtd {
+    justify-content: space-between;
+  }
+
+  .pdp-qtd-btn {
+    width: 56px;
+  }
+
+  .pdp-qtd-valor {
+    flex: 1;
+  }
+
+  /* Barra fixa no fundo do ecrã com preço e botão.
+     O produto.js mostra-a quando o botão principal sai do ecrã. */
+  .pdp-barra {
+    position: fixed;
+    inset: auto 0 0 0;
+    z-index: calc(var(--z-header) - 1);
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 0.75rem var(--page-gutter) calc(0.75rem + env(safe-area-inset-bottom));
+    border-top: 1px solid var(--border-soft);
+    background: rgba(255, 255, 255, 0.97);
+    box-shadow: 0 -8px 24px rgba(0, 0, 0, 0.08);
+    transform: translateY(110%);
+    visibility: hidden;
+    transition: transform 0.3s ease, visibility 0.3s;
+  }
+
+  .pdp-barra.visivel {
+    transform: none;
+    visibility: visible;
+  }
+
+  .pdp-barra-info {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    flex: 1;
+  }
+
+  .pdp-barra-nome {
+    overflow: hidden;
+    color: var(--text-muted);
+    font-size: 0.8rem;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+  }
+
+  .pdp-barra-info strong {
+    font-size: 1.1rem;
+  }
+
+  .pdp-barra .pdp-btn-comprar {
+    flex: 0 0 auto;
+    min-height: 48px;
+  }
+
+  /* O botão do chat sobe para não ficar por baixo da barra */
+  body:has(.pdp-barra.visivel) .chat-widget-container {
+    bottom: calc(80px + env(safe-area-inset-bottom));
+  }
+}
