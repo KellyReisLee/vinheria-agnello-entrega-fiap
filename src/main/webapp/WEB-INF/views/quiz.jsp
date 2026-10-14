@@ -16,7 +16,6 @@
   <link rel="stylesheet" href="${pageContext.request.contextPath}/css/home.css">
   <link rel="stylesheet" href="${pageContext.request.contextPath}/css/animations.css">
   <link rel="stylesheet" href="${pageContext.request.contextPath}/css/sections/_chat.css">
-  <link rel="stylesheet" href="${pageContext.request.contextPath}/css/footer.css">
    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/quiz.css">
   
   <!-- Importação das fontes do Google Fonts -->
@@ -114,7 +113,6 @@
 
   <!-- Scripts com Context Path -->
   <script src="${pageContext.request.contextPath}/js/pages/quiz.js"></script>
-  <script src="${pageContext.request.contextPath}/js/componentes.js"></script>
   <script src="${pageContext.request.contextPath}/js/components/carrinho.js"></script>
   <script src="${pageContext.request.contextPath}/js/components/chat.js"></script>
 

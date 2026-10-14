@@ -4,6 +4,8 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="icon" type="image/png" href="<c:url value='/assets/images/logo-bg-white.png'/>">
   <title>Redefinir Senha — Vinheria Agnello</title>
   <link rel="stylesheet" href="<c:url value='/css/variables.css'/>">
   <link rel="stylesheet" href="<c:url value='/css/global.css'/>">

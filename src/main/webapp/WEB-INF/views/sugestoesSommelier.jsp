@@ -126,7 +126,6 @@
   <!-- SCRIPTS -->
   <script src="<c:url value='/js/pages/sugestoes-sommelier.js'/>"></script>
   <script src="<c:url value='/js/components/carrinho.js'/>"></script>
-  <script src="<c:url value='/js/components/componentes.js'/>"></script>
   <script src="<c:url value='/js/components/chat.js'/>"></script>
 
 </body>

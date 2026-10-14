@@ -1,44 +1,63 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <%@ taglib prefix="c" uri="jakarta.tags.core" %>
-<header class="navbar">
-  <a href="${pageContext.request.contextPath}/home" class="agnello-logo-link" style="text-decoration: none; display: inline-flex; align-items: center;">
-    <div class="logo">
-      <img class="logo-img" src="${pageContext.request.contextPath}/assets/images/logo-no-bg.png" alt="Ícone Vinheria Agnello">
-      <div>
+<%-- Caminho do Servlet que encaminhou para esta página (ex.: /catalogo).
+     Usado para marcar o link ativo do menu. --%>
+<c:set var="ctx" value="${pageContext.request.contextPath}" />
+<c:set var="rotaAtual" value="${requestScope['jakarta.servlet.forward.servlet_path']}" />
+
+<%-- Disponibiliza o context path aos scripts em TODAS as páginas com header --%>
+<script>window.CONTEXT_PATH = window.CONTEXT_PATH || '${ctx}';</script>
+
+<header class="navbar" id="site-navbar">
+  <a href="${ctx}/home" class="agnello-logo-link" aria-label="Vinheria Agnello — página inicial">
+    <span class="logo">
+      <img class="logo-img" src="${ctx}/assets/images/logo-no-bg.png" alt="" width="22" height="56">
+      <span class="logo-text">
         <span class="logo-title">VINHERIA AGNELLO</span>
         <span class="logo-subtitle">DESDE 1978</span>
-      </div>
-    </div>
+      </span>
+    </span>
   </a>
-  
-  <nav class="nav-links">
-    <a href="${pageContext.request.contextPath}/home">Nossa História</a>
-    <a href="${pageContext.request.contextPath}/catalogo">Nossos Rótulos</a>
-    <a href="${pageContext.request.contextPath}/quiz" id="open-quiz">✨ Sommelier Virtual</a>
-  </nav>
-  
-  <div class="nav-icons">
-    <button class="icon-btn"><img src="${pageContext.request.contextPath}/assets/icons/search.svg" alt="lupa"></button>
 
-   <!-- Verificação se o cliente está logado na Sessão -->
-  
+  <nav class="nav-links" id="nav-principal" aria-label="Navegação principal">
+    <a href="${ctx}/home" ${rotaAtual == '/home' or empty rotaAtual ? 'class="active" aria-current="page"' : ''}>Nossa História</a>
+    <a href="${ctx}/catalogo" ${rotaAtual == '/catalogo' ? 'class="active" aria-current="page"' : ''}>Nossos Rótulos</a>
+    <a href="${ctx}/quiz" id="open-quiz" ${rotaAtual == '/quiz' or rotaAtual == '/sugestoes' ? 'class="active" aria-current="page"' : ''}>✨ Sommelier Virtual</a>
+    <a href="${ctx}/catalogo#input-busca" class="nav-link-mobile">Pesquisar vinhos</a>
+  </nav>
+
+  <div class="nav-icons">
+    <a href="${ctx}/catalogo#input-busca" class="icon-btn search-btn" aria-label="Pesquisar vinhos" title="Pesquisar">
+      <img src="${ctx}/assets/icons/search.svg" alt="" width="22" height="22">
+    </a>
+
+    <%-- Ícone de conta muda conforme o cliente esteja ou não autenticado --%>
     <c:choose>
-        <c:when test="${not empty sessionScope.clienteLogado or not empty sessionScope.usuarioLogado}">
-            <!-- URL limpa apontando para a área pessoal -->
-            <a href="${pageContext.request.contextPath}/area-pessoal" class="icon-btn" aria-label="Área Pessoal" title="Minha Conta">
-                <img src="${pageContext.request.contextPath}/assets/icons/user-check.svg" alt="perfil verificado">
-            </a>
-        </c:when>
-        <c:otherwise>
-            <!-- Se NÃO estiver logado, redireciona para a página de login -->
-            <a href="${pageContext.request.contextPath}/login" class="icon-btn" aria-label="Entrar" title="Entrar / Cadastrar">
-                <img src="${pageContext.request.contextPath}/assets/icons/user.svg" alt="perfil">
-            </a>
-        </c:otherwise>
+      <c:when test="${not empty sessionScope.clienteLogado or not empty sessionScope.usuarioLogado}">
+        <a href="${ctx}/area-pessoal" class="icon-btn" aria-label="Minha conta" title="Minha conta">
+          <img src="${ctx}/assets/icons/user-check.svg" alt="" width="22" height="22">
+        </a>
+      </c:when>
+      <c:otherwise>
+        <a href="${ctx}/login" class="icon-btn" aria-label="Entrar ou criar conta" title="Entrar / Cadastrar">
+          <img src="${ctx}/assets/icons/user.svg" alt="" width="22" height="22">
+        </a>
+      </c:otherwise>
     </c:choose>
-    <button class="icon-btn cart-btn">
-      <img src="${pageContext.request.contextPath}/assets/icons/shopping-cart.svg" alt="carrinho">
-      <span class="cart-badge" style="display:none;">0</span>
+
+    <button type="button" class="icon-btn cart-btn" aria-label="Abrir carrinho" title="Carrinho">
+      <img src="${ctx}/assets/icons/shopping-cart.svg" alt="" width="22" height="22">
+      <span class="cart-badge" hidden>0</span>
+    </button>
+
+    <%-- Botão "hambúrguer": só aparece em ecrãs pequenos (ver _header.css) --%>
+    <button type="button" class="icon-btn menu-toggle" aria-label="Abrir menu"
+            aria-controls="nav-principal" aria-expanded="false">
+      <span class="menu-toggle-bar"></span>
+      <span class="menu-toggle-bar"></span>
+      <span class="menu-toggle-bar"></span>
     </button>
   </div>
 </header>
+<div class="nav-backdrop" hidden></div>
+<script src="${ctx}/js/components/header.js" defer></script>

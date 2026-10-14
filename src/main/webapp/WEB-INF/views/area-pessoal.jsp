@@ -16,7 +16,7 @@
 <link rel="stylesheet" href="<c:url value='/css/sections/_chat.css'/>">
 <link rel="stylesheet" href="<c:url value='/css/area-pessoal.css'/>">
 <link rel="stylesheet" href="<c:url value='/css/sections/_modal-deletar.css'/>">
-<link rel="stylesheet" href="<c:url value='/css/sections/_modal-delecao-sucesso.css'/>">
+<link rel="stylesheet" href="<c:url value='/css/sections/modal-delecao-sucesso.css'/>">
 <link
 	href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400..900;1,400..900&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap"
 	rel="stylesheet">
@@ -205,8 +205,6 @@
 		<div id="agnello-cart-body" class="agnello-cart-body"></div>
 	</div>
 
-	<script src="<c:url value='/js/catalogo.js'/>"></script>
-	<script src="<c:url value='/js/components/componentes.js'/>"></script>
 	<script src="<c:url value='/js/components/carrinho.js'/>"></script>
 	<script src="<c:url value='/js/components/chat.js'/>"></script>
 	<script src="<c:url value='/js/components/modal-deletar-conta.js'/>"></script>
