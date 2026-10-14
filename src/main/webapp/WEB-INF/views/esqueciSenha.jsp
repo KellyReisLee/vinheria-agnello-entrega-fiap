@@ -1,94 +1,91 @@
-<%@ page language="java" contentType="text/html; charset=UTF-8"
-	pageEncoding="UTF-8"%>
-<%@ taglib prefix="c" uri="jakarta.tags.core"%>
+<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
+<%@ taglib prefix="c" uri="jakarta.tags.core" %>
+<c:set var="ctx" value="${pageContext.request.contextPath}" />
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<link rel="icon" type="image/png" href="<c:url value='/assets/images/logo-bg-white.png'/>">
-<title>Recuperação de Senha — Vinheria Agnello</title>
-<link rel="stylesheet" href="<c:url value='/css/variables.css'/>">
-<link rel="stylesheet" href="<c:url value='/css/global.css'/>">
-<link rel="stylesheet" href="<c:url value='/css/esqueci-senha.css'/>">
-<link
-	href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400..900;1,400..900&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap"
-	rel="stylesheet">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Recuperar senha | Vinheria Agnello</title>
+  <jsp:include page="/WEB-INF/componentes/auth-head.jsp" />
 </head>
-<body class="agnello-login-body">
 
-	<!-- HEADER MODULAR -->
-	<jsp:include page="/WEB-INF/componentes/header.jsp" />
+<body class="auth-body">
+  <jsp:include page="/WEB-INF/componentes/header.jsp" />
 
-	<main class="login-split-container">
-		<div class="login-split-card">
+  <main class="auth-main" id="conteudo">
+    <div class="auth-card auth-card--narrow">
 
-			<!-- Coluna da Esquerda: Formulário de Recuperação -->
-			<div class="login-form-side">
-				<div class="form-header-top">
-					<span class="sub-tag">SEGURANÇA DA CONTA</span>
-					<h2>Recuperação de Senha</h2>
-					<p>Informe seu e-mail cadastrado para receber as instruções de
-						redefinição.</p>
-				</div>
+      <section class="auth-form-side" aria-labelledby="titulo-recuperar">
+        <span class="auth-eyebrow">Segurança da conta</span>
+        <h1 class="auth-title" id="titulo-recuperar">Recuperação de senha</h1>
+        <p class="auth-lead">Informe o e-mail da sua conta. Se ele estiver cadastrado,
+          enviaremos um link para criar uma nova senha.</p>
 
-				<c:if test="${not empty mensagemErro}">
-					<div class="alert alert-error">${mensagemErro}</div>
-				</c:if>
+        <c:if test="${not empty mensagemErro}">
+          <div class="auth-alert auth-alert--erro" role="alert">
+            <span class="auth-alert-icon" aria-hidden="true">!</span>
+            <div><c:out value="${mensagemErro}" /></div>
+          </div>
+        </c:if>
 
-				<c:if test="${not empty mensagemSucesso}">
-					<div class="agnello-simulation-box">
-						<div class="agnello-simulation-div">
-							<!-- Ícone à esquerda -->
-							<div class="simulation-icon">
-								<img
-									src="${pageContext.request.contextPath}/assets/icons/mail-check.svg"
-									alt="E-mail verificado">
-							</div>
+        <c:choose>
+          <c:when test="${not empty mensagemSucesso}">
+            <div class="auth-alert auth-alert--sucesso" role="status">
+              <span class="auth-alert-icon" aria-hidden="true">✓</span>
+              <div>
+                <strong>Verifique o seu e-mail</strong>
+                <c:out value="${mensagemSucesso}" />
+                O link é válido por 10 minutos. Confira também a pasta de spam.
+              </div>
+            </div>
+            <a href="${ctx}/login" class="auth-btn-outline">Voltar para o login</a>
+          </c:when>
 
-							<!-- Conteúdo à direita (Título, descrição e o botão/link embaixo) -->
-							<div class="simulation-content">
-								<strong>Instruções Geradas (Simulação)</strong>
-								<p>Link de recuperação gerado com sucesso!</p>
-								<div class="simulation-action-link">${mensagemSucesso}</div>
-							</div>
-						</div>
-					</div>
-				</c:if>
-				<form action="<c:url value='/esqueci-senha'/>" method="POST">
-					<div class="input-group">
-						<label for="email">E-mail</label> <input type="email" id="email"
-							name="email" required placeholder="seu@email.com">
-					</div>
+          <c:otherwise>
+            <form class="auth-form" action="${ctx}/esqueci-senha" method="POST" novalidate>
+              <div class="auth-field">
+                <label for="email">E-mail</label>
+                <input type="email" id="email" name="email" data-nome="o e-mail"
+                       value="<c:out value='${param.email}' />"
+                       placeholder="seu@email.com" autocomplete="email" inputmode="email"
+                       required autofocus aria-describedby="email-erro">
+                <span class="auth-field-erro" id="email-erro" aria-live="polite"></span>
+              </div>
 
-					<button type="submit" class="btn-primary">Enviar
-						Instruções</button>
-				</form>
+              <button type="submit" class="auth-btn-primary" data-texto-enviando="Enviando…">
+                <span>Enviar link de recuperação</span>
+              </button>
+            </form>
 
-				<div class="login-footer-back">
-					<a href="<c:url value='/login'/>">← Voltar para o Login</a>
-				</div>
-			</div>
+            <p class="auth-back"><a href="${ctx}/login">← Voltar para o login</a></p>
+          </c:otherwise>
+        </c:choose>
+      </section>
 
-			<!-- Coluna da Direita: Painel Institucional/Visual Agnello -->
-			<div class="login-brand-side">
-				<span class="brand-badge">CLUBE AGNELLO 1978</span>
-				<h3>A curadoria do seu acervo particular.</h3>
-				<p>Não se preocupe, recuperar o acesso à sua adega é rápido e
-					seguro. Continue desfrutando de rótulos exclusivos.</p>
+      <c:set var="brandBadge" scope="request" value="Clube Agnello 1978" />
+      <c:set var="brandTitulo" scope="request" value="A curadoria do seu acervo particular." />
+      <c:set var="brandTexto" scope="request" value="Não se preocupe: recuperar o acesso à sua adega é rápido e seguro." />
+      <c:set var="brandB1" scope="request" value="Acesso imediato ao histórico de pedidos" />
+      <c:set var="brandB2" scope="request" value="Link de uso único, válido por 10 minutos" />
+      <c:set var="brandB3" scope="request" value="Suporte especializado para apreciadores" />
+      <jsp:include page="/WEB-INF/componentes/auth-brand.jsp" />
+    </div>
+  </main>
 
-				<ul class="brand-benefits-list">
-					<li>✓ Acesso imediato ao histórico de pedidos</li>
-					<li>✓ Segurança avançada de dados</li>
-					<li>✓ Suporte especializado para apreciadores</li>
-				</ul>
-			</div>
+  <jsp:include page="/WEB-INF/componentes/footer.jsp" />
 
-		</div>
-	</main>
+  <div id="agnello-cart-overlay" class="agnello-cart-overlay"></div>
+  <div id="agnello-cart-drawer" class="agnello-cart-drawer">
+    <div class="agnello-cart-header">
+      <button type="button" id="agnello-cart-close" class="agnello-cart-back-btn">←</button>
+      <h2 id="agnello-cart-title">Carrinho (0)</h2>
+    </div>
+    <div id="agnello-cart-body" class="agnello-cart-body"></div>
+  </div>
 
-	<!-- FOOTER MODULAR -->
-	<jsp:include page="/WEB-INF/componentes/footer.jsp" />
-
+  <script src="${ctx}/js/pages/auth.js"></script>
+  <script src="${ctx}/js/components/carrinho.js"></script>
+  <script src="${ctx}/js/components/chat.js"></script>
 </body>
 </html>

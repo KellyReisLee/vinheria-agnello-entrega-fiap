@@ -1,171 +1,175 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <%@ taglib prefix="c" uri="jakarta.tags.core" %>
+<c:set var="ctx" value="${pageContext.request.contextPath}" />
+<%-- Se o servidor devolver o formulário com erro, mantém o tipo escolhido (PF/PJ) --%>
+<c:set var="tipo" value="${param.tipo_cliente eq 'PJ' ? 'PJ' : 'PF'}" />
 <!DOCTYPE html>
 <html lang="pt-BR">
-
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Criar Conta — Vinheria Agnello</title>
-
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/variables.css">
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/global.css">
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/cadastro.css">
-
-    <link rel="icon" type="image/png" href="${pageContext.request.contextPath}/assets/images/logo-bg-white.png">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400..900;1,400..900&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Criar conta | Vinheria Agnello</title>
+  <jsp:include page="/WEB-INF/componentes/auth-head.jsp" />
 </head>
 
-<body class="agnello-login-body">
-
-  <!-- HEADER MODULAR (Protegido em WEB-INF) -->
+<body class="auth-body">
   <jsp:include page="/WEB-INF/componentes/header.jsp" />
-  
-    <main class="agnello-cadastro-main">
-        <div class="agnello-cadastro-container">
 
-            <!-- Lado Esquerdo: Formulário de Cadastro -->
-            <div class="agnello-cadastro-box">
-                <div class="cadastro-header-text">
-                    <h1>Comece agora a viver o melhor do mundo do vinho!</h1>
-                    <p>Só aqui você encontra os rótulos ideais para todos os seus momentos.</p>
-                </div>
+  <main class="auth-main" id="conteudo">
+    <div class="auth-card">
 
-                <!-- Exibição de Erro caso ocorra -->
-                <c:if test="${not empty erro}">
-                    <div class="alert-error" style="background: #f8d7da; color: #721c24; padding: 10px; margin-bottom: 15px; border-radius: 4px;">
-                        ${erro}
-                    </div>
-                </c:if>
+      <section class="auth-form-side" aria-labelledby="titulo-cadastro">
+        <span class="auth-eyebrow">Nova conta</span>
+        <h1 class="auth-title" id="titulo-cadastro">Comece agora a viver o melhor do mundo do vinho</h1>
+        <p class="auth-lead">Só aqui você encontra os rótulos ideais para todos os seus momentos.</p>
 
-                <!-- Exibição de Sucesso ao Cadastrar + Timer de Redirecionamento -->
-                <c:if test="${not empty sucesso}">
-                    <div class="alert-success" style="background: #d4edda; color: #155724; padding: 10px; margin-bottom: 15px; border-radius: 4px;">
-                        ${sucesso}
-                    </div>
-                    
-                    <script>
-                        // Redireciona para o login após 4 segundos
-                        setTimeout(function() {
-                            window.location.href = "${pageContext.request.contextPath}/login";
-                        }, 4000);
-                    </script>
-                </c:if>
+        <c:if test="${not empty erro}">
+          <div class="auth-alert auth-alert--erro" role="alert">
+            <span class="auth-alert-icon" aria-hidden="true">!</span>
+            <div><c:out value="${erro}" /></div>
+          </div>
+        </c:if>
 
-                <!-- Abas Pessoa Física / Jurídica -->
-                <div class="signup-tabs">
-                    <button type="button" class="tab-btn active" data-target="pf-form">PESSOA FÍSICA</button>
-                    <button type="button" class="tab-btn" data-target="pj-form">PESSOA JURÍDICA</button>
-                </div>
+        <c:choose>
+          <%-- Sucesso: mostra só a confirmação (sem o formulário) e leva ao login --%>
+          <c:when test="${not empty sucesso}">
+            <div class="auth-alert auth-alert--sucesso" role="status"
+                 data-redirecionar="${ctx}/login" data-segundos="8">
+              <span class="auth-alert-icon" aria-hidden="true">✓</span>
+              <div>
+                <strong>Conta criada!</strong>
+                <c:out value="${sucesso}" />
+                <br>Abrindo o login em <span data-segundos-restantes>8</span> segundos…
+              </div>
+            </div>
+            <a href="${ctx}/login" class="auth-btn-outline">Ir para o login agora</a>
+          </c:when>
 
-                <!-- Formulário Único Unificado com Senha no Final -->
-                <form id="cadastro-form" class="agnello-form" action="${pageContext.request.contextPath}/cadastro" method="POST">
-                    <input type="hidden" id="tipo_cliente" name="tipo_cliente" value="PF">
-
-                    <div class="input-group-login">
-                        <label for="email">E-mail</label>
-                        <input type="email" id="email" name="email" placeholder="seu@email.com" required>
-                    </div>
-
-                    <div class="input-group-login">
-                        <label for="telefone">Telefone</label>
-                        <input type="tel" id="telefone" name="telefone" placeholder="(11) 99999-9999" required>
-                    </div>
-
-                    <!-- Campos específicos de Pessoa Física -->
-                    <div id="campos-pf" class="tipo-cliente-campos">
-                        <div class="input-group-login">
-                            <label for="nome">Nome</label>
-                            <input type="text" id="nome" name="nome" placeholder="Seu nome" required>
-                        </div>
-
-                        <div class="input-group-login">
-                            <label for="sobrenome">Sobrenome</label>
-                            <input type="text" id="sobrenome" name="sobrenome" placeholder="Seu sobrenome" required>
-                        </div>
-
-                        <div class="input-group-login">
-                            <label for="cpf">CPF</label>
-                            <input type="text" id="cpf" name="cpf" placeholder="000.000.000-00" required>
-                        </div>
-                    </div>
-
-                    <!-- Campos específicos de Pessoa Jurídica (inicialmente ocultos) -->
-                    <div id="campos-pj" class="tipo-cliente-campos" style="display: none;">
-                        <div class="input-group-login">
-                            <label for="razao_social">Razão Social</label>
-                            <input type="text" id="razao_social" name="razao_social" placeholder="Nome da Empresa LTDA">
-                        </div>
-
-                        <div class="input-group-login">
-                            <label for="cnpj">CNPJ</label>
-                            <input type="text" id="cnpj" name="cnpj" placeholder="00.000.000/0001-00">
-                        </div>
-                    </div>
-
-                    <!-- Senha posicionada por último, antes do botão de envio -->
-                    <div class="input-group-login">
-                        <label for="senha">Senha</label>
-                        <input type="password" id="senha" name="senha" placeholder="Mínimo 6 caracteres" minlength="6" required>
-                    </div>
-
-                    <button type="submit" class="btn-agnello-primary">Cadastrar</button>
-
-                    <div class="login-divider">
-                        <span>já possui conta?</span>
-                    </div>
-
-                    <a href="${pageContext.request.contextPath}/login" class="btn-agnello-outline">Fazer Login</a>
-                </form>
+          <c:otherwise>
+            <div class="auth-tabs" role="tablist" aria-label="Tipo de conta">
+              <button type="button" class="auth-tab" role="tab" id="aba-pf" data-tipo="PF"
+                      aria-controls="painel-pf" aria-selected="${tipo eq 'PF'}">Pessoa física</button>
+              <button type="button" class="auth-tab" role="tab" id="aba-pj" data-tipo="PJ"
+                      aria-controls="painel-pj" aria-selected="${tipo eq 'PJ'}">Pessoa jurídica</button>
             </div>
 
-            <!-- Lado Direito: Banner de Destaque -->
-            <div class="agnello-promo-box">
-                <div class="promo-content">
-                    <span class="promo-badge">AGNELLO BOX</span>
-                    <h2>O privilégio de ter uma adega particular em casa.</h2>
-                    <p>Faça parte do nosso círculo fechado de apreciadores e receba rótulos selecionados pelo Sr. Giulio e pela Bianca.</p>
+            <form id="cadastro-form" class="auth-form" action="${ctx}/cadastro" method="POST" novalidate>
+              <input type="hidden" id="tipo_cliente" name="tipo_cliente" value="${tipo}">
 
-                    <ul class="promo-benefits">
-                        <li>
-                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"></polyline></svg>
-                            Cashback e vantagens exclusivas em todas as compras
-                        </li>
-                        <li>
-                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"></polyline></svg>
-                            Acesso antecipado a safras raras e limitadas
-                        </li>
-                        <li>
-                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"></polyline></svg>
-                            Frete especial e embalagem térmica garantida
-                        </li>
-                    </ul>
+              <%-- Campos de Pessoa Física --%>
+              <div class="auth-panel" id="painel-pf" role="tabpanel" aria-labelledby="aba-pf" ${tipo eq 'PJ' ? 'hidden' : ''}>
+                <div class="auth-grid-2">
+                  <div class="auth-field">
+                    <label for="nome">Nome</label>
+                    <input type="text" id="nome" name="nome" data-nome="o nome" autocomplete="given-name"
+                           value="<c:out value='${param.nome}' />" required aria-describedby="nome-erro">
+                    <span class="auth-field-erro" id="nome-erro" aria-live="polite"></span>
+                  </div>
+                  <div class="auth-field">
+                    <label for="sobrenome">Sobrenome</label>
+                    <input type="text" id="sobrenome" name="sobrenome" data-nome="o sobrenome" autocomplete="family-name"
+                           value="<c:out value='${param.sobrenome}' />" required aria-describedby="sobrenome-erro">
+                    <span class="auth-field-erro" id="sobrenome-erro" aria-live="polite"></span>
+                  </div>
                 </div>
-            </div>
+                <div class="auth-field">
+                  <label for="cpf">CPF</label>
+                  <input type="text" id="cpf" name="cpf" data-nome="o CPF" data-mascara="cpf"
+                         inputmode="numeric" placeholder="000.000.000-00" maxlength="14"
+                         value="<c:out value='${param.cpf}' />" required aria-describedby="cpf-erro">
+                  <span class="auth-field-erro" id="cpf-erro" aria-live="polite"></span>
+                </div>
+              </div>
 
-        </div>
-    </main>
-    
-  <!-- CARRINHO DRAWER -->
+              <%-- Campos de Pessoa Jurídica --%>
+              <div class="auth-panel" id="painel-pj" role="tabpanel" aria-labelledby="aba-pj" ${tipo eq 'PF' ? 'hidden' : ''}>
+                <div class="auth-field">
+                  <label for="razao_social">Razão social</label>
+                  <input type="text" id="razao_social" name="razao_social" data-nome="a razão social"
+                         autocomplete="organization" placeholder="Nome da Empresa LTDA"
+                         value="<c:out value='${param.razao_social}' />" required aria-describedby="razao_social-erro">
+                  <span class="auth-field-erro" id="razao_social-erro" aria-live="polite"></span>
+                </div>
+                <div class="auth-field">
+                  <label for="cnpj">CNPJ</label>
+                  <input type="text" id="cnpj" name="cnpj" data-nome="o CNPJ" data-mascara="cnpj"
+                         inputmode="numeric" placeholder="00.000.000/0001-00" maxlength="18"
+                         value="<c:out value='${param.cnpj}' />" required aria-describedby="cnpj-erro">
+                  <span class="auth-field-erro" id="cnpj-erro" aria-live="polite"></span>
+                </div>
+              </div>
+
+              <%-- Campos comuns --%>
+              <div class="auth-grid-2">
+                <div class="auth-field">
+                  <label for="email">E-mail</label>
+                  <input type="email" id="email" name="email" data-nome="o e-mail" autocomplete="email"
+                         inputmode="email" placeholder="seu@email.com"
+                         value="<c:out value='${param.email}' />" required aria-describedby="email-erro">
+                  <span class="auth-field-erro" id="email-erro" aria-live="polite"></span>
+                </div>
+                <div class="auth-field">
+                  <label for="telefone">Telefone</label>
+                  <input type="tel" id="telefone" name="telefone" data-nome="o telefone" data-mascara="telefone"
+                         autocomplete="tel-national" placeholder="(11) 99999-9999" maxlength="15"
+                         value="<c:out value='${param.telefone}' />" required aria-describedby="telefone-erro">
+                  <span class="auth-field-erro" id="telefone-erro" aria-live="polite"></span>
+                </div>
+              </div>
+
+              <div class="auth-field">
+                <label for="senha">Senha</label>
+                <div class="auth-input-wrap">
+                  <input type="password" id="senha" name="senha" data-nome="a senha" minlength="6"
+                         autocomplete="new-password" required data-forca="forca-senha"
+                         aria-describedby="forca-senha-texto senha-erro">
+                  <button type="button" class="auth-toggle-senha" aria-controls="senha"
+                          aria-label="Mostrar senha" aria-pressed="false">
+                    <img src="${ctx}/assets/icons/eye-closed.svg" alt="" width="20" height="20">
+                  </button>
+                </div>
+                <div class="auth-forca" id="forca-senha" data-nivel="0" aria-hidden="true">
+                  <span></span><span></span><span></span><span></span>
+                </div>
+                <span class="auth-hint" id="forca-senha-texto">Mínimo de 6 caracteres.</span>
+                <span class="auth-field-erro" id="senha-erro" aria-live="polite"></span>
+              </div>
+
+              <button type="submit" class="auth-btn-primary" data-texto-enviando="Criando conta…">
+                <span>Criar conta</span>
+              </button>
+              <p class="auth-termos">Ao criar a conta, você confirma que tem 18 anos ou mais.</p>
+            </form>
+
+            <div class="auth-divider">já possui conta?</div>
+            <a href="${ctx}/login" class="auth-btn-outline">Fazer login</a>
+          </c:otherwise>
+        </c:choose>
+      </section>
+
+      <c:set var="brandBadge" scope="request" value="Agnello Box" />
+      <c:set var="brandTitulo" scope="request" value="O privilégio de ter uma adega particular em casa." />
+      <c:set var="brandTexto" scope="request" value="Faça parte do nosso círculo de apreciadores e receba rótulos selecionados pelo Sr. Giulio e pela Bianca." />
+      <c:set var="brandB1" scope="request" value="Cashback e vantagens exclusivas em todas as compras" />
+      <c:set var="brandB2" scope="request" value="Acesso antecipado a safras raras e limitadas" />
+      <c:set var="brandB3" scope="request" value="Frete especial e embalagem térmica garantida" />
+      <jsp:include page="/WEB-INF/componentes/auth-brand.jsp" />
+    </div>
+  </main>
+
+  <jsp:include page="/WEB-INF/componentes/footer.jsp" />
+
   <div id="agnello-cart-overlay" class="agnello-cart-overlay"></div>
   <div id="agnello-cart-drawer" class="agnello-cart-drawer">
     <div class="agnello-cart-header">
-      <button id="agnello-cart-close" class="agnello-cart-back-btn">←</button>
+      <button type="button" id="agnello-cart-close" class="agnello-cart-back-btn">←</button>
       <h2 id="agnello-cart-title">Carrinho (0)</h2>
     </div>
     <div id="agnello-cart-body" class="agnello-cart-body"></div>
   </div>
 
-  <!-- FOOTER MODULAR (Protegido em WEB-INF) -->
-  <jsp:include page="/WEB-INF/componentes/footer.jsp" />
-
-    <!-- Scripts com Caminhos Dinâmicos -->
-    <script src="${pageContext.request.contextPath}/js/components/carrinho.js"></script>
-    <script src="${pageContext.request.contextPath}/js/components/chat.js"></script>
-    <script src="${pageContext.request.contextPath}/js/pages/cadastro.js"></script>
-
+  <script src="${ctx}/js/pages/auth.js"></script>
+  <script src="${ctx}/js/components/carrinho.js"></script>
+  <script src="${ctx}/js/components/chat.js"></script>
 </body>
-
 </html>
