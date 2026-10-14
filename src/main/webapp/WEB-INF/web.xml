@@ -8,6 +8,12 @@
         <error-code>404</error-code>
         <location>/app-error-404</location>
     </error-page>
+
+    <!-- Erros internos usam a mesma página (o 404.jsp adapta o texto ao código) -->
+    <error-page>
+        <error-code>500</error-code>
+        <location>/app-error-404</location>
+    </error-page>
     
    
 

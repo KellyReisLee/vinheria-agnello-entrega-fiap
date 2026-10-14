@@ -1,0 +1,523 @@
+/* ==========================================================================
+   PÁGINAS DE CONTA — Login, Cadastro, Esqueci a senha, Redefinir senha
+   Substitui login.css, cadastro.css, esqueci-senha.css e redefinir-senha.css
+   (4 ficheiros que repetiam a mesma estrutura com nomes diferentes).
+   Estrutura: cartão dividido em formulário (esquerda) + painel da marca (direita).
+   ========================================================================== */
+@import url('./sections/_header.css');
+@import url('./sections/_buttons.css');
+@import url('./sections/_footer-completed.css');
+@import url('./sections/_carrinho.css');
+@import url('./sections/_chat.css');
+
+.auth-body {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  background: linear-gradient(180deg, #F6F1E9 0%, var(--bg-offwhite) 60%);
+}
+
+.auth-main {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  padding: calc(var(--header-height) + clamp(1.5rem, 4vw, 3rem)) var(--page-gutter) clamp(3rem, 6vw, 5rem);
+}
+
+/* ---------- Cartão dividido ---------- */
+.auth-card {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  width: 100%;
+  max-width: 1040px;
+  overflow: hidden;
+  border: 1px solid rgba(212, 175, 55, 0.25);
+  border-radius: 16px;
+  background: #FFFFFF;
+  box-shadow: 0 20px 50px rgba(39, 3, 14, 0.08);
+}
+
+.auth-card--narrow {
+  max-width: 920px;
+}
+
+.auth-form-side {
+  padding: clamp(1.75rem, 5vw, 3.25rem);
+}
+
+/* ---------- Cabeçalho do formulário ---------- */
+.auth-eyebrow {
+  display: inline-block;
+  margin-bottom: 0.6rem;
+  color: #8B263E;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+}
+
+.auth-title {
+  margin-bottom: 0.6rem;
+  color: var(--text-charcoal);
+  font-family: var(--font-heading);
+  font-size: clamp(1.7rem, 1.3rem + 1.5vw, 2.2rem);
+  line-height: 1.2;
+  text-wrap: balance;
+}
+
+.auth-lead {
+  margin-bottom: 1.75rem;
+  color: var(--text-muted);
+  font-size: 0.95rem;
+  line-height: 1.6;
+}
+
+/* ---------- Mensagens ---------- */
+.auth-alert {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  margin-bottom: 1.5rem;
+  padding: 0.9rem 1rem;
+  border: 1px solid;
+  border-left-width: 4px;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  line-height: 1.5;
+}
+
+.auth-alert-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  color: #FFFFFF;
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+
+.auth-alert strong {
+  display: block;
+  margin-bottom: 0.15rem;
+}
+
+.auth-alert--erro {
+  border-color: #F0C5CC;
+  border-left-color: #B3263E;
+  background: #FDF3F4;
+  color: #7A1F2E;
+}
+
+.auth-alert--erro .auth-alert-icon {
+  background: #B3263E;
+}
+
+.auth-alert--sucesso {
+  border-color: #C8E6C9;
+  border-left-color: #2E7D32;
+  background: #F2F9F2;
+  color: #1B5E20;
+}
+
+.auth-alert--sucesso .auth-alert-icon {
+  background: #2E7D32;
+}
+
+/* ---------- Abas Pessoa Física / Jurídica ---------- */
+.auth-tabs {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 4px;
+  margin-bottom: 1.5rem;
+  padding: 4px;
+  border-radius: 10px;
+  background: #F3EEE6;
+}
+
+.auth-tab {
+  min-height: 42px;
+  border: none;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--text-muted);
+  font-size: 0.82rem;
+  font-weight: 700;
+  letter-spacing: 0.8px;
+  transition: background-color 0.2s, color 0.2s, box-shadow 0.2s;
+}
+
+.auth-tab[aria-selected="true"] {
+  background: #FFFFFF;
+  color: var(--primary-wine);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+/* ---------- Campos ---------- */
+.auth-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.1rem;
+}
+
+.auth-grid-2 {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1.1rem;
+}
+
+.auth-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 1.1rem;
+}
+
+.auth-panel[hidden] {
+  display: none;
+}
+
+.auth-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.auth-label-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 1rem;
+}
+
+.auth-field label {
+  color: var(--text-charcoal);
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.auth-input-wrap {
+  position: relative;
+}
+
+.auth-field input {
+  width: 100%;
+  min-height: 48px;
+  padding: 0.75rem 0.95rem;
+  border: 1px solid #DDD3C5;
+  border-radius: 8px;
+  background: #FCFBF9;
+  color: var(--text-charcoal);
+  font-size: 1rem;                 /* 16px: o iPhone não faz zoom ao tocar */
+  transition: border-color 0.2s, box-shadow 0.2s, background-color 0.2s;
+}
+
+.auth-field input::placeholder {
+  color: #A59C96;
+}
+
+.auth-field input:focus {
+  outline: none;
+  border-color: var(--accent-gold);
+  background: #FFFFFF;
+  box-shadow: 0 0 0 3px rgba(212, 175, 55, 0.18);
+}
+
+/* Campo com erro (marcado pelo auth.js) */
+.auth-field input[aria-invalid="true"] {
+  border-color: #B3263E;
+  box-shadow: 0 0 0 3px rgba(179, 38, 62, 0.1);
+}
+
+.auth-field-erro {
+  color: #B3263E;
+  font-size: 0.8rem;
+}
+
+.auth-field-erro:empty {
+  display: none;
+}
+
+.auth-hint {
+  color: var(--text-muted);
+  font-size: 0.78rem;
+}
+
+/* Botão "mostrar senha" dentro do campo */
+.auth-input-wrap input {
+  padding-right: 3rem;
+}
+
+.auth-toggle-senha {
+  position: absolute;
+  top: 50%;
+  right: 0.35rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border: none;
+  border-radius: 6px;
+  background: none;
+  opacity: 0.65;
+  transform: translateY(-50%);
+  transition: opacity 0.2s, background-color 0.2s;
+}
+
+.auth-toggle-senha:hover {
+  opacity: 1;
+  background: rgba(74, 21, 37, 0.05);
+}
+
+.auth-toggle-senha img {
+  width: 20px;
+  height: 20px;
+}
+
+/* Barra de força da senha */
+.auth-forca {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 4px;
+  margin-top: 0.2rem;
+}
+
+.auth-forca span {
+  height: 4px;
+  border-radius: 2px;
+  background: #E8E2D5;
+  transition: background-color 0.3s;
+}
+
+.auth-forca[data-nivel="1"] span:nth-child(-n+1) { background: #C0392B; }
+.auth-forca[data-nivel="2"] span:nth-child(-n+2) { background: #E67E22; }
+.auth-forca[data-nivel="3"] span:nth-child(-n+3) { background: #C9A227; }
+.auth-forca[data-nivel="4"] span:nth-child(-n+4) { background: #2E7D32; }
+
+.auth-link {
+  color: #8B263E;
+  font-size: 0.82rem;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.auth-link:hover {
+  text-decoration: underline;
+}
+
+/* ---------- Botões ---------- */
+.auth-btn-primary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.6rem;
+  width: 100%;
+  min-height: 50px;
+  margin-top: 0.4rem;
+  padding: 0.85rem 1.25rem;
+  border: none;
+  border-radius: 8px;
+  background: linear-gradient(135deg, #7A1F36 0%, var(--primary-wine) 100%);
+  color: #FFFFFF;
+  font-size: 1rem;
+  font-weight: 600;
+  box-shadow: 0 6px 16px rgba(74, 21, 37, 0.2);
+  transition: transform 0.2s, box-shadow 0.2s, opacity 0.2s;
+}
+
+.auth-btn-primary:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 10px 22px rgba(74, 21, 37, 0.25);
+}
+
+/* Estado "a enviar" (auth.js adiciona .is-loading e desativa o botão) */
+.auth-btn-primary.is-loading {
+  opacity: 0.85;
+  cursor: progress;
+  transform: none;
+}
+
+.auth-btn-primary.is-loading::before {
+  content: '';
+  width: 16px;
+  height: 16px;
+  border: 2px solid rgba(255, 255, 255, 0.4);
+  border-top-color: #FFFFFF;
+  border-radius: 50%;
+  animation: authGirar 0.7s linear infinite;
+}
+
+@keyframes authGirar {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.auth-btn-outline {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  min-height: 48px;
+  padding: 0.8rem 1.25rem;
+  border: 1px solid #DDD3C5;
+  border-radius: 8px;
+  background: #FFFFFF;
+  color: var(--primary-wine);
+  font-weight: 600;
+  text-decoration: none;
+  transition: border-color 0.2s, background-color 0.2s;
+}
+
+.auth-btn-outline:hover {
+  border-color: var(--primary-wine);
+  background: #FCF8F5;
+}
+
+.auth-divider {
+  display: flex;
+  align-items: center;
+  gap: 0.9rem;
+  margin: 1.5rem 0 1.1rem;
+  color: #A59C96;
+  font-size: 0.8rem;
+}
+
+.auth-divider::before,
+.auth-divider::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: #ECE6DC;
+}
+
+.auth-back {
+  margin-top: 1.5rem;
+  text-align: center;
+}
+
+.auth-back a {
+  color: var(--text-muted);
+  font-size: 0.9rem;
+  font-weight: 500;
+  text-decoration: none;
+}
+
+.auth-back a:hover {
+  color: var(--primary-wine);
+}
+
+.auth-termos {
+  color: var(--text-muted);
+  font-size: 0.78rem;
+  line-height: 1.5;
+  text-align: center;
+}
+
+/* ---------- Painel da marca ---------- */
+.auth-brand-side {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: clamp(2rem, 5vw, 3.25rem);
+  overflow: hidden;
+  background:
+    linear-gradient(160deg, rgba(74, 21, 37, 0.88) 0%, rgba(39, 3, 14, 0.96) 100%),
+    url('../assets/images/hero-image.webp') center / cover no-repeat;
+  color: #FFFFFF;
+}
+
+.auth-brand-badge {
+  align-self: flex-start;
+  margin-bottom: 1.25rem;
+  padding: 0.35rem 0.85rem;
+  border: 1px solid rgba(212, 175, 55, 0.5);
+  border-radius: 999px;
+  background: rgba(212, 175, 55, 0.12);
+  color: var(--accent-gold);
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+}
+
+.auth-brand-side h2 {
+  margin-bottom: 1rem;
+  font-family: var(--font-heading);
+  font-size: clamp(1.5rem, 1.2rem + 1.2vw, 2rem);
+  line-height: 1.25;
+  text-wrap: balance;
+}
+
+.auth-brand-side p {
+  margin-bottom: 1.5rem;
+  color: rgba(255, 255, 255, 0.8);
+  font-size: 0.95rem;
+  line-height: 1.65;
+}
+
+.auth-benefits {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  list-style: none;
+}
+
+.auth-benefits li {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.65rem;
+  color: rgba(255, 255, 255, 0.92);
+  font-size: 0.9rem;
+  line-height: 1.5;
+}
+
+.auth-benefits svg {
+  flex-shrink: 0;
+  width: 18px;
+  height: 18px;
+  margin-top: 2px;
+  fill: none;
+  stroke: var(--accent-gold);
+  stroke-width: 2.5;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+/* ---------- Responsivo ---------- */
+@media (max-width: 860px) {
+  .auth-card,
+  .auth-card--narrow {
+    grid-template-columns: minmax(0, 1fr);
+    max-width: 560px;
+  }
+
+  /* No telemóvel, o painel da marca fica abaixo do formulário e mais curto */
+  .auth-brand-side {
+    padding: 1.75rem;
+  }
+
+  .auth-brand-side p {
+    margin-bottom: 1.1rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .auth-main {
+    padding-left: 0.75rem;
+    padding-right: 0.75rem;
+  }
+
+  .auth-grid-2 {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .auth-label-row {
+    flex-wrap: wrap;
+  }
+}

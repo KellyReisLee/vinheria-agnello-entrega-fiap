@@ -1,133 +1,165 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <%@ taglib prefix="c" uri="jakarta.tags.core" %>
 <%@ taglib prefix="fmt" uri="jakarta.tags.fmt" %>
-<%@ taglib prefix="fn" uri="jakarta.tags.functions" %>
+<%-- Preços sempre no formato brasileiro (1.189,90), seja qual for o servidor --%>
+<fmt:setLocale value="pt_BR" />
+<c:set var="ctx" value="${pageContext.request.contextPath}" />
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Sugestões do Sommelier — Vinheria Agnello</title>
+  <title>Sugestões do Sommelier | Vinheria Agnello</title>
+  <meta name="theme-color" content="#4A1525">
+  <link rel="icon" type="image/png" href="${ctx}/assets/images/logo-bg-white.png">
 
-  <link rel="stylesheet" href="<c:url value='/css/variables.css'/>">
-  <link rel="stylesheet" href="<c:url value='/css/global.css'/>">
-  <link rel="stylesheet" href="<c:url value='/css/quiz.css'/>">
-  <link rel="stylesheet" href="<c:url value='/css/sugestoes-sommelier.css'/>">
-  <link rel="stylesheet" href="<c:url value='/css/catalogo.css'/>">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400..900;1,400..900&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap"
+    rel="stylesheet">
+
+  <link rel="stylesheet" href="${ctx}/css/variables.css">
+  <link rel="stylesheet" href="${ctx}/css/global.css">
+  <%-- catalogo.css traz o header, os cards e a grelha .agnello-wine-grid --%>
+  <link rel="stylesheet" href="${ctx}/css/catalogo.css">
+  <link rel="stylesheet" href="${ctx}/css/sugestoes-sommelier.css">
 
   <script>
-    window.CONTEXT_PATH = '${pageContext.request.contextPath}';
+    window.CONTEXT_PATH = '${ctx}';
   </script>
 </head>
-<body class="sugestoes-page-body-unique">
+<body class="sugestoes-page-body">
 
-   <!-- HEADER MODULAR -->
   <jsp:include page="/WEB-INF/componentes/header.jsp" />
 
-  <main class="sugestoes-main-wrapper-unique">
-    <div class="sugestoes-container-unique">
+  <main class="sugestoes-main" id="conteudo">
+    <div class="sugestoes-container">
 
-      <div class="sugestoes-header-unique">
-        <span class="calc-tag-unique">SELEÇÃO EXCLUSIVA DE RÓTULOS</span>
-        <h1 class="sugestoes-title-unique">Sua Adega Personalizada</h1>
-        <p class="sugestoes-subtitle-unique" id="perfil-descricao-unique">Filtramos nossa adega com base nas suas preferências indicadas no quiz. Veja as melhores opções:</p>
+      <header class="sugestoes-header">
+        <span class="sugestoes-eyebrow">Seleção do Sommelier Virtual</span>
+        <h1 class="sugestoes-title">Sua Adega Personalizada</h1>
+        <%-- Texto e "chips" do perfil preenchidos pelo sugestoes-sommelier.js --%>
+        <p class="sugestoes-subtitle" id="perfil-descricao">Preparando suas sugestões…</p>
+        <ul class="sugestoes-perfil" id="perfil-resumo" aria-label="As suas respostas" hidden></ul>
+      </header>
+
+      <c:if test="${not empty errorMessage}">
+        <div class="agnello-alert" role="alert">${errorMessage}</div>
+      </c:if>
+
+      <%-- Mostrado quando a pessoa chega aqui sem ter feito o quiz --%>
+      <div class="sugestoes-sem-quiz" id="sem-quiz" hidden>
+        <p>Ainda não conhecemos o seu paladar. Responda a 3 perguntas rápidas e
+          o Sommelier Virtual escolhe os rótulos certos para você.</p>
+        <a href="${ctx}/quiz" class="btn-gold">Fazer o quiz <span class="btn-arrow" aria-hidden="true">→</span></a>
       </div>
 
-      <!-- GRID DE PRODUTOS RENDERIZADO VIA JSTL -->
-      <section id="vinhos-container" class="agnello-wine-grid">
+      <section id="vinhos-container" class="agnello-wine-grid" aria-label="Vinhos sugeridos">
         <c:choose>
           <c:when test="${not empty produtos}">
-            <c:forEach var="p" items="${produtos}">
-              <article class="product-card" 
-                       data-tipo="${p.tipo}"
-                       data-nome="${p.nome}" 
-                       data-origem="${p.origem}"
-                       data-preco="${p.preco}" 
-                       data-pontuacao="${p.pontuacao}">
+            <c:forEach var="p" items="${produtos}" varStatus="st">
+              <c:set var="imgVinho"
+                value="${ctx}${p.imagem.startsWith('.') ? p.imagem.substring(1) : p.imagem}" />
+              <fmt:formatNumber var="precoFmt" value="${p.preco}" minFractionDigits="2" maxFractionDigits="2" />
+              <c:set var="esgotado" value="${p.estoque le 0}" />
 
-                <!-- Selo de Desconto Opcional -->
-                <c:if test="${not empty p.desconto}">
-                  <span class="agnello-badge-off">${p.desconto}</span>
-                </c:if>
+              <article class="product-card${esgotado ? ' is-esgotado' : ''}"
+                       data-ordem="${st.index}" data-tipo="${p.tipo}"
+                       data-nome="${p.nome}" data-origem="${p.origem}"
+                       data-preco="${p.preco}" data-pontuacao="${p.pontuacao}"
+                       data-estoque="${p.estoque}">
 
-                <!-- Imagem com tratamento de caminho -->
+                <c:choose>
+                  <c:when test="${esgotado}">
+                    <span class="agnello-badge-off agnello-badge-esgotado">Esgotado</span>
+                  </c:when>
+                  <c:when test="${not empty p.desconto}">
+                    <span class="agnello-badge-off">${p.desconto}</span>
+                  </c:when>
+                </c:choose>
+
                 <div class="product-img-placeholder">
-                  <img src="${pageContext.request.contextPath}${fn:startsWith(p.imagem, '.') ? fn:substring(p.imagem, 1, fn:length(p.imagem)) : p.imagem}"
-                       alt="${p.nome}"
-                       onerror="this.style.display='none'; this.parentElement.style.backgroundColor='#F8F7F4';">
+                  <img src="${imgVinho}" alt="Garrafa de ${p.nome}" width="160" height="190"
+                       loading="lazy" decoding="async" onerror="this.style.visibility='hidden'">
                 </div>
 
-                <!-- Informações do Vinho -->
                 <div class="product-info">
                   <span class="product-meta">${p.origem} • ${p.tipo}</span>
                   <h3 class="product-name">${p.nome}</h3>
-                  <p class="product-desc" style="font-size: 0.85rem; color: #736b6d; margin-top: 4px;">${p.descricao}</p>
-
+                  <c:if test="${not empty p.descricao}">
+                    <p class="product-desc">${p.descricao}</p>
+                  </c:if>
                   <c:if test="${not empty p.pontuacao}">
-                    <ul class="product-scores" style="margin-top: 8px;">
-                      <li>
-                        <img class="score-icon" src="${pageContext.request.contextPath}/assets/icons/star-check.svg" alt="Estrela"> 
-                        ${p.pontuacao}
-                      </li>
+                    <ul class="product-scores">
+                      <li><img class="score-icon" src="${ctx}/assets/icons/star-check.svg"
+                        alt="" width="13" height="13"> ${p.pontuacao}</li>
                     </ul>
                   </c:if>
                 </div>
 
-                <!-- Rodapé do Card com Preço Formatado (2 casas decimais) -->
                 <div class="product-footer">
                   <div class="price-box">
                     <c:if test="${p.precoAntigo > 0}">
-                      <span class="old-price">R$ <fmt:formatNumber value="${p.precoAntigo}" minFractionDigits="2" maxFractionDigits="2" /></span>
+                      <span class="old-price"><span class="sr-only">De</span>
+                        R$ <fmt:formatNumber value="${p.precoAntigo}" minFractionDigits="2" maxFractionDigits="2" /></span>
                     </c:if>
-                    <span class="product-price">R$ <fmt:formatNumber value="${p.preco}" minFractionDigits="2" maxFractionDigits="2" /></span>
+                    <span class="product-price">
+                      <c:if test="${p.precoAntigo > 0}"><span class="sr-only">por</span></c:if>
+                      R$ ${precoFmt}
+                    </span>
                   </div>
-                  <button class="agnello-btn-comprar" aria-label="Selecionar"
-                          data-id="${p.id}" 
-                          data-nome="${p.nome}"
-                          data-preco="R$ <fmt:formatNumber value='${p.preco}' minFractionDigits='2' maxFractionDigits='2' />"
-                          data-origem="${p.origem} • ${p.tipo}"
-                          data-imagem="${pageContext.request.contextPath}${fn:startsWith(p.imagem, '.') ? fn:substring(p.imagem, 1, fn:length(p.imagem)) : p.imagem}">
-                    Selecionar
-                  </button>
+                  <c:choose>
+                    <c:when test="${esgotado}">
+                      <button type="button" class="agnello-btn-comprar" disabled>Esgotado</button>
+                    </c:when>
+                    <c:otherwise>
+                      <button type="button" class="agnello-btn-comprar"
+                              aria-label="Adicionar ${p.nome} ao carrinho"
+                              data-id="${p.id}" data-nome="${p.nome}"
+                              data-preco="R$ ${precoFmt}"
+                              data-origem="${p.origem} • ${p.tipo}"
+                              data-imagem="${imgVinho}">Selecionar</button>
+                    </c:otherwise>
+                  </c:choose>
                 </div>
-
               </article>
             </c:forEach>
           </c:when>
           <c:otherwise>
-            <!-- Estado Vazio -->
-            <div class="grid-empty-state" style="grid-column: 1/-1; text-align: center; padding: 3rem 1.5rem; background-color: #faf8f6; border: 1px dashed #dcd5d0; border-radius: 8px; margin: 1rem 0;">
-              <p style="font-size: 1.1rem; color: #4a1525; font-weight: 600; margin-bottom: 0.5rem;">Nenhum vinho encontrado para o seu perfil.</p>
-              <p style="font-size: 0.9rem; color: #736b6d;">Tente refazer o quiz alterando algumas das suas preferências.</p>
+            <div class="grid-empty-state">
+              <strong>Nenhum vinho disponível no momento.</strong>
+              <p>Tente novamente mais tarde ou fale conosco pelo chat.</p>
             </div>
           </c:otherwise>
         </c:choose>
       </section>
 
-      <div class="sugestoes-actions-unique" style="margin-top: 2rem; text-align: center;">
-        <a href="<c:url value='/quiz'/>" class="btn-refazer-unique">Refazer o Quiz</a>
+      <div class="sugestoes-actions">
+        <a href="${ctx}/quiz" class="btn-outline-dark">
+          <span aria-hidden="true">↺</span> Refazer o quiz
+        </a>
+        <a href="${ctx}/catalogo" class="sugestoes-link-catalogo">
+          Ver toda a adega <span class="btn-arrow" aria-hidden="true">→</span>
+        </a>
       </div>
 
     </div>
   </main>
 
+  <jsp:include page="/WEB-INF/componentes/footer.jsp" />
+
   <div id="agnello-cart-overlay" class="agnello-cart-overlay"></div>
   <div id="agnello-cart-drawer" class="agnello-cart-drawer">
     <div class="agnello-cart-header">
-      <button id="agnello-cart-close" class="agnello-cart-back-btn">←</button>
+      <button type="button" id="agnello-cart-close" class="agnello-cart-back-btn">←</button>
       <h2 id="agnello-cart-title">Carrinho (0)</h2>
     </div>
     <div id="agnello-cart-body" class="agnello-cart-body"></div>
   </div>
 
-  <!-- FOOTER MODULAR -->
-  <jsp:include page="/WEB-INF/componentes/footer.jsp" />
-
-  <!-- SCRIPTS -->
-  <script src="<c:url value='/js/pages/sugestoes-sommelier.js'/>"></script>
-  <script src="<c:url value='/js/components/carrinho.js'/>"></script>
-  <script src="<c:url value='/js/components/componentes.js'/>"></script>
-  <script src="<c:url value='/js/components/chat.js'/>"></script>
-
+  <script src="${ctx}/js/pages/sugestoes-sommelier.js"></script>
+  <script src="${ctx}/js/components/carrinho.js"></script>
+  <script src="${ctx}/js/components/chat.js"></script>
 </body>
 </html>
