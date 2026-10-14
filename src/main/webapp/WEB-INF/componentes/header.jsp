@@ -3,7 +3,10 @@
 <%-- Caminho do Servlet que encaminhou para esta página (ex.: /catalogo).
      Usado para marcar o link ativo do menu. --%>
 <c:set var="ctx" value="${pageContext.request.contextPath}" />
-<c:set var="rotaAtual" value="${requestScope['jakarta.servlet.forward.servlet_path']}" />
+<%-- Páginas que passam por um Servlet chegam aqui por "forward" (ex.: /catalogo);
+     as páginas institucionais são abertas direto pelo web.xml (ex.: /sobre). --%>
+<c:set var="rotaForward" value="${requestScope['jakarta.servlet.forward.servlet_path']}" />
+<c:set var="rotaAtual" value="${empty rotaForward ? pageContext.request.servletPath : rotaForward}" />
 
 <%-- Disponibiliza o context path aos scripts em TODAS as páginas com header --%>
 <script>
@@ -24,10 +27,11 @@
   </a>
 
   <nav class="nav-links" id="nav-principal" aria-label="Navegação principal">
-    <a href="${ctx}/home" ${rotaAtual == '/home' or empty rotaAtual ? 'class="active" aria-current="page"' : ''}>Nossa História</a>
+    <a href="${ctx}/sobre" ${rotaAtual == '/sobre' ? 'class="active" aria-current="page"' : ''}>Nossa História</a>
     <a href="${ctx}/catalogo" ${rotaAtual == '/catalogo' ? 'class="active" aria-current="page"' : ''}>Nossos Rótulos</a>
     <a href="${ctx}/quiz" id="open-quiz" ${rotaAtual == '/quiz' or rotaAtual == '/sugestoes' ? 'class="active" aria-current="page"' : ''}>✨ Sommelier Virtual</a>
     <a href="${ctx}/catalogo#input-busca" class="nav-link-mobile">Pesquisar vinhos</a>
+    <a href="${ctx}/ajuda" class="nav-link-mobile" ${rotaAtual == '/ajuda' ? 'aria-current="page"' : ''}>Central de Ajuda</a>
   </nav>
 
   <div class="nav-icons">
@@ -65,3 +69,4 @@
 </header>
 <div class="nav-backdrop" hidden></div>
 <script src="${ctx}/js/components/header.js" defer></script>
+<script src="${ctx}/js/components/verificacao-idade.js" defer></script>

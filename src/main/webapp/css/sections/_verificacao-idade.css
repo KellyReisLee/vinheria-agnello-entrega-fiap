@@ -1,0 +1,118 @@
+/* ==========================================================================
+   CONFIRMAÇÃO DE IDADE (js/components/verificacao-idade.js)
+   Importado pelo global.css para estar disponível em todas as páginas.
+   ========================================================================== */
+.idade-dialogo {
+  width: min(440px, calc(100% - 2rem));
+  max-height: calc(100% - 2rem);
+  margin: auto;
+  padding: clamp(1.75rem, 5vw, 2.5rem);
+  border: 1px solid rgba(212, 175, 55, 0.4);
+  border-radius: 18px;
+  background: #FFFFFF;
+  color: var(--text-charcoal);
+  text-align: center;
+  box-shadow: 0 30px 70px rgba(0, 0, 0, 0.35);
+}
+
+.idade-dialogo::backdrop {
+  background: rgba(30, 8, 15, 0.82);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+}
+
+.idade-dialogo[open] {
+  animation: idadeEntrada 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes idadeEntrada {
+  from {
+    opacity: 0;
+    transform: translateY(14px) scale(0.98);
+  }
+
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.idade-logo {
+  display: block;
+  width: 22px;
+  height: 56px;
+  margin: 0 auto 0.4rem;
+  object-fit: cover;
+}
+
+.idade-marca {
+  margin-bottom: 1.25rem;
+  color: var(--primary-wine);
+  font-family: var(--font-heading);
+  font-size: 0.85rem;
+  font-weight: 700;
+  letter-spacing: 2px;
+}
+
+.idade-dialogo h2 {
+  color: var(--primary-wine);
+  font-size: clamp(1.5rem, 1.3rem + 1vw, 1.85rem);
+  text-wrap: balance;
+}
+
+#idade-texto {
+  margin: 0.75rem 0 1.5rem;
+  color: var(--text-muted);
+  line-height: 1.6;
+}
+
+.idade-acoes {
+  display: grid;
+  gap: 0.6rem;
+}
+
+.idade-btn {
+  min-height: 50px;
+  padding: 0.75rem 1rem;
+  border: 1px solid #DDD3C5;
+  border-radius: 10px;
+  background: #FFFFFF;
+  color: var(--text-charcoal);
+  font-weight: 600;
+  transition: background-color 0.2s, border-color 0.2s;
+}
+
+.idade-btn:hover {
+  border-color: var(--primary-wine);
+}
+
+.idade-btn--sim {
+  border-color: var(--primary-wine);
+  background: var(--primary-wine);
+  color: #FFFFFF;
+}
+
+.idade-btn--sim:hover {
+  background: var(--primary-wine-dark);
+}
+
+.idade-recusa {
+  padding: 1rem;
+  border-radius: 10px;
+  background: #FBEFF0;
+  color: #8C2F2F;
+  font-size: 0.93rem;
+  line-height: 1.6;
+}
+
+.idade-legal {
+  margin-top: 1.25rem;
+  color: var(--text-muted);
+  font-size: 0.78rem;
+  line-height: 1.55;
+}
+
+.idade-legal a {
+  color: var(--primary-wine);
+  font-weight: 600;
+}

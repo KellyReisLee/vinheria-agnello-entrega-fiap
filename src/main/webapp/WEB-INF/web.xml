@@ -14,7 +14,72 @@
         <error-code>500</error-code>
         <location>/app-error-404</location>
     </error-page>
-    
-   
+
+    <!-- ==========================================================
+         PÁGINAS INSTITUCIONAIS (só conteúdo, sem dados do banco)
+         Não precisam de um Controller em Java: o próprio Tomcat
+         mostra o JSP quando alguém abre o endereço. Assim a URL fica
+         limpa (/sobre) e o JSP continua protegido dentro de WEB-INF.
+         ========================================================== -->
+
+    <!-- Nossa História -->
+    <servlet>
+        <servlet-name>PaginaSobre</servlet-name>
+        <jsp-file>/WEB-INF/views/sobre.jsp</jsp-file>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>PaginaSobre</servlet-name>
+        <url-pattern>/sobre</url-pattern>
+    </servlet-mapping>
+
+    <!-- Contato -->
+    <servlet>
+        <servlet-name>PaginaContato</servlet-name>
+        <jsp-file>/WEB-INF/views/contato.jsp</jsp-file>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>PaginaContato</servlet-name>
+        <url-pattern>/contato</url-pattern>
+    </servlet-mapping>
+
+    <!-- Central de Ajuda (FAQ) -->
+    <servlet>
+        <servlet-name>PaginaAjuda</servlet-name>
+        <jsp-file>/WEB-INF/views/ajuda.jsp</jsp-file>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>PaginaAjuda</servlet-name>
+        <url-pattern>/ajuda</url-pattern>
+    </servlet-mapping>
+
+    <!-- Entregas, trocas e devoluções -->
+    <servlet>
+        <servlet-name>PaginaEntregasTrocas</servlet-name>
+        <jsp-file>/WEB-INF/views/entregas-trocas.jsp</jsp-file>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>PaginaEntregasTrocas</servlet-name>
+        <url-pattern>/entregas-e-trocas</url-pattern>
+    </servlet-mapping>
+
+    <!-- Política de Privacidade (LGPD) -->
+    <servlet>
+        <servlet-name>PaginaPrivacidade</servlet-name>
+        <jsp-file>/WEB-INF/views/privacidade.jsp</jsp-file>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>PaginaPrivacidade</servlet-name>
+        <url-pattern>/privacidade</url-pattern>
+    </servlet-mapping>
+
+    <!-- Termos de Uso -->
+    <servlet>
+        <servlet-name>PaginaTermos</servlet-name>
+        <jsp-file>/WEB-INF/views/termos.jsp</jsp-file>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>PaginaTermos</servlet-name>
+        <url-pattern>/termos</url-pattern>
+    </servlet-mapping>
 
 </web-app>
