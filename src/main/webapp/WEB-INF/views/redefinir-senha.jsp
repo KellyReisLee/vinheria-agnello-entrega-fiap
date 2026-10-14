@@ -94,7 +94,7 @@
       <c:set var="brandBadge" scope="request" value="Clube Agnello 1978" />
       <c:set var="brandTitulo" scope="request" value="Segurança e exclusividade em cada detalhe." />
       <c:set var="brandTexto" scope="request" value="A sua nova senha garante a privacidade das suas escolhas e do seu histórico de pedidos." />
-      <c:set var="brandB1" scope="request" value="Link de uso único, com prazo de validade" />
+      <c:set var="brandB1" scope="request" value="Criptografia de ponta a ponta" />
       <c:set var="brandB2" scope="request" value="Acesso protegido ao seu perfil" />
       <c:set var="brandB3" scope="request" value="Atendimento dedicado aos membros" />
       <jsp:include page="/WEB-INF/componentes/auth-brand.jsp" />
