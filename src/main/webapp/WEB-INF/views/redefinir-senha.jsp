@@ -1,113 +1,109 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <%@ taglib prefix="c" uri="jakarta.tags.core" %>
+<c:set var="ctx" value="${pageContext.request.contextPath}" />
+<%-- O token vem do controller (atributo) ou do link do e-mail (?token=...) --%>
+<c:set var="tokenAtual" value="${not empty token ? token : param.token}" />
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link rel="icon" type="image/png" href="<c:url value='/assets/images/logo-bg-white.png'/>">
-  <title>Redefinir Senha — Vinheria Agnello</title>
-  <link rel="stylesheet" href="<c:url value='/css/variables.css'/>">
-  <link rel="stylesheet" href="<c:url value='/css/global.css'/>">
-  <link rel="stylesheet" href="<c:url value='/css/esqueci-senha.css'/>">
-  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400..900;1,400..900&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <title>Nova senha | Vinheria Agnello</title>
+  <jsp:include page="/WEB-INF/componentes/auth-head.jsp" />
 </head>
-<body class="agnello-login-body">
 
-  <!-- HEADER MODULAR -->
+<body class="auth-body">
   <jsp:include page="/WEB-INF/componentes/header.jsp" />
-  
-  <main class="login-split-container">
-    <div class="login-split-card">
-      
-      <!-- Coluna da Esquerda: Formulário de Nova Senha -->
-      <div class="login-form-side">
-        <div class="form-header-top">
-          <span class="sub-tag">NOVA CREDENCIAL</span>
-          <h2>Redefinir Senha</h2>
-          <p>Escolha uma nova senha segura para proteger o acesso à sua adega particular.</p>
-        </div>
-        
-        <!-- Mensagem de Erro -->
+
+  <main class="auth-main" id="conteudo">
+    <div class="auth-card auth-card--narrow">
+
+      <section class="auth-form-side" aria-labelledby="titulo-redefinir">
+        <span class="auth-eyebrow">Nova credencial</span>
+        <h1 class="auth-title" id="titulo-redefinir">Redefinir senha</h1>
+        <p class="auth-lead">Escolha uma nova senha segura para proteger o acesso à sua adega particular.</p>
+
         <c:if test="${not empty mensagemErro}">
-          <div class="alert alert-error" style="background-color: #fdf2f2; border: 1px solid #f5c6cb; color: #721c24; padding: 12px 16px; border-radius: 8px; margin-bottom: 20px; font-size: 0.9rem;">
-            ⚠️ ${mensagemErro}
-          </div>
-        </c:if>
-        
-        <!-- Mensagem de Sucesso com Estilo Inline Garantido -->
-        <c:if test="${not empty mensagemSucesso}">
-          <div style="display: flex; align-items: flex-start; gap: 16px; background: linear-gradient(135deg, #f4f9f4 0%, #e8f5e9 100%); border: 1px solid #c8e6c9; border-left: 5px solid #2e7d32; padding: 20px; border-radius: 12px; margin-bottom: 24px; box-shadow: 0 4px 12px rgba(46, 125, 50, 0.08);">
-            <div style="background-color: #2e7d32; color: #ffffff; width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.1rem; font-weight: bold; flex-shrink: 0; box-shadow: 0 2px 6px rgba(46, 125, 50, 0.2);">✓</div>
-            <div style="display: flex; flex-direction: column; gap: 4px;">
-              <strong style="color: #1b5e20; font-size: 1.05rem; font-family: 'Playfair Display', serif;">Tudo pronto por aqui!</strong>
-              <p style="color: #388e3c; font-size: 0.9rem; margin: 0; line-height: 1.4;">${mensagemSucesso} Você será redirecionado para a página de login em instantes...</p>
-            </div>
+          <div class="auth-alert auth-alert--erro" role="alert">
+            <span class="auth-alert-icon" aria-hidden="true">!</span>
+            <div><c:out value="${mensagemErro}" /></div>
           </div>
         </c:if>
 
-        <!-- Formulário (Só exibe se não teve sucesso) -->
-        <c:if test="${empty mensagemSucesso}">
-          <form action="<c:url value='/redefinir-senha'/>" method="POST">
-            <input type="hidden" name="token" value="${param.token}">
-
-            <div class="input-group">
-              <label for="novaSenha">Nova Senha</label>
-              <div style="position: relative; width: 100%; display: block;">
-                <input type="password" id="novaSenha" name="novaSenha" required placeholder="••••••••" style="width: 100%; padding-right: 45px; box-sizing: border-box;">
-                <button type="button" onclick="togglePasswordVisibility('novaSenha', this, '<c:url value='/assets/icons/eye.svg'/>', '<c:url value='/assets/icons/eye-closed.svg'/>')" title="Mostrar/Ocultar Senha" style="position: absolute; right: 12px; top: 50%; transform: translateY(-50%); background: none; border: none; cursor: pointer; padding: 0; display: flex; align-items: center; justify-content: center; z-index: 5; opacity: 0.7;">
-                  <img src="<c:url value='/assets/icons/eye-closed.svg'/>" alt="Mostrar Senha" id="icon-novaSenha" style="width: 20px; height: 20px; object-fit: contain;">
-                </button>
+        <c:choose>
+          <c:when test="${not empty mensagemSucesso}">
+            <div class="auth-alert auth-alert--sucesso" role="status"
+                 data-redirecionar="${ctx}/login" data-segundos="5">
+              <span class="auth-alert-icon" aria-hidden="true">✓</span>
+              <div>
+                <strong>Tudo pronto!</strong>
+                <c:out value="${mensagemSucesso}" />
+                <br>Abrindo o login em <span data-segundos-restantes>5</span> segundos…
               </div>
             </div>
+            <a href="${ctx}/login" class="auth-btn-outline">Entrar agora</a>
+          </c:when>
 
-            <div class="input-group">
-              <label for="confirmaSenha">Confirme a Nova Senha</label>
-              <div style="position: relative; width: 100%; display: block;">
-                <input type="password" id="confirmaSenha" name="confirmaSenha" required placeholder="••••••••" style="width: 100%; padding-right: 45px; box-sizing: border-box;">
-                <button type="button" onclick="togglePasswordVisibility('confirmaSenha', this, '<c:url value='/assets/icons/eye.svg'/>', '<c:url value='/assets/icons/eye-closed.svg'/>')" title="Mostrar/Ocultar Senha" style="position: absolute; right: 12px; top: 50%; transform: translateY(-50%); background: none; border: none; cursor: pointer; padding: 0; display: flex; align-items: center; justify-content: center; z-index: 5; opacity: 0.7;">
-                  <img src="<c:url value='/assets/icons/eye-closed.svg'/>" alt="Mostrar Senha" id="icon-confirmaSenha" style="width: 20px; height: 20px; object-fit: contain;">
-                </button>
+          <c:otherwise>
+            <form class="auth-form" action="${ctx}/redefinir-senha" method="POST" novalidate>
+              <%-- c:out escapa o token (antes ia direto para o HTML: risco de XSS) --%>
+              <input type="hidden" name="token" value="<c:out value='${tokenAtual}' />">
+
+              <div class="auth-field">
+                <label for="novaSenha">Nova senha</label>
+                <div class="auth-input-wrap">
+                  <input type="password" id="novaSenha" name="novaSenha" data-nome="a nova senha"
+                         minlength="6" autocomplete="new-password" required autofocus
+                         data-forca="forca-senha" aria-describedby="forca-senha-texto novaSenha-erro">
+                  <button type="button" class="auth-toggle-senha" aria-controls="novaSenha"
+                          aria-label="Mostrar senha" aria-pressed="false">
+                    <img src="${ctx}/assets/icons/eye-closed.svg" alt="" width="20" height="20">
+                  </button>
+                </div>
+                <div class="auth-forca" id="forca-senha" data-nivel="0" aria-hidden="true">
+                  <span></span><span></span><span></span><span></span>
+                </div>
+                <span class="auth-hint" id="forca-senha-texto">Mínimo de 6 caracteres.</span>
+                <span class="auth-field-erro" id="novaSenha-erro" aria-live="polite"></span>
               </div>
-            </div>
-            
-            <button type="submit" class="btn-primary">Atualizar Senha</button>
-          </form>
-        </c:if>
 
-        <div class="login-footer-back">
-          <a href="<c:url value='/login'/>">← Voltar para o Login</a>
-        </div>
-      </div>
+              <div class="auth-field">
+                <label for="confirmaSenha">Confirme a nova senha</label>
+                <div class="auth-input-wrap">
+                  <input type="password" id="confirmaSenha" name="confirmaSenha" data-nome="a confirmação da senha"
+                         data-igual-a="novaSenha" autocomplete="new-password" required
+                         aria-describedby="confirmaSenha-erro">
+                  <button type="button" class="auth-toggle-senha" aria-controls="confirmaSenha"
+                          aria-label="Mostrar senha" aria-pressed="false">
+                    <img src="${ctx}/assets/icons/eye-closed.svg" alt="" width="20" height="20">
+                  </button>
+                </div>
+                <span class="auth-field-erro" id="confirmaSenha-erro" aria-live="polite"></span>
+              </div>
 
-      <!-- Coluna da Direita: Painel Visual Agnello -->
-      <div class="login-brand-side">
-        <span class="brand-badge">CLUBE AGNELLO 1978</span>
-        <h3>Segurança e exclusividade em cada detalhe.</h3>
-        <p>Sua nova senha garantirá a privacidade e o controle total sobre suas escolhas e histórico de pedidos na nossa curadoria.</p>
-        
-        <ul class="brand-benefits-list">
-          <li>✓ Criptografia de ponta a ponta</li>
-          <li>✓ Acesso protegido ao seu perfil</li>
-          <li>✓ Atendimento dedicado aos membros</li>
-        </ul>
-      </div>
+              <button type="submit" class="auth-btn-primary" data-texto-enviando="Atualizando…">
+                <span>Atualizar senha</span>
+              </button>
+            </form>
 
+            <p class="auth-back"><a href="${ctx}/login">← Voltar para o login</a></p>
+          </c:otherwise>
+        </c:choose>
+      </section>
+
+      <c:set var="brandBadge" scope="request" value="Clube Agnello 1978" />
+      <c:set var="brandTitulo" scope="request" value="Segurança e exclusividade em cada detalhe." />
+      <c:set var="brandTexto" scope="request" value="A sua nova senha garante a privacidade das suas escolhas e do seu histórico de pedidos." />
+      <c:set var="brandB1" scope="request" value="Link de uso único, com prazo de validade" />
+      <c:set var="brandB2" scope="request" value="Acesso protegido ao seu perfil" />
+      <c:set var="brandB3" scope="request" value="Atendimento dedicado aos membros" />
+      <jsp:include page="/WEB-INF/componentes/auth-brand.jsp" />
     </div>
   </main>
-  
-  <!-- FOOTER MODULAR -->
+
   <jsp:include page="/WEB-INF/componentes/footer.jsp" />
 
-  <!-- Script Externo -->
-  <script src="<c:url value='/js/pages/redefinir-senha.js'/>"></script>
-
-  <!-- Script condicional de redirecionamento para o login após o sucesso -->
-  <c:if test="${not empty mensagemSucesso}">
-    <script>
-      iniciarRedirecionamentoLogin("<c:url value='/login'/>", 4);
-    </script>
-  </c:if>
-
+  <script src="${ctx}/js/pages/auth.js"></script>
+  <script src="${ctx}/js/components/chat.js"></script>
 </body>
 </html>
