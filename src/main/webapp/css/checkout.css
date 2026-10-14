@@ -545,6 +545,9 @@
   gap: 0.8rem;
   max-height: 320px;
   margin-bottom: 1rem;
+  /* A lista tem rolagem própria, que corta o que sai das bordas.
+     O espaço no topo deixa o selo de quantidade (top: -6px) inteiro. */
+  padding-top: 0.5rem;
   overflow-y: auto;
   list-style: none;
 }
