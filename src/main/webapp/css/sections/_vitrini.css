@@ -328,7 +328,7 @@
     display: none;
   }
 
-  .product-card {
+  .product-grid .product-card {
     flex: 0 0 78%;
     max-width: 300px;
     scroll-snap-align: start;
@@ -338,11 +338,11 @@
     transform: none;               /* no toque, o "salto" do hover não faz sentido */
   }
 
-  .product-img-placeholder {
+  .product-grid .product-img-placeholder {
     height: 200px;
   }
 
-  .grid-empty-state {
+  .product-grid .grid-empty-state {
     flex: 1 0 100%;
   }
 
