@@ -13,7 +13,7 @@
 
 .footer-content {
   display: grid;
-  grid-template-columns: 1.3fr 1fr 1.1fr 0.8fr;
+  grid-template-columns: 1.3fr 1fr 1.1fr 0.75fr 0.85fr;
   gap: 2.5rem;
   max-width: 1250px;
   margin: 0 auto 3rem;
@@ -198,9 +198,14 @@
 }
 
 /* ---------- Responsivo ---------- */
-@media (max-width: 1024px) {
+@media (max-width: 1100px) {
   .footer-content {
     grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  /* A coluna da marca ocupa a linha toda; as outras ficam aos pares */
+  .footer-content > .footer-col:first-child {
+    grid-column: 1 / -1;
   }
 }
 
@@ -208,6 +213,16 @@
   .footer-content {
     grid-template-columns: minmax(0, 1fr);
     gap: 2.25rem;
+  }
+
+  /* As duas listas de links ficam lado a lado (são curtas) */
+  .footer-content:has(> nav.footer-col + nav.footer-col) {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    column-gap: 1.25rem;
+  }
+
+  .footer-content > .footer-col:not(nav) {
+    grid-column: 1 / -1;
   }
 
   .footer-bottom-content {
