@@ -23,7 +23,17 @@ As chaves ficam **fora do banco**, em variáveis de ambiente. Assim, quem conseg
 
 ---
 
-## Passo a passo da migração (banco que já existe no Neon)
+## Opção A — recomeçar sem os clientes atuais (contas de teste)
+
+Use esta opção se as contas atuais podem ser descartadas. É mais simples: não precisa do V2, do `MigrarDadosSensiveis` nem do V3.
+
+1. **Backup:** Neon → Branches → Create branch.
+2. **Chaves:** rode `GerarChaves` e configure as duas chaves no Tomcat do Eclipse e no Render (ver passos 1, 2 e 5 abaixo).
+3. **Neon → SQL Editor:** rode `recriar_clientes.sql`. Ele apaga todos os clientes e cria a tabela nova. Os produtos não mudam.
+4. (Opcional) Rode `migracoes/V4__produtos_integridade.sql`.
+5. Faça o push e o merge do Pull Request para publicar a versão nova.
+
+## Opção B — manter os clientes atuais (passo a passo da migração)
 
 A migração segue o padrão **expandir → migrar → contrair**: as colunas antigas só são apagadas no fim, depois de tudo estar conferido. Até ao passo 6 dá para voltar atrás sem perder nada.
 
