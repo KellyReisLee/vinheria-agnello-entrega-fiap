@@ -1,65 +1,56 @@
 package com.agnello.controller;
 
-import com.agnello.service.ClienteService;
+import java.io.IOException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
+import com.agnello.exception.RegraNegocioException;
 import com.agnello.model.Usuario;
+import com.agnello.service.ClienteService;
+import com.agnello.util.SessaoCliente;
+
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import jakarta.servlet.http.HttpSession;
-import java.io.IOException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 @WebServlet("/deletar-conta")
 public class DeletarContaController extends HttpServlet {
 
     private static final long serialVersionUID = 1L;
     private static final Logger LOGGER = Logger.getLogger(DeletarContaController.class.getName());
-    private ClienteService clienteService = new ClienteService();
+
+    private final ClienteService clienteService = new ClienteService();
 
     @Override
-    protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+    protected void doPost(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
         request.setCharacterEncoding("UTF-8");
-        
-        // Verifica se existe uma sessão ativa
-        HttpSession session = request.getSession(false);
-        if (session == null || session.getAttribute("clienteLogado") == null) {
+        response.setContentType("text/plain; charset=UTF-8");
+
+        // O usuário vem SEMPRE da sessão; o formulário só envia a confirmação do e-mail
+        Usuario usuario = SessaoCliente.atual(request);
+        if (usuario == null) {
             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-            response.getWriter().write("Sessao expirada.");
+            response.getWriter().write("Sessão expirada. Entre novamente.");
             return;
         }
 
-        // Obtém o e-mail do utilizador diretamente da sessão (segurança no backend)
-        Usuario usuarioLogado = (Usuario) session.getAttribute("clienteLogado");
-        String emailSessao = usuarioLogado.getEmail();
-        
-        // Obtém o e-mail que o utilizador digitou no campo de confirmação do modal
-        String emailConfirmacao = request.getParameter("emailConfirmacao");
-
         try {
-            // Chama o service para validar e executar a exclusão
-            clienteService.deletarConta(emailSessao, emailConfirmacao);
-            
-            // Se correu tudo bem, destrói a sessão completamente (Desloga o cliente)
-            session.invalidate();
-            
-            // Retorna sucesso 200 OK para o AJAX do frontend acionar o modal de sucesso
-            response.setStatus(HttpServletResponse.SC_OK);
+            clienteService.deletarConta(usuario, request.getParameter("emailConfirmacao"));
+            LOGGER.log(Level.INFO, "Conta excluída a pedido do cliente id={0}", usuario.getId());
+            SessaoCliente.encerrar(request);
             response.getWriter().write("Conta encerrada com sucesso.");
 
-        } catch (IllegalArgumentException e) {
-            // Captura erros de validação (ex: e-mails não coincidem)
-            LOGGER.log(Level.WARNING, "Falha ao tentar excluir conta: {0}", e.getMessage());
+        } catch (RegraNegocioException e) {
             response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
             response.getWriter().write(e.getMessage());
-            
-        } catch (Exception e) {
-            // Captura erros críticos de banco de dados ou sistema
-            LOGGER.log(Level.SEVERE, "Erro crítico ao apagar conta do e-mail: " + emailSessao, e);
+
+        } catch (RuntimeException e) {
+            LOGGER.log(Level.SEVERE, "Erro ao excluir a conta do cliente id=" + usuario.getId(), e);
             response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-            response.getWriter().write("Ocorreu um erro interno ao processar a exclusão da conta.");
+            response.getWriter().write("Não foi possível excluir a conta agora. Tente novamente em alguns instantes.");
         }
     }
 }

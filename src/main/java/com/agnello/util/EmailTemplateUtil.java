@@ -16,8 +16,8 @@ public class EmailTemplateUtil {
             "    <!-- Corpo da Mensagem -->" +
             "    <tr>" +
             "      <td style=\"padding: 45px 35px;\">" +
-            "        <h2 style=\"color: #4A1525; font-size: 21px; margin-top: 0; margin-bottom: 20px; font-family: Georgia, serif;\">Redefinição de Palavra-passe</h2>" +
-            "        <p style=\"font-size: 15px; line-height: 1.7; color: #555555; margin-bottom: 20px;\">Recebemos um pedido para redefinir a palavra-passe associada à sua conta na Vinheria Agnello.</p>" +
+            "        <h2 style=\"color: #4A1525; font-size: 21px; margin-top: 0; margin-bottom: 20px; font-family: Georgia, serif;\">Redefinição de senha</h2>" +
+            "        <p style=\"font-size: 15px; line-height: 1.7; color: #555555; margin-bottom: 20px;\">Recebemos um pedido para redefinir a senha associada à sua conta na Vinheria Agnello.</p>" +
             "        <p style=\"font-size: 15px; line-height: 1.7; color: #555555; margin-bottom: 30px;\">Para criar uma nova credencial de forma segura, clique no botão abaixo. Por razões de segurança, este link é válido por apenas <strong>10 minutos</strong>:</p>" +
             "        <!-- Botão Principal Centralizado -->" +
             "        <table align=\"center\" border=\"0\" cellspacing=\"0\" cellpadding=\"0\" style=\"margin: 35px auto;\">" +
@@ -64,7 +64,7 @@ public class EmailTemplateUtil {
             "      <td style=\"padding: 45px 35px;\">" +
             "        <h2 style=\"color: #4A1525; font-size: 21px; margin-top: 0; margin-bottom: 20px; font-family: Georgia, serif;\">Bem-vindo(a) à nossa Adega!</h2>" +
             "        <p style=\"font-size: 15px; line-height: 1.7; color: #555555; margin-bottom: 20px;\">Olá, ficamos imensamente felizes pelo seu cadastro na <strong>Vinheria Agnello</strong>. Para garantir a segurança da sua conta e concluir o seu acesso, por favor, confirme o seu endereço de e-mail.</p>" +
-            "        <p style=\"font-size: 15px; line-height: 1.7; color: #555555; margin-bottom: 30px;\">Para ativar a sua conta de forma segura, clique no botão abaixo:</p>" +
+            "        <p style=\"font-size: 15px; line-height: 1.7; color: #555555; margin-bottom: 30px;\">Para ativar a sua conta de forma segura, clique no botão abaixo. O link é válido por <strong>48 horas</strong>:</p>" +
             "        <!-- Botão Principal Centralizado -->" +
             "        <table align=\"center\" border=\"0\" cellspacing=\"0\" cellpadding=\"0\" style=\"margin: 35px auto;\">" +
             "          <tr>" +

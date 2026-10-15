@@ -1,64 +1,52 @@
 package com.agnello.controller;
 
+import java.io.IOException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
+import com.agnello.exception.RegraNegocioException;
 import com.agnello.service.ClienteService;
+import com.agnello.util.UrlAplicacao;
+
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import java.io.IOException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 @WebServlet("/esqueci-senha")
 public class EsqueciSenhaController extends HttpServlet {
 
     private static final long serialVersionUID = 1L;
-    
     private static final Logger LOGGER = Logger.getLogger(EsqueciSenhaController.class.getName());
-    
-    private ClienteService clienteService = new ClienteService();
+    private static final String PAGINA = "/WEB-INF/views/esqueciSenha.jsp";
+
+    private final ClienteService clienteService = new ClienteService();
 
     @Override
-    protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        request.getRequestDispatcher("/WEB-INF/views/esqueciSenha.jsp").forward(request, response);
+    protected void doGet(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+        request.getRequestDispatcher(PAGINA).forward(request, response);
     }
+
     @Override
-    protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+    protected void doPost(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
         request.setCharacterEncoding("UTF-8");
-        String email = request.getParameter("email");
 
         try {
-            // Descobre a URL base para montar o link dinamicamente
-            String baseUrl = request.getRequestURL().toString().replace("esqueci-senha", "redefinir-senha");
-            
-            // O service valida o e-mail e retorna o link formatado (ou null se o e-mail não existir)
-            String linkRedefinicao = clienteService.solicitarRecuperacaoSenha(email, baseUrl);
+            clienteService.solicitarRecuperacaoSenha(request.getParameter("email"), UrlAplicacao.base(request));
+            // A mesma mensagem quer o e-mail exista ou não (não revela quem é cliente)
+            request.setAttribute("mensagemSucesso",
+                    "Se o e-mail estiver cadastrado, você vai receber um link para criar uma nova senha.");
 
-            // SEGURANÇA E FLUXO: Se o link for gerado (e-mail existe), tratamos o token
-            if (linkRedefinicao != null) {
-                int indiceToken = linkRedefinicao.indexOf("?token=");
-                if (indiceToken != -1) {
-                    String token = linkRedefinicao.substring(indiceToken + 7);
-                    request.getSession().setAttribute("token_" + token, email.trim());
-                }
-            }
-
-            // MENSAGEM NEUTRA: Exatamente a mesma resposta quer o e-mail exista ou não 
-            String mensagemSucesso = "Se o e-mail informado estiver registado, as instruções de recuperação serão enviadas.";
-            request.setAttribute("mensagemSucesso", mensagemSucesso);
-
-        } catch (IllegalArgumentException e) {
-            // Erros de validação de negócio (ex: campo vazio)
-            LOGGER.log(Level.WARNING, "Tentativa inválida de recuperação de senha. Motivo: {0}", e.getMessage());
+        } catch (RegraNegocioException e) {
             request.setAttribute("mensagemErro", e.getMessage());
-            
-        } catch (Exception e) {
-            // Qualquer outro erro (incluindo falhas de base de dados que subiram como RuntimeException)
-            LOGGER.log(Level.SEVERE, "Erro crítico ou inesperado no fluxo de esqueci-senha para o e-mail: " + email, e);
-            request.setAttribute("mensagemErro", "Ocorreu um erro interno ao processar sua solicitação. Por favor, tente novamente mais tarde.");
+        } catch (RuntimeException e) {
+            LOGGER.log(Level.SEVERE, "Erro inesperado ao pedir recuperação de senha", e);
+            request.setAttribute("mensagemErro", "Não foi possível processar o pedido agora. Tente novamente em alguns instantes.");
         }
 
-        request.getRequestDispatcher("/WEB-INF/views/esqueciSenha.jsp").forward(request, response);
+        request.getRequestDispatcher(PAGINA).forward(request, response);
     }
 }
