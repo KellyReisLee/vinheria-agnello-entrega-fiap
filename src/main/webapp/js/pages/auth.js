@@ -149,13 +149,13 @@ document.addEventListener('DOMContentLoaded', () => {
     input.addEventListener('input', () => {
       const v = input.value;
       let nivel = 0;
-      if (v.length >= 6) nivel++;
-      if (v.length >= 10) nivel++;
+      if (v.length >= 8) nivel++;
+      if (v.length >= 12) nivel++;
       if (/[A-Z]/.test(v) && /[a-z]/.test(v)) nivel++;
       if (/\d/.test(v) && /[^A-Za-z0-9]/.test(v)) nivel++;
       if (v && nivel === 0) nivel = 1;
       barra.dataset.nivel = String(nivel);
-      if (texto) texto.textContent = v ? `Força da senha: ${NOMES[nivel]}` : 'Mínimo de 6 caracteres.';
+      if (texto) texto.textContent = v ? `Força da senha: ${NOMES[nivel]}` : 'Mínimo de 8 caracteres.';
     });
   });
 

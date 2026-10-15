@@ -1,100 +1,89 @@
 package com.agnello.model;
 
 import java.io.Serializable;
-import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 
-public abstract class Usuario implements Serializable{
-    private static final long serialVersionUID = 1L;
-    
+/**
+ * Dados comuns a todos os clientes (PF e PJ).
+ *
+ * Este objeto fica guardado na sessão enquanto o cliente navega. Por isso:
+ * - não existe campo "senha": a senha em texto nunca sai do pedido de login;
+ * - senhaHash e bloqueadoAte são "transient": servem só para o login e nunca
+ *   são gravados se o Tomcat persistir a sessão em disco. O ClienteService
+ *   ainda os limpa antes de pôr o usuário na sessão.
+ */
+public abstract class Usuario implements Serializable {
+
+    private static final long serialVersionUID = 2L;
+
     private int id;
     private String email;
-    private String senha;
     private String telefone;
-    protected boolean emailVerificado;
-    private String tokenAtivacao;
-    private String tokenRecuperacao;
-    private LocalDateTime tokenExpiracao;
+    private boolean emailVerificado;
 
-    public Usuario() {}
+    private transient String senhaHash;
+    private transient OffsetDateTime bloqueadoAte;
 
-	public Usuario(int id, String email, String senha, String telefone, boolean emailVerificado, String tokenAtivacao,
-			String tokenRecuperacao, LocalDateTime tokenExpiracao) {
-		super();
-		this.id = id;
-		this.email = email;
-		this.senha = senha;
-		this.telefone = telefone;
-		this.emailVerificado = emailVerificado;
-		this.tokenAtivacao = tokenAtivacao;
-		this.tokenRecuperacao = tokenRecuperacao;
-		this.tokenExpiracao = tokenExpiracao;
-	}
+    protected Usuario() {
+    }
 
-	public int getId() {
-		return id;
-	}
+    public int getId() {
+        return id;
+    }
 
-	public void setId(int id) {
-		this.id = id;
-	}
+    public void setId(int id) {
+        this.id = id;
+    }
 
-	public String getEmail() {
-		return email;
-	}
+    public String getEmail() {
+        return email;
+    }
 
-	public void setEmail(String email) {
-		this.email = email;
-	}
+    public void setEmail(String email) {
+        this.email = email;
+    }
 
-	public String getSenha() {
-		return senha;
-	}
+    public String getTelefone() {
+        return telefone;
+    }
 
-	public void setSenha(String senha) {
-		this.senha = senha;
-	}
+    public void setTelefone(String telefone) {
+        this.telefone = telefone;
+    }
 
-	public String getTelefone() {
-		return telefone;
-	}
+    public boolean isEmailVerificado() {
+        return emailVerificado;
+    }
 
-	public void setTelefone(String telefone) {
-		this.telefone = telefone;
-	}
+    public void setEmailVerificado(boolean emailVerificado) {
+        this.emailVerificado = emailVerificado;
+    }
 
-	public boolean isEmailVerificado() {
-		return emailVerificado;
-	}
+    public String getSenhaHash() {
+        return senhaHash;
+    }
 
-	public void setEmailVerificado(boolean emailVerificado) {
-		this.emailVerificado = emailVerificado;
-	}
+    public void setSenhaHash(String senhaHash) {
+        this.senhaHash = senhaHash;
+    }
 
-	public String getTokenAtivacao() {
-		return tokenAtivacao;
-	}
+    public OffsetDateTime getBloqueadoAte() {
+        return bloqueadoAte;
+    }
 
-	public void setTokenAtivacao(String tokenAtivacao) {
-		this.tokenAtivacao = tokenAtivacao;
-	}
+    public void setBloqueadoAte(OffsetDateTime bloqueadoAte) {
+        this.bloqueadoAte = bloqueadoAte;
+    }
 
-	public String getTokenRecuperacao() {
-		return tokenRecuperacao;
-	}
+    /** Remove os dados que só servem para o login (chamado antes de ir para a sessão). */
+    public void limparDadosDeAutenticacao() {
+        this.senhaHash = null;
+        this.bloqueadoAte = null;
+    }
 
-	public void setTokenRecuperacao(String tokenRecuperacao) {
-		this.tokenRecuperacao = tokenRecuperacao;
-	}
+    /** "PF" ou "PJ". */
+    public abstract String getTipoCliente();
 
-	public LocalDateTime getTokenExpiracao() {
-		return tokenExpiracao;
-	}
-
-	public void setTokenExpiracao(LocalDateTime tokenExpiracao) {
-		this.tokenExpiracao = tokenExpiracao;
-	}
-
-	
-	
-    
+    /** Nome para mostrar no site (nome completo ou razão social). */
+    public abstract String getNomeExibicao();
 }

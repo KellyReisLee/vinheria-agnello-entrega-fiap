@@ -4,6 +4,16 @@
          xsi:schemaLocation="https://jakarta.ee/xml/ns/jakartaee https://jakarta.ee/xml/ns/jakartaee/web-app_5_0.xsd" 
          version="5.0">
 
+    <!-- Sessão: expira após 30 min sem atividade; o cookie não é acessível por
+         JavaScript (http-only) e o ID nunca aparece na URL (só por cookie). -->
+    <session-config>
+        <session-timeout>30</session-timeout>
+        <cookie-config>
+            <http-only>true</http-only>
+        </cookie-config>
+        <tracking-mode>COOKIE</tracking-mode>
+    </session-config>
+
     <error-page>
         <error-code>404</error-code>
         <location>/app-error-404</location>

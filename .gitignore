@@ -15,3 +15,6 @@ build/
 # Configurações do Servidor
 /.metadata/
 /.tmp/
+# Segredos (chaves e senhas NUNCA vão para o Git)
+.env
+*.env

@@ -1,66 +1,61 @@
 package com.agnello.controller;
 
+import java.io.IOException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
+import com.agnello.exception.RegraNegocioException;
 import com.agnello.service.ClienteService;
+import com.agnello.util.UrlAplicacao;
+
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import java.io.IOException;
 
 @WebServlet(name = "CadastroController", urlPatterns = {"/cadastro"})
 public class CadastroController extends HttpServlet {
+
     private static final long serialVersionUID = 1L;
-    
-    private ClienteService clienteService = new ClienteService();
+    private static final Logger LOGGER = Logger.getLogger(CadastroController.class.getName());
+    private static final String PAGINA = "/WEB-INF/views/cadastro.jsp";
+
+    private final ClienteService clienteService = new ClienteService();
 
     @Override
-    protected void doGet(HttpServletRequest request, HttpServletResponse response) 
+    protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        request.getRequestDispatcher("/WEB-INF/views/cadastro.jsp").forward(request, response);
+        request.getRequestDispatcher(PAGINA).forward(request, response);
     }
-   
-    @Override
-    protected void doPost(HttpServletRequest request, HttpServletResponse response) 
-            throws ServletException, IOException {
-        
-        request.setCharacterEncoding("UTF-8");
-        String tipoCliente = request.getParameter("tipo_cliente"); 
 
-        String email = request.getParameter("email");
-        String senha = request.getParameter("senha");
-        String telefone = request.getParameter("telefone");
-        
-        // Dados específicos PF
-        String nome = request.getParameter("nome");
-        String sobrenome = request.getParameter("sobrenome");
-        String cpf = request.getParameter("cpf");
-        
-        // Dados específicos PJ
-        String razaoSocial = request.getParameter("razao_social");
-        String cnpj = request.getParameter("cnpj");
+    @Override
+    protected void doPost(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+        request.setCharacterEncoding("UTF-8");
 
         try {
-            // Descobre a URL base dinamicamente para construir o link de ativação no e-mail
-            String baseUrl = request.getRequestURL().toString().replace(request.getRequestURI(), "") + request.getContextPath();
+            clienteService.cadastrarCliente(
+                    request.getParameter("tipo_cliente"),
+                    request.getParameter("email"),
+                    request.getParameter("senha"),
+                    request.getParameter("telefone"),
+                    request.getParameter("nome"),
+                    request.getParameter("sobrenome"),
+                    request.getParameter("cpf"),
+                    request.getParameter("razao_social"),
+                    request.getParameter("cnpj"),
+                    UrlAplicacao.base(request));
 
-            // Delega a regra de negócio e persistência para o Service, passando a baseUrl
-            clienteService.cadastrarCliente(tipoCliente, email, senha, telefone, nome, sobrenome, cpf, razaoSocial, cnpj, baseUrl);
+            request.setAttribute("sucesso", "Cadastro realizado! Enviamos um link de ativação para o seu e-mail.");
 
-            request.setAttribute("sucesso", "Cadastro realizado com sucesso! Verifique o seu e-mail para ativar a conta.");
-            request.getRequestDispatcher("/WEB-INF/views/cadastro.jsp").forward(request, response);
-
-        } catch (Exception e) {
-            e.printStackTrace(); 
-            String mensagemErro = e.getMessage().toLowerCase();
-            
-            if (mensagemErro.contains("violates unique constraint") || mensagemErro.contains("duplicate key")) {
-                request.setAttribute("erro", "Este CPF, CNPJ ou E-mail já está cadastrado em nossa base.");
-            } else {
-                request.setAttribute("erro", "Erro ao processar o cadastro: " + e.getMessage());
-            }
-            
-            request.getRequestDispatcher("/WEB-INF/views/cadastro.jsp").forward(request, response);
+        } catch (RegraNegocioException e) {
+            request.setAttribute("erro", e.getMessage());
+        } catch (RuntimeException e) {
+            LOGGER.log(Level.SEVERE, "Erro inesperado no cadastro", e);
+            request.setAttribute("erro", "Não foi possível concluir o cadastro agora. Tente novamente em alguns instantes.");
         }
+
+        request.getRequestDispatcher(PAGINA).forward(request, response);
     }
 }
