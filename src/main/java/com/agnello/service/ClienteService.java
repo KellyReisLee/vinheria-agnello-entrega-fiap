@@ -1,208 +1,267 @@
 package com.agnello.service;
 
+import java.time.OffsetDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
 import com.agnello.dao.ClienteDAO;
+import com.agnello.exception.RegraNegocioException;
 import com.agnello.model.ClientePF;
 import com.agnello.model.ClientePJ;
 import com.agnello.model.Usuario;
+import com.agnello.seguranca.HashSenha;
+import com.agnello.seguranca.TokenSeguro;
+import com.agnello.util.EmailTemplateUtil;
+import com.agnello.util.Validacao;
 
+/**
+ * Regras de negócio das contas de cliente: cadastro, ativação, login,
+ * recuperação de senha e exclusão.
+ *
+ * Os Controllers só tratam de HTTP (ler parâmetros, escolher a página); tudo o
+ * que envolve segurança e validação está aqui, num único lugar.
+ */
 public class ClienteService {
 
-	private ClienteDAO clienteDAO;
-	private EmailService emailService;
+    private static final Logger LOGGER = Logger.getLogger(ClienteService.class.getName());
 
-	public ClienteService() {
-		this.clienteDAO = new ClienteDAO();
-		this.emailService = new EmailService();
-	}
+    /** Validade do link de ativação enviado por e-mail. */
+    public static final int VALIDADE_ATIVACAO_HORAS = 48;
+    /** Validade do link de recuperação de senha (o texto do e-mail fala em 10 minutos). */
+    public static final int VALIDADE_RECUPERACAO_MINUTOS = 10;
+    /** Tentativas de senha erradas seguidas antes do bloqueio temporário. */
+    public static final int MAX_TENTATIVAS_LOGIN = 5;
+    public static final int MINUTOS_BLOQUEIO = 15;
 
-	public void cadastrarCliente(String tipoCliente, String email, String senha, String telefone, String nome,
-			String sobrenome, String cpf, String razaoSocial, String cnpj, String baseUrl) throws Exception {
+    private static final String MSG_LOGIN_INVALIDO = "E-mail ou senha inválidos.";
 
-		if (tipoCliente == null || tipoCliente.trim().isEmpty()) {
-			throw new IllegalArgumentException("O tipo de cliente não foi informado.");
-		}
+    private final ClienteDAO clienteDAO;
+    private final EmailService emailService;
 
-		String tokenAtivacao = java.util.UUID.randomUUID().toString();
-		String emailTratado = email.trim().toLowerCase();
-
-		if ("PF".equalsIgnoreCase(tipoCliente)) {
-			ClientePF pf = new ClientePF();
-			pf.setNome(nome);
-			pf.setSobrenome(sobrenome);
-			pf.setCpf(cpf);
-			pf.setEmail(emailTratado);
-			pf.setTelefone(telefone);
-			pf.setSenha(senha);
-
-			clienteDAO.cadastrarPF(pf, tokenAtivacao);
-
-		} else if ("PJ".equalsIgnoreCase(tipoCliente)) {
-			ClientePJ pj = new ClientePJ();
-			pj.setRazaoSocial(razaoSocial);
-			pj.setCnpj(cnpj);
-			pj.setEmail(emailTratado);
-			pj.setTelefone(telefone);
-			pj.setSenha(senha);
-
-			clienteDAO.cadastrarPJ(pj, tokenAtivacao);
-		} else {
-			throw new IllegalArgumentException("Tipo de cliente inválido.");
-		}
-
-       // Monta o link de ativação
-		String baseLimpa = baseUrl != null ? baseUrl.replaceAll("/$", "") : "";
-		String linkAtivacao = baseLimpa + "/ativar?token=" + tokenAtivacao;
-
-      // Envia o e-mail de confirmação de cadastro de forma assíncrona
-		String assunto = "Confirme o seu cadastro - Vinheria Agnello";
-		String corpoHtml = com.agnello.util.EmailTemplateUtil.getCorpoAtivacaoConta(linkAtivacao); // Crie este template
-																									// ou adapte
-
-		emailService.enviarEmailAssincrono(emailTratado, assunto, corpoHtml);
-	}
-
-	
-	
-	public boolean ativarConta(String token) {
-		if (token == null || token.trim().isEmpty()) {
-			return false;
-		}
-		return clienteDAO.ativarContaPorToken(token.trim());
-	}
-	
-	
-
-	/**
-	 * Valida as credenciais de login do usuário.
-	 */
-	/**
-     * Valida as credenciais de login do usuário e bloqueia se o e-mail não estiver verificado.
-     */
-    public Usuario autenticar(String email, String senhaInformada) throws Exception {
-        Usuario usuarioBanco = clienteDAO.buscarPorEmail(email);
-        
-        if (usuarioBanco != null && usuarioBanco.getSenha() != null) {
-            if (usuarioBanco.getSenha().trim().equals(senhaInformada.trim())) {
-                
-                // BLINDAGEM: Impede o login se o e-mail não foi ativado via link
-                if (!usuarioBanco.isEmailVerificado()) {
-                    throw new Exception("A sua conta ainda não foi ativada. Por favor, verifique o seu e-mail e clique no link de confirmação.");
-                }
-                
-                return usuarioBanco; 
-            }
-        }
-        return null; 
+    public ClienteService() {
+        this(new ClienteDAO(), new EmailService());
     }
 
-	/**
-	 * Valida o e-mail, gera um token seguro de recuperação, define uma expiração de
-	 * 30 minutos, persiste os dados e dispara o e-mail de forma assíncrona.
-	 */
-	public String solicitarRecuperacaoSenha(String email, String baseUrl) {
-		if (email == null || email.trim().isEmpty()) {
-			throw new IllegalArgumentException("Por favor, informe um e-mail válido.");
-		}
+    /** Construtor para testes (permite usar versões falsas do DAO e do e-mail). */
+    public ClienteService(ClienteDAO clienteDAO, EmailService emailService) {
+        this.clienteDAO = clienteDAO;
+        this.emailService = emailService;
+    }
 
-		String emailTratado = email.trim().toLowerCase();
-		Usuario usuario = clienteDAO.buscarPorEmail(emailTratado);
+    // ===================================================================== cadastro
 
-		// SEGURANÇA: Se o e-mail não existir, retorna null (proteção contra User
-		// Enumeration)
-		if (usuario == null) {
-			return null;
-		}
+    /**
+     * Valida os dados, guarda a conta (senha em hash, CPF e telefone cifrados) e
+     * envia o e-mail de ativação. Devolve o cliente criado (sem dados de autenticação).
+     */
+    public Usuario cadastrarCliente(String tipoCliente, String email, String senha, String telefone,
+            String nome, String sobrenome, String cpf, String razaoSocial, String cnpj, String urlBase)
+            throws RegraNegocioException {
 
-		String token = java.util.UUID.randomUUID().toString();
-		java.time.LocalDateTime expiracao = java.time.LocalDateTime.now().plusMinutes(10);
+        String emailTratado = Validacao.normalizarEmail(email);
+        if (!Validacao.emailValido(emailTratado)) {
+            throw new RegraNegocioException("Informe um e-mail válido.");
+        }
+        String erroSenha = Validacao.validarSenha(senha);
+        if (erroSenha != null) {
+            throw new RegraNegocioException(erroSenha);
+        }
+        String telefoneDigitos = Validacao.somenteDigitos(telefone);
+        if (!Validacao.vazio(telefoneDigitos) && !Validacao.telefoneValido(telefoneDigitos)) {
+            throw new RegraNegocioException("Informe um telefone com DDD (10 ou 11 dígitos).");
+        }
 
-		// Persiste o token e a expiração na base de dados
-		clienteDAO.salvarTokenRecuperacao(emailTratado, token, expiracao);
+        String token = TokenSeguro.gerar();
+        String senhaHash = HashSenha.gerar(senha);
+        Usuario criado;
 
-		String baseLimpa = baseUrl != null ? baseUrl.replaceAll("/$", "") : "";
-		String linkRedefinicao = baseLimpa + "?token=" + token;
+        if ("PF".equalsIgnoreCase(tipoCliente)) {
+            if (Validacao.vazio(nome) || Validacao.vazio(sobrenome)) {
+                throw new RegraNegocioException("Informe o nome e o sobrenome.");
+            }
+            if (!Validacao.cpfValido(cpf)) {
+                throw new RegraNegocioException("Informe um CPF válido.");
+            }
+            ClientePF pf = new ClientePF();
+            pf.setNome(nome.trim());
+            pf.setSobrenome(sobrenome.trim());
+            pf.setCpf(Validacao.somenteDigitos(cpf));
+            pf.setEmail(emailTratado);
+            pf.setTelefone(Validacao.vazio(telefoneDigitos) ? null : telefoneDigitos);
+            pf.setId(clienteDAO.inserirPF(pf, senhaHash, TokenSeguro.hash(token), VALIDADE_ATIVACAO_HORAS));
+            criado = pf;
 
-		// DISPARO DO E-MAIL DE RECUPERAÇÃO
-		String assunto = "Recuperação de Senha - Vinheria Agnello";
-		String corpoHtml = com.agnello.util.EmailTemplateUtil.getCorpoRecuperacaoSenha(linkRedefinicao);
+        } else if ("PJ".equalsIgnoreCase(tipoCliente)) {
+            if (Validacao.vazio(razaoSocial)) {
+                throw new RegraNegocioException("Informe a razão social.");
+            }
+            if (!Validacao.cnpjValido(cnpj)) {
+                throw new RegraNegocioException("Informe um CNPJ válido.");
+            }
+            ClientePJ pj = new ClientePJ();
+            pj.setRazaoSocial(razaoSocial.trim());
+            pj.setCnpj(Validacao.somenteDigitos(cnpj));
+            pj.setEmail(emailTratado);
+            pj.setTelefone(Validacao.vazio(telefoneDigitos) ? null : telefoneDigitos);
+            pj.setId(clienteDAO.inserirPJ(pj, senhaHash, TokenSeguro.hash(token), VALIDADE_ATIVACAO_HORAS));
+            criado = pj;
 
-		emailService.enviarEmailAssincrono(emailTratado, assunto, corpoHtml);
+        } else {
+            throw new RegraNegocioException("Escolha o tipo de conta: pessoa física ou jurídica.");
+        }
 
-		return linkRedefinicao;
-	}
+        String link = urlBase + "/ativar?token=" + token;
+        emailService.enviarEmailAssincrono(emailTratado, "Confirme o seu cadastro - Vinheria Agnello",
+                EmailTemplateUtil.getCorpoAtivacaoConta(link));
+        return criado;
+    }
 
-	/**
-	 * Valida se o token existe e ainda está dentro do prazo de 30 minutos.
-	 */
-	public boolean validarTokenRecuperacao(String token) {
-		if (token == null || token.trim().isEmpty()) {
-			return false;
-		}
-		return clienteDAO.validarToken(token.trim());
-	}
+    public boolean ativarConta(String token) {
+        if (Validacao.vazio(token)) {
+            return false;
+        }
+        return clienteDAO.ativarPorToken(TokenSeguro.hash(token));
+    }
 
-	/**
-	 * Realiza a redefinição da senha utilizando o token de forma segura e o
-	 * invalida após o uso.
-	 */
-	public void redefinirSenhaComToken(String token, String novaSenha, String confirmaSenha) throws Exception {
-		if (token == null || token.trim().isEmpty()) {
-			throw new Exception("Sessão de recuperação inválida. Solicite um novo link.");
-		}
+    // ===================================================================== login
 
-		// Validação rigorosa de tempo/existência antes de prosseguir
-		if (!validarTokenRecuperacao(token)) {
-			throw new Exception(
-					"Este link de recuperação expirou (limite de 10 minutos) ou já foi utilizado. Por favor, solicite um novo.");
-		}
+    /**
+     * Confere e-mail e senha. Devolve o usuário (pronto para a sessão) ou lança
+     * RegraNegocioException com a mensagem a mostrar.
+     *
+     * Cuidados de segurança:
+     * - a mensagem é a mesma para "e-mail não existe" e "senha errada";
+     * - se o e-mail não existe, ainda assim gastamos o tempo de um hash
+     *   (o tempo de resposta não revela quais e-mails estão cadastrados);
+     * - 5 erros seguidos bloqueiam a conta por 15 minutos;
+     * - hashes antigos/fracos são refeitos automaticamente no login.
+     */
+    public Usuario autenticar(String email, String senha) throws RegraNegocioException {
+        String emailTratado = Validacao.normalizarEmail(email);
+        if (Validacao.vazio(emailTratado) || senha == null || senha.isEmpty() || senha.length() > Validacao.SENHA_MAX) {
+            throw new RegraNegocioException(MSG_LOGIN_INVALIDO);
+        }
 
-		if (novaSenha == null || novaSenha.trim().isEmpty() || confirmaSenha == null
-				|| confirmaSenha.trim().isEmpty()) {
-			throw new IllegalArgumentException("Por favor, preencha todos os campos de senha.");
-		}
+        Usuario usuario = clienteDAO.buscarPorEmail(emailTratado);
+        if (usuario == null) {
+            HashSenha.verificarSemUsuario(senha);
+            throw new RegraNegocioException(MSG_LOGIN_INVALIDO);
+        }
 
-		if (!novaSenha.equals(confirmaSenha)) {
-			throw new IllegalArgumentException("As senhas digitadas não coincidem. Tente novamente.");
-		}
+        OffsetDateTime bloqueadoAte = usuario.getBloqueadoAte();
+        if (bloqueadoAte != null && bloqueadoAte.isAfter(OffsetDateTime.now())) {
+            throw new RegraNegocioException("Muitas tentativas sem sucesso. Por segurança, tente novamente depois das "
+                    + bloqueadoAte.atZoneSameInstant(java.time.ZoneId.of("America/Sao_Paulo"))
+                            .format(DateTimeFormatter.ofPattern("HH:mm"))
+                    + " ou redefina a sua senha.");
+        }
 
-		if (novaSenha.length() < 6) {
-			throw new IllegalArgumentException("A nova senha deve conter pelo menos 6 caracteres.");
-		}
+        if (!HashSenha.verificar(senha, usuario.getSenhaHash())) {
+            clienteDAO.registrarFalhaLogin(usuario.getId(), MAX_TENTATIVAS_LOGIN, MINUTOS_BLOQUEIO);
+            LOGGER.log(Level.WARNING, "Senha incorreta para o cliente id={0}", usuario.getId());
+            throw new RegraNegocioException(MSG_LOGIN_INVALIDO);
+        }
 
-		// Atualiza a senha e limpa o token na base de dados (Garante o uso único)
-		clienteDAO.atualizarSenhaEInvalidarToken(token.trim(), novaSenha);
-	}
+        if (!usuario.isEmailVerificado()) {
+            throw new RegraNegocioException("A sua conta ainda não foi ativada. Verifique o seu e-mail e clique "
+                    + "no link de confirmação.");
+        }
 
-	/**
-	 * Busca um usuário pelo e-mail com validação prévia.
-	 */
-	public Usuario buscarPorEmail(String email) throws Exception {
-		if (email == null || email.trim().isEmpty()) {
-			return null;
-		}
-		return clienteDAO.buscarPorEmail(email.trim());
-	}
+        String novoHash = HashSenha.precisaAtualizar(usuario.getSenhaHash()) ? HashSenha.gerar(senha) : null;
+        clienteDAO.registrarLoginComSucesso(usuario.getId(), novoHash);
 
-	/**
-	 * Valida o e-mail de confirmação e executa a exclusão da conta do utilizador.
-	 */
-	public void deletarConta(String emailSessao, String emailConfirmacao) throws Exception {
-		if (emailSessao == null || emailSessao.trim().isEmpty()) {
-			throw new Exception("Sessão inválida. Por favor, faça login novamente.");
-		}
+        usuario.limparDadosDeAutenticacao();
+        return usuario;
+    }
 
-		if (emailConfirmacao == null || emailConfirmacao.trim().isEmpty()) {
-			throw new IllegalArgumentException("Por favor, digite o seu e-mail para confirmar a exclusão.");
-		}
+    // ===================================================================== recuperação de senha
 
-		if (!emailSessao.trim().equalsIgnoreCase(emailConfirmacao.trim())) {
-			throw new IllegalArgumentException("O e-mail digitado não corresponde à sua conta ativa.");
-		}
+    /**
+     * Gera o link de recuperação e envia por e-mail. Não diz se o e-mail existe
+     * (o Controller mostra sempre a mesma mensagem), para não revelar quem é cliente.
+     */
+    public void solicitarRecuperacaoSenha(String email, String urlBase) throws RegraNegocioException {
+        String emailTratado = Validacao.normalizarEmail(email);
+        if (!Validacao.emailValido(emailTratado)) {
+            throw new RegraNegocioException("Informe um e-mail válido.");
+        }
 
-		boolean deletado = clienteDAO.deletarPorEmail(emailSessao.trim());
+        Usuario usuario = clienteDAO.buscarPorEmail(emailTratado);
+        if (usuario == null) {
+            return;
+        }
 
-		if (!deletado) {
-			throw new Exception("Não foi possível encontrar o registo para exclusão na base de dados.");
-		}
-	}
+        String token = TokenSeguro.gerar();
+        clienteDAO.salvarTokenRecuperacao(usuario.getId(), TokenSeguro.hash(token), VALIDADE_RECUPERACAO_MINUTOS);
+
+        String link = urlBase + "/redefinir-senha?token=" + token;
+        emailService.enviarEmailAssincrono(emailTratado, "Recuperação de senha - Vinheria Agnello",
+                EmailTemplateUtil.getCorpoRecuperacaoSenha(link));
+    }
+
+    public boolean validarTokenRecuperacao(String token) {
+        return !Validacao.vazio(token) && clienteDAO.tokenRecuperacaoValido(TokenSeguro.hash(token));
+    }
+
+    public void redefinirSenhaComToken(String token, String novaSenha, String confirmaSenha)
+            throws RegraNegocioException {
+        if (Validacao.vazio(novaSenha) || Validacao.vazio(confirmaSenha)) {
+            throw new RegraNegocioException("Preencha os dois campos de senha.");
+        }
+        if (!novaSenha.equals(confirmaSenha)) {
+            throw new RegraNegocioException("As senhas digitadas não coincidem.");
+        }
+        String erroSenha = Validacao.validarSenha(novaSenha);
+        if (erroSenha != null) {
+            throw new RegraNegocioException(erroSenha);
+        }
+        if (Validacao.vazio(token)
+                || !clienteDAO.redefinirSenhaPorToken(TokenSeguro.hash(token), HashSenha.gerar(novaSenha))) {
+            throw new TokenInvalidoException();
+        }
+    }
+
+    /** Link de recuperação expirado ou já usado: o Controller manda pedir um novo. */
+    public static class TokenInvalidoException extends RegraNegocioException {
+        private static final long serialVersionUID = 1L;
+
+        public TokenInvalidoException() {
+            super("Este link de recuperação expirou ou já foi usado. Peça um novo.");
+        }
+    }
+
+    // ===================================================================== consultas
+
+    public boolean emailCadastrado(String email) {
+        String emailTratado = Validacao.normalizarEmail(email);
+        return Validacao.emailValido(emailTratado) && clienteDAO.existeEmail(emailTratado);
+    }
+
+    /** Usuário pronto para a sessão (sem hash de senha). */
+    public Usuario buscarParaSessao(int id) {
+        Usuario usuario = clienteDAO.buscarPorId(id);
+        if (usuario != null) {
+            usuario.limparDadosDeAutenticacao();
+        }
+        return usuario;
+    }
+
+    // ===================================================================== exclusão
+
+    /** Exclui a conta do usuário da sessão, depois de ele confirmar o próprio e-mail. */
+    public void deletarConta(Usuario usuarioSessao, String emailConfirmacao) throws RegraNegocioException {
+        if (usuarioSessao == null) {
+            throw new RegraNegocioException("Sessão expirada. Entre novamente.");
+        }
+        if (Validacao.vazio(emailConfirmacao)) {
+            throw new RegraNegocioException("Digite o seu e-mail para confirmar a exclusão.");
+        }
+        if (!usuarioSessao.getEmail().equalsIgnoreCase(emailConfirmacao.trim())) {
+            throw new RegraNegocioException("O e-mail digitado não corresponde à sua conta.");
+        }
+        if (!clienteDAO.deletarPorId(usuarioSessao.getId())) {
+            throw new RegraNegocioException("Esta conta já não existe.");
+        }
+    }
 }

@@ -124,9 +124,17 @@
             pessoais, exceto os que a lei nos obriga a manter, como as informações fiscais dos pedidos, guardadas pelo prazo legal.</p>
 
           <h2 id="seguranca">Segurança</h2>
-          <p>Adotamos medidas técnicas e administrativas para proteger os seus dados, como conexão segura (HTTPS),
-            acesso restrito às informações e senhas que só você conhece. Nenhum sistema é totalmente imune a falhas;
-            se acontecer um incidente que possa trazer risco a você, vamos avisá-lo e comunicar à ANPD.</p>
+          <p>Adotamos medidas técnicas e administrativas para proteger os seus dados:</p>
+          <ul>
+            <li>conexão segura (HTTPS) entre o seu navegador e o site, e conexão cifrada entre o site e o banco de dados;</li>
+            <li>a sua <strong>senha nunca é guardada</strong>: guardamos apenas um código irreversível gerado a partir dela
+              (hash PBKDF2), que não permite descobrir a senha;</li>
+            <li><strong>CPF e telefone ficam cifrados</strong> no banco de dados (AES-256), com chaves guardadas separadamente;</li>
+            <li>os links de ativação e de recuperação de senha são de uso único e expiram;</li>
+            <li>a conta é bloqueada temporariamente depois de várias tentativas de senha erradas.</li>
+          </ul>
+          <p>Nenhum sistema é totalmente imune a falhas; se acontecer um incidente que possa trazer risco a você,
+            vamos avisá-lo e comunicar à ANPD.</p>
 
           <h2 id="direitos">Os seus direitos</h2>
           <p>Pelo artigo 18 da LGPD, você pode, a qualquer momento:</p>

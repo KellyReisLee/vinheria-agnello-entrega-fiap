@@ -297,7 +297,7 @@ document.addEventListener('DOMContentLoaded', () => {
       if (!pf && !$('novo-razao').value.trim()) return falhar('Informe a razão social.', $('novo-razao'));
       if (!pf && so($('novo-cnpj').value).length !== 14) return falhar('Informe um CNPJ com 14 dígitos.', $('novo-cnpj'));
       if (so($('novo-telefone').value).length < 10) return falhar('Informe o telefone com DDD.', $('novo-telefone'));
-      if ($('novo-senha').value.length < 6) return falhar('A senha deve ter pelo menos 6 caracteres.', $('novo-senha'));
+      if ($('novo-senha').value.length < 8) return falhar('A senha deve ter pelo menos 8 caracteres.', $('novo-senha'));
 
       const dados = new URLSearchParams(new FormData($('form-identification')));
       dados.set('senha', $('novo-senha').value);
