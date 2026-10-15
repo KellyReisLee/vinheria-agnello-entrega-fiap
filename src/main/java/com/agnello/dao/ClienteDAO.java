@@ -1,282 +1,261 @@
 package com.agnello.dao;
 
-import com.agnello.connection.ConnectionFactory;
-import com.agnello.model.ClientePF;
-import com.agnello.model.ClientePJ;
-import com.agnello.model.Usuario;
-
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
+import java.time.OffsetDateTime;
 
+import org.postgresql.util.PSQLException;
+
+import com.agnello.connection.ConnectionFactory;
+import com.agnello.exception.DadoDuplicadoException;
+import com.agnello.model.ClientePF;
+import com.agnello.model.ClientePJ;
+import com.agnello.model.Usuario;
+import com.agnello.seguranca.CifraDados;
+import com.agnello.seguranca.IndiceCego;
+
+/**
+ * Acesso à tabela "clientes".
+ *
+ * Esta é a ÚNICA classe que conhece o formato guardado no banco:
+ * - ao gravar, cifra CPF e telefone e calcula o índice cego do CPF;
+ * - ao ler, decifra — o resto da aplicação trabalha sempre com os valores normais.
+ *
+ * Senhas e tokens chegam aqui já transformados em hash pelo ClienteService.
+ * Todas as consultas usam PreparedStatement (proteção contra SQL Injection).
+ */
 public class ClienteDAO {
 
-    
-	// Atualiza o método de cadastro PF para gerar e guardar o token de ativação
-    public void cadastrarPF(ClientePF cliente, String tokenAtivacao) {
-        String sql = "INSERT INTO clientes (tipo_cliente, nome, sobrenome, cpf, email, telefone, senha, email_verificado, token_ativacao) VALUES (?, ?, ?, ?, ?, ?, ?, false, ?)";
+    /** Nomes usados como "dados associados" na cifra e no índice (não mudar depois de ir para produção). */
+    public static final String CAMPO_CPF = "cpf";
+    public static final String CAMPO_TELEFONE = "telefone";
+
+    private static final String COLUNAS =
+            "id, tipo_cliente, email, senha_hash, nome, sobrenome, cpf_cifrado, razao_social, cnpj, "
+            + "telefone_cifrado, email_verificado, bloqueado_ate";
+
+    /** Código do PostgreSQL para "violação de valor único". */
+    private static final String SQLSTATE_DUPLICADO = "23505";
+
+    // ------------------------------------------------------------------ cadastro
+
+    public int inserirPF(ClientePF cliente, String senhaHash, String tokenAtivacaoHash, int validadeTokenHoras)
+            throws DadoDuplicadoException {
+        String sql = "INSERT INTO clientes (tipo_cliente, email, senha_hash, nome, sobrenome, cpf_cifrado, cpf_indice, "
+                + "telefone_cifrado, email_verificado, token_ativacao_hash, token_ativacao_expira) "
+                + "VALUES ('PF', ?, ?, ?, ?, ?, ?, ?, false, ?, now() + make_interval(hours => ?))";
 
         try (Connection conn = ConnectionFactory.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
+             PreparedStatement stmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
 
-            stmt.setString(1, "PF");
-            stmt.setString(2, cliente.getNome());
-            stmt.setString(3, cliente.getSobrenome());
-            stmt.setString(4, cliente.getCpf());
-            stmt.setString(5, cliente.getEmail());
-            stmt.setString(6, cliente.getTelefone());
-            stmt.setString(7, cliente.getSenha());
-            stmt.setString(8, tokenAtivacao);
-
+            stmt.setString(1, cliente.getEmail());
+            stmt.setString(2, senhaHash);
+            stmt.setString(3, cliente.getNome());
+            stmt.setString(4, cliente.getSobrenome());
+            stmt.setString(5, CifraDados.cifrar(CAMPO_CPF, cliente.getCpf()));
+            stmt.setString(6, IndiceCego.calcular(CAMPO_CPF, cliente.getCpf()));
+            stmt.setString(7, CifraDados.cifrar(CAMPO_TELEFONE, cliente.getTelefone()));
+            stmt.setString(8, tokenAtivacaoHash);
+            stmt.setInt(9, validadeTokenHoras);
             stmt.executeUpdate();
+            return idGerado(stmt);
 
         } catch (SQLException e) {
-            throw new RuntimeException("Erro ao cadastrar Cliente PF no Supabase: " + e.getMessage(), e);
+            if (SQLSTATE_DUPLICADO.equals(e.getSQLState())) {
+                throw new DadoDuplicadoException(mensagemDuplicado(e));
+            }
+            throw new RuntimeException("Erro ao cadastrar cliente.", e);
         }
     }
 
-    // Atualiza o método de cadastro PJ para gerar e guardar o token de ativação
-    public void cadastrarPJ(ClientePJ cliente, String tokenAtivacao) {
-        String sql = "INSERT INTO clientes (tipo_cliente, razao_social, cnpj, email, telefone, senha, email_verificado, token_ativacao) VALUES (?, ?, ?, ?, ?, ?, false, ?)";
+    public int inserirPJ(ClientePJ cliente, String senhaHash, String tokenAtivacaoHash, int validadeTokenHoras)
+            throws DadoDuplicadoException {
+        String sql = "INSERT INTO clientes (tipo_cliente, email, senha_hash, razao_social, cnpj, telefone_cifrado, "
+                + "email_verificado, token_ativacao_hash, token_ativacao_expira) "
+                + "VALUES ('PJ', ?, ?, ?, ?, ?, false, ?, now() + make_interval(hours => ?))";
 
         try (Connection conn = ConnectionFactory.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
+             PreparedStatement stmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
 
-            stmt.setString(1, "PJ");
-            stmt.setString(2, cliente.getRazaoSocial());
-            stmt.setString(3, cliente.getCnpj());
-            stmt.setString(4, cliente.getEmail());
-            stmt.setString(5, cliente.getTelefone());
-            stmt.setString(6, cliente.getSenha());
-            stmt.setString(7, tokenAtivacao);
-
+            stmt.setString(1, cliente.getEmail());
+            stmt.setString(2, senhaHash);
+            stmt.setString(3, cliente.getRazaoSocial());
+            stmt.setString(4, cliente.getCnpj());
+            stmt.setString(5, CifraDados.cifrar(CAMPO_TELEFONE, cliente.getTelefone()));
+            stmt.setString(6, tokenAtivacaoHash);
+            stmt.setInt(7, validadeTokenHoras);
             stmt.executeUpdate();
+            return idGerado(stmt);
 
         } catch (SQLException e) {
-            throw new RuntimeException("Erro ao cadastrar Cliente PJ no Supabase: " + e.getMessage(), e);
+            if (SQLSTATE_DUPLICADO.equals(e.getSQLState())) {
+                throw new DadoDuplicadoException(mensagemDuplicado(e));
+            }
+            throw new RuntimeException("Erro ao cadastrar cliente.", e);
         }
     }
 
-    // Método para ativar a conta pelo token
-    public boolean ativarContaPorToken(String token) {
-        String sql = "UPDATE clientes SET email_verificado = true, token_ativacao = NULL WHERE token_ativacao = ?";
-
-        try (Connection conn = ConnectionFactory.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
-
-            stmt.setString(1, token);
-            int linhasAfetadas = stmt.executeUpdate();
-            return linhasAfetadas > 0;
-
-        } catch (SQLException e) {
-            throw new RuntimeException("Erro ao ativar conta por token: " + e.getMessage(), e);
-        }
+    /** Ativa a conta se o token existir e estiver no prazo. O token só funciona uma vez. */
+    public boolean ativarPorToken(String tokenHash) {
+        String sql = "UPDATE clientes SET email_verificado = true, token_ativacao_hash = NULL, token_ativacao_expira = NULL "
+                + "WHERE token_ativacao_hash = ? AND token_ativacao_expira > now()";
+        return executarUpdate(sql, "ativar conta", tokenHash) > 0;
     }
-    
-    
+
+    // ------------------------------------------------------------------ consultas
+
+    /** Inclui o hash da senha e o bloqueio: usado apenas pelo login. */
     public Usuario buscarPorEmail(String email) {
-        String sql = "SELECT * FROM clientes WHERE email = ?";
-        Usuario usuario = null;
+        return buscarUm("SELECT " + COLUNAS + " FROM clientes WHERE lower(email) = lower(?)", email);
+    }
 
+    public Usuario buscarPorId(int id) {
+        return buscarUm("SELECT " + COLUNAS + " FROM clientes WHERE id = ?", id);
+    }
+
+    public boolean existeEmail(String email) {
+        String sql = "SELECT 1 FROM clientes WHERE lower(email) = lower(?)";
         try (Connection conn = ConnectionFactory.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
-
             stmt.setString(1, email);
             try (ResultSet rs = stmt.executeQuery()) {
-                if (rs.next()) {
-                    String tipo = rs.getString("tipo_cliente");
-                    int id = rs.getInt("id");
-                    String senha = rs.getString("senha");
-                    String telefone = rs.getString("telefone");
-                    boolean emailVerificado = rs.getBoolean("email_verificado"); // Lê do banco
-
-                    if ("PF".equals(tipo)) {
-                        ClientePF pf = new ClientePF();
-                        pf.setId(id);
-                        pf.setEmail(email);
-                        pf.setSenha(senha);
-                        pf.setTelefone(telefone);
-                        pf.setNome(rs.getString("nome"));
-                        pf.setSobrenome(rs.getString("sobrenome"));
-                        pf.setCpf(rs.getString("cpf"));
-                        pf.setEmailVerificado(emailVerificado); // Define no objeto
-                        usuario = pf;
-                    } else if ("PJ".equals(tipo)) {
-                        ClientePJ pj = new ClientePJ();
-                        pj.setId(id);
-                        pj.setEmail(email);
-                        pj.setSenha(senha);
-                        pj.setTelefone(telefone);
-                        pj.setRazaoSocial(rs.getString("razao_social"));
-                        pj.setCnpj(rs.getString("cnpj"));
-                        pj.setEmailVerificado(emailVerificado); // Define no objeto
-                        usuario = pj;
-                    }
-                }
+                return rs.next();
             }
         } catch (SQLException e) {
-            throw new RuntimeException("Erro ao buscar usuário por e-mail: " + e.getMessage(), e);
+            throw new RuntimeException("Erro ao verificar e-mail.", e);
         }
+    }
 
+    // ------------------------------------------------------------------ login
+
+    /**
+     * Soma uma tentativa falhada. À 5.ª seguida, bloqueia a conta por 15 minutos
+     * (dificulta adivinhar a senha por tentativa e erro).
+     */
+    public void registrarFalhaLogin(int id, int maxTentativas, int minutosBloqueio) {
+        String sql = "UPDATE clientes SET "
+                + "tentativas_login_falhas = CASE WHEN tentativas_login_falhas + 1 >= ? THEN 0 ELSE tentativas_login_falhas + 1 END, "
+                + "bloqueado_ate = CASE WHEN tentativas_login_falhas + 1 >= ? THEN now() + make_interval(mins => ?) ELSE bloqueado_ate END "
+                + "WHERE id = ?";
+        executarUpdate(sql, "registrar falha de login", maxTentativas, maxTentativas, minutosBloqueio, id);
+    }
+
+    /** Zera as tentativas e, se for o caso, grava um hash de senha mais forte. */
+    public void registrarLoginComSucesso(int id, String novoHashOuNull) {
+        String sql = "UPDATE clientes SET tentativas_login_falhas = 0, bloqueado_ate = NULL, ultimo_login_em = now(), "
+                + "senha_hash = COALESCE(?, senha_hash) WHERE id = ?";
+        executarUpdate(sql, "registrar login", novoHashOuNull, id);
+    }
+
+    // ------------------------------------------------------------------ recuperação de senha
+
+    public void salvarTokenRecuperacao(int id, String tokenHash, int validadeMinutos) {
+        String sql = "UPDATE clientes SET token_recuperacao_hash = ?, "
+                + "token_recuperacao_expira = now() + make_interval(mins => ?) WHERE id = ?";
+        executarUpdate(sql, "salvar token de recuperação", tokenHash, validadeMinutos, id);
+    }
+
+    public boolean tokenRecuperacaoValido(String tokenHash) {
+        String sql = "SELECT 1 FROM clientes WHERE token_recuperacao_hash = ? AND token_recuperacao_expira > now()";
+        try (Connection conn = ConnectionFactory.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setString(1, tokenHash);
+            try (ResultSet rs = stmt.executeQuery()) {
+                return rs.next();
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException("Erro ao validar o token de recuperação.", e);
+        }
+    }
+
+    /**
+     * Troca a senha e invalida o token numa única instrução (não há como usar o
+     * mesmo link duas vezes, nem em pedidos simultâneos). Também desbloqueia a conta.
+     */
+    public boolean redefinirSenhaPorToken(String tokenHash, String novoSenhaHash) {
+        String sql = "UPDATE clientes SET senha_hash = ?, token_recuperacao_hash = NULL, token_recuperacao_expira = NULL, "
+                + "tentativas_login_falhas = 0, bloqueado_ate = NULL "
+                + "WHERE token_recuperacao_hash = ? AND token_recuperacao_expira > now()";
+        return executarUpdate(sql, "redefinir senha", novoSenhaHash, tokenHash) > 0;
+    }
+
+    // ------------------------------------------------------------------ exclusão
+
+    public boolean deletarPorId(int id) {
+        return executarUpdate("DELETE FROM clientes WHERE id = ?", "excluir conta", id) > 0;
+    }
+
+    // ------------------------------------------------------------------ auxiliares
+
+    private Usuario buscarUm(String sql, Object parametro) {
+        try (Connection conn = ConnectionFactory.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setObject(1, parametro);
+            try (ResultSet rs = stmt.executeQuery()) {
+                return rs.next() ? mapear(rs) : null;
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException("Erro ao buscar cliente.", e);
+        }
+    }
+
+    /** Converte uma linha do banco num ClientePF/ClientePJ, decifrando os dados pessoais. */
+    private Usuario mapear(ResultSet rs) throws SQLException {
+        Usuario usuario;
+        if ("PJ".equals(rs.getString("tipo_cliente"))) {
+            ClientePJ pj = new ClientePJ();
+            pj.setRazaoSocial(rs.getString("razao_social"));
+            pj.setCnpj(rs.getString("cnpj"));
+            usuario = pj;
+        } else {
+            ClientePF pf = new ClientePF();
+            pf.setNome(rs.getString("nome"));
+            pf.setSobrenome(rs.getString("sobrenome"));
+            pf.setCpf(CifraDados.decifrar(CAMPO_CPF, rs.getString("cpf_cifrado")));
+            usuario = pf;
+        }
+        usuario.setId(rs.getInt("id"));
+        usuario.setEmail(rs.getString("email"));
+        usuario.setTelefone(CifraDados.decifrar(CAMPO_TELEFONE, rs.getString("telefone_cifrado")));
+        usuario.setEmailVerificado(rs.getBoolean("email_verificado"));
+        usuario.setSenhaHash(rs.getString("senha_hash"));
+        usuario.setBloqueadoAte(rs.getObject("bloqueado_ate", OffsetDateTime.class));
         return usuario;
     }
-    
-    
-    public void atualizarSenhaPorEmail(String email, String novaSenha) {
-        String sql = "UPDATE clientes SET senha = ? WHERE email = ?";
 
+    private int executarUpdate(String sql, String operacao, Object... parametros) {
         try (Connection conn = ConnectionFactory.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
-
-            stmt.setString(1, novaSenha);
-            stmt.setString(2, email);
-
-            int linhasAfetadas = stmt.executeUpdate();
-
-            if (linhasAfetadas == 0) {
-                throw new RuntimeException("Nenhum cliente foi encontrado com o e-mail: " + email);
+            for (int i = 0; i < parametros.length; i++) {
+                stmt.setObject(i + 1, parametros[i]);
             }
-
+            return stmt.executeUpdate();
         } catch (SQLException e) {
-            throw new RuntimeException("Erro ao atualizar a senha no banco de dados: " + e.getMessage(), e);
-        }
-    }
-    
-    
-    /**
-     * Remove o cliente da base de dados com base no e-mail.
-     */
-    public boolean deletarPorEmail(String email) throws SQLException {
-    	String sql = "DELETE FROM clientes WHERE email = ?";
-        
-        try (Connection conexao = ConnectionFactory.getConnection();
-             PreparedStatement stmt = conexao.prepareStatement(sql)) {
-            
-            stmt.setString(1, email);
-            int linhasAfetadas = stmt.executeUpdate();
-            
-            return linhasAfetadas > 0;
-            
-        } catch (SQLException e) {
-            throw new SQLException("Erro crítico ao tentar remover o utilizador do banco de dados.", e);
-        }
-    }
-    
-    /**
-     * Salva o token de recuperação e a data de expiração para o e-mail correspondente.
-     */
-    public void salvarTokenRecuperacao(String email, String token, java.time.LocalDateTime expiracao) {
-        String sql = "UPDATE clientes SET token_recuperacao = ?, token_expiracao = ? WHERE email = ?";
-
-        try (Connection conn = ConnectionFactory.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
-
-            stmt.setString(1, token);
-            stmt.setTimestamp(2, java.sql.Timestamp.valueOf(expiracao));
-            stmt.setString(3, email);
-            stmt.executeUpdate();
-
-        } catch (SQLException e) {
-            throw new RuntimeException("Erro ao salvar o token de recuperação: " + e.getMessage(), e);
+            throw new RuntimeException("Erro ao " + operacao + ".", e);
         }
     }
 
-    public Usuario buscarPorTokenRecuperacao(String token) {
-        // Atenção ao nome correto da tabela ("clientes")
-        String sql = "SELECT * FROM clientes WHERE token_recuperacao = ? AND token_expiracao > ?";
-
-        try (Connection conn = ConnectionFactory.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
-
-            stmt.setString(1, token);
-            stmt.setTimestamp(2, java.sql.Timestamp.valueOf(java.time.LocalDateTime.now()));
-            
-            try (ResultSet rs = stmt.executeQuery()) {
-                if (rs.next()) {
-                    // Descobre se é PF ou PJ com base numa coluna da base de dados (ex: 'tipo')
-                    String tipoCliente = rs.getString("tipo_cliente"); 
-                    
-                    Usuario usuario;
-                    if ("PJ".equalsIgnoreCase(tipoCliente)) {
-                        ClientePJ pj = new ClientePJ();
-                        pj.setRazaoSocial(rs.getString("razao_social"));
-                        pj.setCnpj(rs.getString("cnpj"));
-                        usuario = pj;
-                    } else {
-                        ClientePF pf = new ClientePF();
-                        pf.setNome(rs.getString("nome"));
-                        pf.setSobrenome(rs.getString("sobreNome"));
-                        pf.setCpf(rs.getString("cpf"));
-                        usuario = pf;
-                    }
-                    
-                    // Preenche os campos comuns da classe mãe Usuario
-                    usuario.setId(rs.getInt("id"));
-                    usuario.setEmail(rs.getString("email"));
-                    usuario.setSenha(rs.getString("senha"));
-                    usuario.setTelefone(rs.getString("telefone"));
-                    usuario.setEmailVerificado(rs.getBoolean("email_verificado"));
-                    usuario.setTokenAtivacao(rs.getString("token_ativacao"));
-                    usuario.setTokenRecuperacao(rs.getString("token_recuperacao"));
-                    
-                    java.sql.Timestamp timestampExp = rs.getTimestamp("token_expiracao");
-                    if (timestampExp != null) {
-                        usuario.setTokenExpiracao(timestampExp.toLocalDateTime());
-                    }
-                    
-                    return usuario;
-                }
-            }
-        } catch (SQLException e) {
-            throw new RuntimeException("Erro ao buscar utilizador por token de recuperação: " + e.getMessage(), e);
-        }
-        return null;
-    }
-    
-    
-    /**
-     * Valida se o token existe e ainda está dentro do prazo de 30 minutos.
-     */
-    public boolean validarToken(String token) {
-        String sql = "SELECT id FROM clientes WHERE token_recuperacao = ? AND token_expiracao > ?";
-
-        try (Connection conn = ConnectionFactory.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
-
-            stmt.setString(1, token);
-            stmt.setTimestamp(2, java.sql.Timestamp.valueOf(java.time.LocalDateTime.now()));
-
-            try (ResultSet rs = stmt.executeQuery()) {
-                return rs.next(); // Retorna true se encontrou um registo válido e não expirado
-            }
-        } catch (SQLException e) {
-            throw new RuntimeException("Erro ao validar o token de recuperação: " + e.getMessage(), e);
+    private static int idGerado(PreparedStatement stmt) throws SQLException {
+        try (ResultSet chaves = stmt.getGeneratedKeys()) {
+            return chaves.next() ? chaves.getInt(1) : 0;
         }
     }
 
-    /**
-     * Atualiza a senha do cliente usando o token e logo em seguida limpa os campos 
-     * do token (invalidando-o para uso único).
-     */
-    public void atualizarSenhaEInvalidarToken(String token, String novaSenha) {
-        String sql = "UPDATE clientes SET senha = ?, token_recuperacao = NULL, token_expiracao = NULL WHERE token_recuperacao = ?";
-
-        try (Connection conn = ConnectionFactory.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
-
-            stmt.setString(1, novaSenha);
-            stmt.setString(2, token);
-
-            int linhasAfetadas = stmt.executeUpdate();
-
-            if (linhasAfetadas == 0) {
-                throw new RuntimeException("Token inválido ou já utilizado.");
-            }
-
-        } catch (SQLException e) {
-            throw new RuntimeException("Erro ao atualizar a senha e invalidar o token: " + e.getMessage(), e);
+    /** Descobre qual dado se repetiu pelo nome da restrição única que falhou. */
+    private static String mensagemDuplicado(SQLException e) {
+        String detalhe = "";
+        if (e instanceof PSQLException pg && pg.getServerErrorMessage() != null) {
+            detalhe = String.valueOf(pg.getServerErrorMessage().getConstraint()).toLowerCase();
         }
+        if (detalhe.contains("cpf")) {
+            return "Este CPF já está cadastrado. Se a conta é sua, use \"Esqueci a senha\".";
+        }
+        if (detalhe.contains("cnpj")) {
+            return "Este CNPJ já está cadastrado. Se a conta é sua, use \"Esqueci a senha\".";
+        }
+        return "Este e-mail já está cadastrado. Se a conta é sua, use \"Esqueci a senha\".";
     }
-    
 }

@@ -1,147 +1,95 @@
 package com.agnello.controller;
 
 import java.io.IOException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
+import com.agnello.exception.RegraNegocioException;
+import com.agnello.model.Usuario;
+import com.agnello.service.ClienteService;
+import com.agnello.util.RespostaJson;
+import com.agnello.util.SessaoCliente;
+import com.agnello.util.UrlAplicacao;
+
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import jakarta.servlet.http.HttpSession;
 
-import com.agnello.model.Usuario;
-import com.agnello.service.ClienteService;
-
+/**
+ * Página de checkout + pedidos AJAX do passo "Identificação" (checkout.js):
+ *  1. só e-mail                → {"existe": true|false}
+ *  2. e-mail + senha           → login       → {"sucesso": …, "mensagem": …}
+ *  3. e-mail + senha + dados   → cadastro    → {"sucesso": …, "mensagem": …}
+ */
 @WebServlet(name = "CheckoutController", urlPatterns = {"/checkout"})
 public class CheckoutController extends HttpServlet {
+
     private static final long serialVersionUID = 1L;
+    private static final Logger LOGGER = Logger.getLogger(CheckoutController.class.getName());
+    private static final String MSG_ERRO_INTERNO = "Não foi possível concluir agora. Tente novamente em alguns instantes.";
 
-    private ClienteService clienteService = new ClienteService();
+    private final ClienteService clienteService = new ClienteService();
 
-    // 1. O doGet renderiza a página do checkout
     @Override
-    protected void doGet(HttpServletRequest request, HttpServletResponse response) 
+    protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        
-        HttpSession session = request.getSession(false);
-        Usuario usuario = (session != null) ? (Usuario) session.getAttribute("clienteLogado") : null;
-        
+        Usuario usuario = SessaoCliente.atual(request);
         if (usuario != null) {
             request.setAttribute("usuarioLogado", usuario);
         }
-        
         request.getRequestDispatcher("/WEB-INF/views/checkout.jsp").forward(request, response);
     }
 
-    // 2. O doPost lida com as requisições AJAX (Login por etapa, Cadastro e Verificação de E-mail)
     @Override
-    protected void doPost(HttpServletRequest request, HttpServletResponse response) 
+    protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        
         request.setCharacterEncoding("UTF-8");
-        response.setContentType("application/json");
-        response.setCharacterEncoding("UTF-8");
 
-        String senhaInformada = request.getParameter("senha");
         String email = request.getParameter("email");
-        String tipoCliente = request.getParameter("tipo_cliente"); 
+        String senha = request.getParameter("senha");
+        boolean temDadosCadastro = !vazio(request.getParameter("nome")) || !vazio(request.getParameter("razao_social"));
 
-        // =========================================================================
-        // CASO 1: Validação de senha do cliente existente
-        // =========================================================================
- 
-        if (senhaInformada != null && !senhaInformada.trim().isEmpty() && 
-            (request.getParameter("nome") == null && request.getParameter("razao_social") == null)) {
-            
-            boolean senhaValida = false;
-            String mensagemErro = "E-mail ou senha inválidos.";
-            
-            try {
-                Usuario usuarioBanco = clienteService.autenticar(email, senhaInformada);
-                
-                if (usuarioBanco != null) {
-                    senhaValida = true;
-                    HttpSession session = request.getSession();
-                    session.setAttribute("clienteLogado", usuarioBanco);
-                }
-            } catch (Exception e) {
-                e.printStackTrace();
-                // Captura a mensagem de erro lançada pelo Service (ex: "A sua conta ainda não foi ativada...")
-                mensagemErro = e.getMessage() != null ? e.getMessage() : "Erro ao autenticar.";
-            }
-
-            // Retorna o sucesso e a mensagem exata para exibir no box de alerta da interface
-            response.getWriter().write("{\"sucesso\": " + senhaValida + ", \"mensagem\": \"" + mensagemErro + "\"}");
-            return;
-        }
-
-        // =========================================================================
-        // CASO 2: Cadastro de novo cliente (Utilizando o método unificado do Service)
-        // =========================================================================
-        boolean temDadosCadastro = (request.getParameter("nome") != null && !request.getParameter("nome").trim().isEmpty()) || 
-                                   (request.getParameter("razao_social") != null && !request.getParameter("razao_social").trim().isEmpty());
-
-        if (tipoCliente != null && !tipoCliente.trim().isEmpty() && temDadosCadastro) {
-            boolean sucesso = false;
-            String mensagemErro = "";
-
-            try {
-                String telefone = request.getParameter("telefone");
-                String nome = request.getParameter("nome");
-                String sobrenome = request.getParameter("sobrenome");
-                String cpf = request.getParameter("cpf");
-                String razaoSocial = request.getParameter("razao_social");
-                String cnpj = request.getParameter("cnpj");
-
-                // 1. Descobre a URL base dinamicamente para o link de ativação
-                String baseUrl = request.getRequestURL().toString().replace(request.getRequestURI(), "") + request.getContextPath();
-
-                // 2. Chamada corrigida incluindo a baseUrl no final
-                clienteService.cadastrarCliente(tipoCliente, email, senhaInformada, telefone, nome, sobrenome, cpf, razaoSocial, cnpj, baseUrl);
-                sucesso = true;
-
-                // Login automático pós-cadastro
-                if (sucesso) {
-                    Usuario usuarioCriado = clienteService.buscarPorEmail(email);
-                    if (usuarioCriado != null) {
-                        HttpSession session = request.getSession();
-                        session.setAttribute("clienteLogado", usuarioCriado);
-                    }
-                }
-
-            } catch (Exception e) {
-                e.printStackTrace();
-                sucesso = false;
-                mensagemErro = e.getMessage() != null ? e.getMessage().toLowerCase() : "erro desconhecido";
-                if (mensagemErro.contains("violates unique constraint") || mensagemErro.contains("duplicate key")) {
-                    mensagemErro = "Este CPF, CNPJ ou E-mail já está cadastrado em nossa base.";
-                } else {
-                    mensagemErro = "Erro ao processar o cadastro: " + e.getMessage();
-                }
-            }
-
-            if (sucesso) {
-                response.getWriter().write("{\"sucesso\": true}");
+        try {
+            if (!vazio(senha) && temDadosCadastro) {
+                cadastrar(request, response, email, senha);
+            } else if (!vazio(senha)) {
+                Usuario usuario = clienteService.autenticar(email, senha);
+                SessaoCliente.iniciar(request, usuario);
+                RespostaJson.enviar(response, "sucesso", true, "mensagem", "");
             } else {
-                response.getWriter().write("{\"sucesso\": false, \"mensagem\": \"" + mensagemErro + "\"}");
+                RespostaJson.enviar(response, "existe", clienteService.emailCadastrado(email));
             }
-            return;
-        }
 
-        // =========================================================================
-        // CASO 3: Verificação inicial de e-mail
-        // =========================================================================
-        boolean existe = false;
-        if (email != null && !email.trim().isEmpty()) {
-            try {
-                Usuario usuario = clienteService.buscarPorEmail(email);
-                if (usuario != null) {
-                    existe = true;
-                }
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
+        } catch (RegraNegocioException e) {
+            RespostaJson.enviar(response, "sucesso", false, "mensagem", e.getMessage());
+        } catch (RuntimeException e) {
+            LOGGER.log(Level.SEVERE, "Erro inesperado no checkout", e);
+            response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+            RespostaJson.enviar(response, "sucesso", false, "mensagem", MSG_ERRO_INTERNO);
         }
+    }
 
-        response.getWriter().write("{\"existe\": " + existe + "}");
+    /**
+     * Cria a conta e já inicia a sessão, para o cliente terminar a compra sem sair
+     * do checkout. O e-mail de ativação é enviado na mesma; sem ativar, o próximo
+     * login (fora desta sessão) pede a confirmação do e-mail.
+     */
+    private void cadastrar(HttpServletRequest request, HttpServletResponse response, String email, String senha)
+            throws RegraNegocioException, IOException {
+        Usuario criado = clienteService.cadastrarCliente(
+                request.getParameter("tipo_cliente"), email, senha,
+                request.getParameter("telefone"),
+                request.getParameter("nome"), request.getParameter("sobrenome"), request.getParameter("cpf"),
+                request.getParameter("razao_social"), request.getParameter("cnpj"),
+                UrlAplicacao.base(request));
+
+        SessaoCliente.iniciar(request, clienteService.buscarParaSessao(criado.getId()));
+        RespostaJson.enviar(response, "sucesso", true);
+    }
+
+    private static boolean vazio(String valor) {
+        return valor == null || valor.trim().isEmpty();
     }
 }

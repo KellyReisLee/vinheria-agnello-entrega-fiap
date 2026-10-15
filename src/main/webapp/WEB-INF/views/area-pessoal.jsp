@@ -124,7 +124,14 @@
           <dl class="conta-dados">
             <div><dt>${ehPJ ? 'Razão social' : 'Nome'}</dt><dd><c:out value="${nomeExibicao}" /></dd></div>
             <div><dt>E-mail</dt><dd><c:out value="${clienteLogado.email}" /></dd></div>
-            <div><dt>Telefone</dt><dd><c:out value="${not empty clienteLogado.telefone ? clienteLogado.telefone : '—'}" /></dd></div>
+            <%-- O telefone é guardado só com dígitos; aqui volta a ter o formato (11) 99999-9999 --%>
+            <c:set var="tel" value="${clienteLogado.telefone}" />
+            <c:choose>
+              <c:when test="${fn:length(tel) eq 11}"><c:set var="telFormatado" value="(${fn:substring(tel, 0, 2)}) ${fn:substring(tel, 2, 7)}-${fn:substring(tel, 7, 11)}" /></c:when>
+              <c:when test="${fn:length(tel) eq 10}"><c:set var="telFormatado" value="(${fn:substring(tel, 0, 2)}) ${fn:substring(tel, 2, 6)}-${fn:substring(tel, 6, 10)}" /></c:when>
+              <c:otherwise><c:set var="telFormatado" value="${empty tel ? '—' : tel}" /></c:otherwise>
+            </c:choose>
+            <div><dt>Telefone</dt><dd><c:out value="${telFormatado}" /></dd></div>
             <c:if test="${not empty documento}">
               <%-- Mostra só os últimos dígitos do documento (privacidade) --%>
               <div><dt>${ehPJ ? 'CNPJ' : 'CPF'}</dt>

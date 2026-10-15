@@ -5,38 +5,45 @@ import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.util.Properties;
 
-public class ConnectionFactory {
-    
+/**
+ * Abre conexões com o PostgreSQL (Neon).
+ *
+ * As credenciais vêm de variáveis de ambiente (nunca do código):
+ *   NEON_DB_URL       ex.: jdbc:postgresql://ep-xxx.neon.tech/neondb?sslmode=require
+ *   NEON_DB_USER
+ *   NEON_DB_PASSWORD
+ *
+ * A ligação é sempre cifrada (TLS): se a URL não disser nada, usamos sslmode=require,
+ * para os dados não viajarem em texto puro entre o servidor e o banco.
+ */
+public final class ConnectionFactory {
+
+    private ConnectionFactory() {
+    }
+
     public static Connection getConnection() {
+        String url = System.getenv("NEON_DB_URL");
+        if (url == null || url.isBlank()) {
+            throw new IllegalStateException("A variável de ambiente NEON_DB_URL não está configurada.");
+        }
+
+        Properties props = new Properties();
+        String user = System.getenv("NEON_DB_USER");
+        String password = System.getenv("NEON_DB_PASSWORD");
+        if (user != null) {
+            props.setProperty("user", user);
+        }
+        if (password != null) {
+            props.setProperty("password", password);
+        }
+        if (!url.contains("sslmode=")) {
+            props.setProperty("sslmode", "require");
+        }
+
         try {
-            Class.forName("org.postgresql.Driver");
-            
-            // URL limpa buscada da variável de ambiente do Render
-            String url = System.getenv("NEON_DB_URL");
-            String user = System.getenv("NEON_DB_USER");
-            String password = System.getenv("NEON_DB_PASSWORD");
-            
-            // Validação opcional para garantir que o ambiente está configurado
-            if (url == null || url.isEmpty()) {
-                throw new RuntimeException("A variável de ambiente NEON_DB_URL não está configurada!");
-            }
-            
-            // Passando as credenciais separadamente (exatamente como funcionou no seu teste), 
-            // mas agora vindas das variáveis de ambiente com total segurança
-            Properties props = new Properties();
-            if (user != null) {
-                props.setProperty("user", user);
-            }
-            if (password != null) {
-                props.setProperty("password", password);
-            }
-            
             return DriverManager.getConnection(url, props);
-            
-        } catch (ClassNotFoundException e) {
-            throw new RuntimeException("Erro: Driver JDBC do PostgreSQL não encontrado nas bibliotecas!", e);
         } catch (SQLException e) {
-            throw new RuntimeException("Erro ao conectar com o banco de dados no Neon!", e);
+            throw new IllegalStateException("Não foi possível conectar ao banco de dados.", e);
         }
     }
 }

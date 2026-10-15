@@ -1,50 +1,45 @@
 package com.agnello.model;
 
-import java.io.Serializable;
-import java.time.LocalDateTime;
+/** Cliente pessoa física. O CPF chega aqui já decifrado pelo ClienteDAO. */
+public class ClientePF extends Usuario {
 
-public class ClientePF extends Usuario implements Serializable {
-    private static final long serialVersionUID = 1L;
-    
+    private static final long serialVersionUID = 2L;
+
     private String nome;
     private String sobrenome;
     private String cpf;
 
-    public ClientePF() {
-        super();
+    public String getNome() {
+        return nome;
     }
 
-    public ClientePF(int id, String email, String senha, String telefone, boolean emailVerificado, 
-                     String tokenAtivacao, String tokenRecuperacao, LocalDateTime tokenExpiracao, 
-                     String nome, String sobrenome, String cpf) {
-        super(id, email, senha, telefone, emailVerificado, tokenAtivacao, tokenRecuperacao, tokenExpiracao);
+    public void setNome(String nome) {
         this.nome = nome;
+    }
+
+    public String getSobrenome() {
+        return sobrenome;
+    }
+
+    public void setSobrenome(String sobrenome) {
         this.sobrenome = sobrenome;
+    }
+
+    public String getCpf() {
+        return cpf;
+    }
+
+    public void setCpf(String cpf) {
         this.cpf = cpf;
     }
 
-    // Getters e Setters específicos
-    public String getNome() { 
-        return nome; 
-    }
-    
-    public void setNome(String nome) { 
-        this.nome = nome; 
+    @Override
+    public String getTipoCliente() {
+        return "PF";
     }
 
-    public String getSobrenome() { 
-        return sobrenome; 
-    }
-    
-    public void setSobrenome(String sobrenome) { 
-        this.sobrenome = sobrenome; 
-    }
-
-    public String getCpf() { 
-        return cpf; 
-    }
-    
-    public void setCpf(String cpf) { 
-        this.cpf = cpf; 
+    @Override
+    public String getNomeExibicao() {
+        return sobrenome == null || sobrenome.isBlank() ? nome : nome + " " + sobrenome;
     }
 }

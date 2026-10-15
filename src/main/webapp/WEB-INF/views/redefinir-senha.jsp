@@ -53,7 +53,7 @@
                 <label for="novaSenha">Nova senha</label>
                 <div class="auth-input-wrap">
                   <input type="password" id="novaSenha" name="novaSenha" data-nome="a nova senha"
-                         minlength="6" autocomplete="new-password" required autofocus
+                         minlength="8" autocomplete="new-password" required autofocus
                          data-forca="forca-senha" aria-describedby="forca-senha-texto novaSenha-erro">
                   <button type="button" class="auth-toggle-senha" aria-controls="novaSenha"
                           aria-label="Mostrar senha" aria-pressed="false">
@@ -63,7 +63,7 @@
                 <div class="auth-forca" id="forca-senha" data-nivel="0" aria-hidden="true">
                   <span></span><span></span><span></span><span></span>
                 </div>
-                <span class="auth-hint" id="forca-senha-texto">Mínimo de 6 caracteres.</span>
+                <span class="auth-hint" id="forca-senha-texto">Mínimo de 8 caracteres.</span>
                 <span class="auth-field-erro" id="novaSenha-erro" aria-live="polite"></span>
               </div>
 

@@ -120,7 +120,7 @@
               <div class="auth-field">
                 <label for="senha">Senha</label>
                 <div class="auth-input-wrap">
-                  <input type="password" id="senha" name="senha" data-nome="a senha" minlength="6"
+                  <input type="password" id="senha" name="senha" data-nome="a senha" minlength="8"
                          autocomplete="new-password" required data-forca="forca-senha"
                          aria-describedby="forca-senha-texto senha-erro">
                   <button type="button" class="auth-toggle-senha" aria-controls="senha"
@@ -131,7 +131,7 @@
                 <div class="auth-forca" id="forca-senha" data-nivel="0" aria-hidden="true">
                   <span></span><span></span><span></span><span></span>
                 </div>
-                <span class="auth-hint" id="forca-senha-texto">Mínimo de 6 caracteres.</span>
+                <span class="auth-hint" id="forca-senha-texto">Mínimo de 8 caracteres.</span>
                 <span class="auth-field-erro" id="senha-erro" aria-live="polite"></span>
               </div>
 

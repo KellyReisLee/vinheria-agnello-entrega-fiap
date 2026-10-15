@@ -167,7 +167,7 @@
                     </div>
                     <div class="field">
                       <label for="novo-senha">Crie uma senha</label>
-                      <input type="password" id="novo-senha" autocomplete="new-password" placeholder="Mínimo de 6 caracteres">
+                      <input type="password" id="novo-senha" autocomplete="new-password" placeholder="Mínimo de 8 caracteres" minlength="8">
                     </div>
                   </div>
 
