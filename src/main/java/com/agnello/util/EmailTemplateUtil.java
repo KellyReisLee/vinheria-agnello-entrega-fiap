@@ -197,7 +197,7 @@ public class EmailTemplateUtil {
     }
 
     private static String reais(BigDecimal valor) {
-        return NumberFormat.getCurrencyInstance(new Locale("pt", "BR")).format(valor).replace('\u00a0', ' ');
+        return NumberFormat.getCurrencyInstance(Locale.forLanguageTag("pt-BR")).format(valor).replace('\u00a0', ' ');
     }
 
     /** Evita que um nome como "<script>" vire HTML dentro do e-mail. */
