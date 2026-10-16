@@ -3,7 +3,7 @@
   <div class="footer-content">
     <div class="footer-col">
       <div class="footer-logo">
-        <img src="${pageContext.request.contextPath}/assets/images/logo-taca-branca-48.png" srcset="${pageContext.request.contextPath}/assets/images/logo-taca-branca-96.png 2x, ${pageContext.request.contextPath}/assets/images/logo-taca-branca-144.png 3x" alt="" class="footer-logo-img" width="20" height="48">
+        <jsp:include page="/WEB-INF/componentes/logo-taca.jsp"><jsp:param name="id" value="rodape" /><jsp:param name="classe" value="footer-logo-img" /></jsp:include>
         Vinheria Agnello
       </div>
       <p>O autêntico sabor da curadoria familiar, entregue na sua porta com segurança e temperatura ideal.</p>

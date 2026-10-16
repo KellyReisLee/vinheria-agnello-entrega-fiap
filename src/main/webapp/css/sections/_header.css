@@ -43,12 +43,11 @@
   gap: 0.35rem;
 }
 
+/* Taça em SVG (WEB-INF/componentes/logo-taca.jsp): um pouco mais alta que
+   as duas linhas de texto ao lado, para ficarem equilibradas */
 .logo-img {
-  /* logo-taca-*.png já vem recortada à volta da taça e em 3 resoluções
-     (o srcset escolhe a nítida para cada ecrã, inclusive Retina) */
-  display: block;
-  width: auto;
-  height: 48px;
+  height: 38px;
+  color: var(--primary-wine);
 }
 
 .logo-text {
@@ -297,7 +296,7 @@
 /* Telemóvel */
 @media (max-width: 650px) {
   .logo-img {
-    height: 40px;
+    height: 32px;
   }
 
   .navbar {

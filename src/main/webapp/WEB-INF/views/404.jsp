@@ -25,7 +25,7 @@
 <body class="erro-body">
   <main class="erro-card">
     <a href="${ctx}/home" class="erro-logo" aria-label="Vinheria Agnello — página inicial">
-      <img src="${ctx}/assets/images/logo-taca-48.png" srcset="${ctx}/assets/images/logo-taca-96.png 2x, ${ctx}/assets/images/logo-taca-144.png 3x" alt="" width="20" height="48">
+      <jsp:include page="/WEB-INF/componentes/logo-taca.jsp"><jsp:param name="id" value="erro" /><jsp:param name="classe" value="erro-logo-img" /></jsp:include>
       <span>VINHERIA AGNELLO</span>
     </a>
 
