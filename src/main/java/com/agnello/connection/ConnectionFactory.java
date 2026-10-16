@@ -18,6 +18,20 @@ import java.util.Properties;
  */
 public final class ConnectionFactory {
 
+    /*
+     * Registra o driver do PostgreSQL uma vez, quando a classe é carregada.
+     * Dentro do Tomcat isto é obrigatório: o DriverManager não encontra sozinho
+     * drivers que estão em WEB-INF/lib (o .jar da aplicação), e sem esta linha
+     * aparece o erro "No suitable driver found for jdbc:postgresql://...".
+     */
+    static {
+        try {
+            Class.forName("org.postgresql.Driver");
+        } catch (ClassNotFoundException e) {
+            throw new ExceptionInInitializerError("Driver do PostgreSQL não encontrado (falta o postgresql.jar).");
+        }
+    }
+
     private ConnectionFactory() {
     }
 
@@ -26,6 +40,7 @@ public final class ConnectionFactory {
         if (url == null || url.isBlank()) {
             throw new IllegalStateException("A variável de ambiente NEON_DB_URL não está configurada.");
         }
+        url = url.trim(); // um espaço colado por engano no painel não deve quebrar a conexão
 
         Properties props = new Properties();
         String user = System.getenv("NEON_DB_USER");
