@@ -38,7 +38,7 @@
       <version>3.0.1</version>
     </dependency>
 
-    <!-- PostgreSQL Driver (Para conectar no Supabase) -->
+    <!-- PostgreSQL Driver (Para conectar no Neon) -->
     <dependency>
       <groupId>org.postgresql</groupId>
       <artifactId>postgresql</artifactId>
