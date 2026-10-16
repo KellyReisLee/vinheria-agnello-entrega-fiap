@@ -1,4 +1,36 @@
-# Banco de dados: proteção dos dados dos clientes
+# Banco de dados
+
+## Pedidos e contato (V5) — rodar ANTES de publicar a versão com pedidos
+
+Neon → **SQL Editor** → cole `migracoes/V5__pedidos_e_contato.sql` → **Run**.
+Cria as tabelas `pedidos`, `itens_pedido` e `mensagens_contato`. Pode rodar mais de uma vez sem problema.
+
+| Tabela | O que guarda |
+|---|---|
+| `pedidos` | Número (AG-000123, gerado pelo banco), cliente, status, pagamento, parcelas, entrega, valores e o **endereço cifrado** (AES-256-GCM) |
+| `itens_pedido` | Vinho, nome e preço **no momento da compra**, quantidade |
+| `mensagens_contato` | Mensagens do formulário de contato |
+
+Regras garantidas pelo próprio banco: total = subtotal + frete − desconto, parcelas de 1 a 6 só no cartão, quantidade de 1 a 99, entrega exige endereço.
+Se um cliente excluir a conta, os pedidos ficam (obrigação fiscal), mas sem ligação à pessoa (`cliente_id` vira `NULL`).
+
+**Status do pedido:** a loja muda o status no SQL Editor, por exemplo quando o Pix for confirmado:
+```sql
+UPDATE pedidos SET status = 'PAGO' WHERE numero = 'AG-000123';
+-- outros: EM_SEPARACAO, ENVIADO, PRONTO_RETIRADA, ENTREGUE, CANCELADO
+```
+Se cancelar, devolva as garrafas ao estoque:
+```sql
+UPDATE produtos p SET estoque = p.estoque + i.quantidade
+FROM itens_pedido i JOIN pedidos ped ON ped.id = i.pedido_id
+WHERE ped.numero = 'AG-000123' AND i.produto_id = p.id;
+```
+
+Variável de ambiente opcional: `EMAIL_CONTATO` — caixa que recebe as mensagens do contato (se não existir, usa `EMAIL_USER`).
+
+---
+
+# Proteção dos dados dos clientes
 
 ## O que muda
 
