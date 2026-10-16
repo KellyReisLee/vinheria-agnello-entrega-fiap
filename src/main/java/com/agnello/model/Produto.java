@@ -17,6 +17,8 @@ public class Produto implements Serializable {
     private String pontuacao;
     private int estoque;
     private String imagem;
+    /** false = desativado no painel: some da loja, mas continua nos pedidos antigos. */
+    private boolean ativo = true;
 
     // Construtor padrão (vazio)
     public Produto() {
@@ -132,5 +134,21 @@ public class Produto implements Serializable {
     public String toString() {
         return "Produto [id=" + id + ", nome=" + nome + ", tipo=" + tipo + ", origem=" + origem 
                 + ", preco=" + preco + ", estoque=" + estoque + "]";
+    }
+
+    public boolean isAtivo() {
+        return ativo;
+    }
+
+    public void setAtivo(boolean ativo) {
+        this.ativo = ativo;
+    }
+
+    /** Endereço da imagem pronto para o HTML (sem o "./" do início dos caminhos antigos). */
+    public String getImagemUrl() {
+        if (imagem == null || imagem.isBlank()) {
+            return "";
+        }
+        return imagem.startsWith(".") ? imagem.substring(1) : imagem;
     }
 }

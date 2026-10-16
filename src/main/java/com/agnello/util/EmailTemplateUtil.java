@@ -196,6 +196,61 @@ public class EmailTemplateUtil {
                 + RODAPE;
     }
 
+    /** E-mail ao cliente quando a loja muda o status do pedido no painel. */
+    public static String getCorpoMudancaStatus(Pedido pedido, String nomeCliente) {
+        String explicacao;
+        switch (pedido.getStatus()) {
+            case PAGO:
+                explicacao = "Recebemos o seu pagamento. Já vamos preparar as suas garrafas.";
+                break;
+            case EM_SEPARACAO:
+                explicacao = "As suas garrafas estão sendo separadas e embaladas com proteção térmica.";
+                break;
+            case ENVIADO:
+                explicacao = "O seu pedido saiu para entrega e chega em até 48 horas.";
+                break;
+            case PRONTO_RETIRADA:
+                explicacao = "O seu pedido está pronto! Retire na Rua das Videiras, 1978 &mdash; Jardins, São Paulo, "
+                        + "de segunda a sábado, das 10h às 20h. Leve um documento com foto.";
+                break;
+            case ENTREGUE:
+                explicacao = "O pedido foi entregue. Esperamos que aprecie! Obrigado por escolher a Vinheria Agnello.";
+                break;
+            case CANCELADO:
+                explicacao = "O seu pedido foi cancelado. Se já tiver pago, o valor será devolvido pela mesma forma "
+                        + "de pagamento. Em caso de dúvida, responda a este e-mail.";
+                break;
+            default:
+                explicacao = "O status do seu pedido foi atualizado.";
+        }
+        return CABECALHO
+                + "<h2 style=\"color: #4A1525; font-size: 21px; margin: 0 0 8px; font-family: Georgia, serif;\">"
+                + escapar(pedido.getStatus().getDescricao()) + "</h2>"
+                + "<p style=\"font-size: 15px; line-height: 1.7; color: #555555; margin: 0 0 18px;\">Olá"
+                + (nomeCliente == null || nomeCliente.isBlank() ? "" : ", " + escapar(nomeCliente))
+                + ". Há novidades no seu pedido <strong>" + escapar(pedido.getNumero()) + "</strong>.</p>"
+                + "<p style=\"font-size: 15px; line-height: 1.7; color: #4A1525; background: #fdfbf7; border-left: 4px solid #c5a059; padding: 12px 16px; margin: 0 0 18px;\">"
+                + explicacao + "</p>"
+                + "<p style=\"font-size: 13px; line-height: 1.6; color: #777777; margin: 0;\">Total do pedido: <strong>"
+                + reais(pedido.getTotal()) + "</strong>. Acompanhe em <strong>Minha conta &rsaquo; Meus pedidos</strong>.</p>"
+                + RODAPE;
+    }
+
+    /** Resposta da loja a uma mensagem do formulário de contato. */
+    public static String getCorpoRespostaContato(String nomeCliente, String mensagemOriginal, String resposta,
+            String nomeAtendente) {
+        return CABECALHO
+                + "<p style=\"font-size: 15px; line-height: 1.7; color: #555555; margin: 0 0 18px;\">Olá, "
+                + escapar(nomeCliente) + ".</p>"
+                + "<div style=\"font-size: 15px; line-height: 1.7; color: #333333; white-space: pre-wrap; margin: 0 0 22px;\">"
+                + escapar(resposta) + "</div>"
+                + "<p style=\"font-size: 14px; color: #555555; margin: 0 0 24px;\">"
+                + escapar(nomeAtendente) + "<br><span style=\"color: #999999;\">Equipe Vinheria Agnello</span></p>"
+                + "<p style=\"font-size: 12px; line-height: 1.6; color: #999999; border-top: 1px solid #eeeeee; padding-top: 14px; margin: 0;\">"
+                + "A sua mensagem:<br><span style=\"white-space: pre-wrap;\">" + escapar(mensagemOriginal) + "</span></p>"
+                + RODAPE;
+    }
+
     private static String reais(BigDecimal valor) {
         return NumberFormat.getCurrencyInstance(Locale.forLanguageTag("pt-BR")).format(valor).replace('\u00a0', ' ');
     }

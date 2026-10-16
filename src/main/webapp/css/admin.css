@@ -1,0 +1,1035 @@
+/* css/admin.css
+   Painel administrativo (/admin). Usa as mesmas cores e fontes da loja
+   (variables.css), num layout de trabalho: menu fixo à esquerda, conteúdo
+   em cartões brancos, tabelas fáceis de ler. */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+:root {
+  --adm-fundo: #F6F4F1;
+  --adm-menu: #2A0B15;
+  --adm-borda: #E7E2DA;
+  --adm-verde: #2E6B30;
+  --adm-verde-fundo: #E6F3E6;
+  --adm-ambar: #8A5A00;
+  --adm-ambar-fundo: #FFF3D6;
+  --adm-vermelho: #A12626;
+  --adm-vermelho-fundo: #FCEBEB;
+  --adm-azul: #1F4E8C;
+  --adm-azul-fundo: #E7EFFA;
+}
+
+body {
+  margin: 0;
+  font-family: var(--font-body);
+  font-size: 15px;
+  line-height: 1.5;
+  color: var(--text-charcoal);
+  background: var(--adm-fundo);
+}
+
+h1,
+h2 {
+  margin: 0;
+  font-family: var(--font-heading);
+  color: var(--primary-wine);
+  font-weight: 700;
+}
+
+h1 {
+  font-size: 1.75rem;
+  line-height: 1.2;
+}
+
+h2 {
+  margin-bottom: 1rem;
+  font-size: 1.1rem;
+}
+
+p {
+  margin: 0;
+}
+
+a {
+  color: inherit;
+}
+
+img {
+  max-width: 100%;
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+:focus-visible {
+  outline: 2px solid var(--accent-gold);
+  outline-offset: 2px;
+}
+
+/* =================================================================== layout */
+.adm-body {
+  display: grid;
+  grid-template-columns: 240px minmax(0, 1fr);
+  min-height: 100vh;
+}
+
+.adm-menu {
+  position: sticky;
+  top: 0;
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  padding: 1.5rem 1rem;
+  background: var(--adm-menu);
+  color: #F3E9EC;
+}
+
+.adm-marca {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0 0.5rem 1.5rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  text-decoration: none;
+}
+
+.adm-marca-taca {
+  height: 36px;
+  color: #FFFFFF;
+}
+
+.adm-marca strong {
+  display: block;
+  font-family: var(--font-heading);
+  font-size: 1.15rem;
+  letter-spacing: 0.5px;
+}
+
+.adm-marca small {
+  display: block;
+  color: var(--accent-gold);
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+}
+
+.adm-nav {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  margin-top: 1.25rem;
+}
+
+.adm-nav a {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.65rem 0.75rem;
+  border-radius: 8px;
+  color: rgba(255, 255, 255, 0.78);
+  font-weight: 500;
+  text-decoration: none;
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+.adm-nav a:hover {
+  background: rgba(255, 255, 255, 0.07);
+  color: #FFFFFF;
+}
+
+.adm-nav a.ativo {
+  background: rgba(212, 175, 55, 0.16);
+  color: #FFFFFF;
+  box-shadow: inset 3px 0 0 var(--accent-gold);
+}
+
+.adm-nav svg {
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.adm-menu-rodape {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  margin-top: auto;
+  padding-top: 1rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.adm-ver-loja {
+  padding: 0 0.5rem;
+  color: var(--accent-gold);
+  font-size: 0.85rem;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.adm-usuario {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0 0.5rem;
+}
+
+.adm-avatar {
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: var(--accent-gold);
+  color: var(--adm-menu);
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.adm-usuario-nome {
+  overflow: hidden;
+  font-size: 0.88rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.adm-sair {
+  width: 100%;
+  padding: 0.55rem;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 8px;
+  background: transparent;
+  color: #FFFFFF;
+  font: inherit;
+  font-size: 0.88rem;
+  cursor: pointer;
+}
+
+.adm-sair:hover {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.adm-main {
+  width: 100%;
+  max-width: 1200px;
+  padding: 2rem clamp(1rem, 3vw, 2.5rem) 3rem;
+}
+
+.adm-cabecalho {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.adm-cabecalho p {
+  margin-top: 0.25rem;
+  color: var(--text-muted);
+}
+
+.adm-voltar {
+  display: inline-block;
+  margin-bottom: 0.75rem;
+  color: var(--text-muted);
+  font-size: 0.88rem;
+  text-decoration: none;
+}
+
+.adm-voltar:hover {
+  color: var(--primary-wine);
+}
+
+/* =================================================================== cartões */
+.adm-cartao {
+  margin-bottom: 1.25rem;
+  padding: 1.25rem 1.4rem;
+  border: 1px solid var(--adm-borda);
+  border-radius: 12px;
+  background: #FFFFFF;
+}
+
+.adm-cartao-topo {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+}
+
+.adm-grade-detalhe {
+  display: grid;
+  grid-template-columns: minmax(0, 1.6fr) minmax(280px, 1fr);
+  gap: 1.25rem;
+  align-items: start;
+}
+
+.adm-vazio {
+  padding: 2rem 0;
+  color: var(--text-muted);
+  text-align: center;
+}
+
+.adm-mudo {
+  color: var(--text-muted);
+  font-size: 0.85rem;
+}
+
+.adm-link {
+  color: var(--primary-wine);
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.adm-link:hover,
+.adm-link-forte:hover {
+  text-decoration: underline;
+}
+
+.adm-link-forte {
+  color: var(--primary-wine);
+  font-weight: 700;
+  text-decoration: none;
+}
+
+/* =================================================================== indicadores */
+.adm-indicadores {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.adm-indicador {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  padding: 1.1rem 1.2rem;
+  border: 1px solid var(--adm-borda);
+  border-radius: 12px;
+  background: #FFFFFF;
+  text-decoration: none;
+  transition: border-color 0.2s ease, transform 0.2s ease;
+}
+
+a.adm-indicador:hover {
+  border-color: var(--accent-gold);
+  transform: translateY(-2px);
+}
+
+.adm-indicador strong {
+  font-family: var(--font-heading);
+  color: var(--primary-wine);
+  font-size: 1.9rem;
+  line-height: 1.15;
+}
+
+.adm-indicador-rotulo {
+  color: var(--text-charcoal);
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.adm-indicador-dica {
+  color: var(--text-muted);
+  font-size: 0.78rem;
+}
+
+.adm-indicador--alerta {
+  border-color: #EBC777;
+  background: #FFFBF0;
+}
+
+.adm-indicador--destaque {
+  background: var(--primary-wine);
+  border-color: var(--primary-wine);
+}
+
+.adm-indicador--destaque strong,
+.adm-indicador--destaque .adm-indicador-rotulo {
+  color: #FFFFFF;
+}
+
+.adm-indicador--destaque .adm-indicador-dica {
+  color: rgba(255, 255, 255, 0.7);
+}
+
+/* =================================================================== tabelas */
+.adm-tabela-rolagem {
+  position: relative; /* textos "sr-only" ficam presos aqui e não alargam a página */
+  overflow-x: auto;
+}
+
+.adm-tabela {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.9rem;
+}
+
+.adm-tabela th {
+  padding: 0.6rem 0.75rem;
+  border-bottom: 1px solid var(--adm-borda);
+  color: var(--text-muted);
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  text-align: left;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.adm-tabela td {
+  padding: 0.75rem;
+  border-bottom: 1px solid #F1EDE7;
+  vertical-align: middle;
+}
+
+.adm-tabela tbody tr:hover {
+  background: #FCFBF9;
+}
+
+.adm-tabela .num {
+  text-align: right;
+  white-space: nowrap;
+}
+
+.adm-tabela--compacta td {
+  padding: 0.55rem 0.5rem;
+}
+
+.adm-tabela tfoot td {
+  border-bottom: none;
+  color: var(--text-muted);
+}
+
+.adm-tabela tfoot .adm-total td {
+  border-top: 1px solid var(--adm-borda);
+  color: var(--primary-wine);
+  font-size: 1rem;
+  font-weight: 700;
+}
+
+.adm-linha-inativa td {
+  opacity: 0.55;
+}
+
+.adm-linha-inativa td.adm-acoes {
+  opacity: 1;
+}
+
+.adm-miniatura {
+  display: block;
+  object-fit: contain;
+}
+
+.adm-acoes {
+  white-space: nowrap;
+}
+
+.adm-acoes form {
+  display: inline;
+}
+
+/* =================================================================== selos */
+.adm-status,
+.adm-situacao {
+  display: inline-block;
+  padding: 0.2rem 0.65rem;
+  border-radius: 999px;
+  background: #EFECE8;
+  color: var(--text-muted);
+  font-size: 0.75rem;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.adm-status--grande,
+.adm-situacao--grande {
+  padding: 0.4rem 0.9rem;
+  font-size: 0.85rem;
+}
+
+.adm-status--AGUARDANDO_PAGAMENTO,
+.adm-situacao--pendente {
+  background: var(--adm-ambar-fundo);
+  color: var(--adm-ambar);
+}
+
+.adm-status--PAGO,
+.adm-status--EM_SEPARACAO {
+  background: var(--adm-azul-fundo);
+  color: var(--adm-azul);
+}
+
+.adm-status--ENVIADO,
+.adm-status--PRONTO_RETIRADA {
+  background: #F1E8F7;
+  color: #5B2C83;
+}
+
+.adm-status--ENTREGUE,
+.adm-situacao--ativo {
+  background: var(--adm-verde-fundo);
+  color: var(--adm-verde);
+}
+
+.adm-status--CANCELADO {
+  background: var(--adm-vermelho-fundo);
+  color: var(--adm-vermelho);
+}
+
+.adm-selo-desconto {
+  color: var(--adm-vermelho);
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+
+/* =================================================================== filtros e busca */
+.adm-barra {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.adm-barra .adm-filtros {
+  margin-bottom: 0;
+}
+
+.adm-filtros {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  margin-bottom: 1rem;
+}
+
+.adm-filtros a {
+  padding: 0.4rem 0.85rem;
+  border: 1px solid var(--adm-borda);
+  border-radius: 999px;
+  background: #FFFFFF;
+  font-size: 0.85rem;
+  text-decoration: none;
+}
+
+.adm-filtros a:hover {
+  border-color: var(--primary-wine);
+}
+
+.adm-filtros a.ativo {
+  border-color: var(--primary-wine);
+  background: var(--primary-wine);
+  color: #FFFFFF;
+}
+
+.adm-contador {
+  margin-left: 0.2rem;
+  opacity: 0.7;
+}
+
+.adm-busca {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.adm-busca input {
+  width: min(280px, 60vw);
+}
+
+.adm-paginacao {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  padding-top: 1rem;
+  color: var(--text-muted);
+  font-size: 0.88rem;
+}
+
+/* =================================================================== formulários */
+.adm-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.adm-form.adm-grade-detalhe {
+  display: grid;
+}
+
+.adm-campo {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  margin-bottom: 1rem;
+}
+
+.adm-campo:last-child {
+  margin-bottom: 0;
+}
+
+.adm-campo label {
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.adm-opcional {
+  color: var(--text-muted);
+  font-weight: 400;
+}
+
+input[type="text"],
+input[type="email"],
+input[type="password"],
+input[type="search"],
+input[type="number"],
+textarea {
+  width: 100%;
+  padding: 0.6rem 0.75rem;
+  border: 1px solid #D9D3CA;
+  border-radius: 8px;
+  background: #FFFFFF;
+  color: var(--text-charcoal);
+  font: inherit;
+}
+
+textarea {
+  resize: vertical;
+}
+
+input:focus,
+textarea:focus {
+  border-color: var(--primary-wine);
+  outline: 2px solid rgba(74, 21, 37, 0.15);
+  outline-offset: 0;
+}
+
+input[type="file"] {
+  font: inherit;
+  font-size: 0.85rem;
+}
+
+.adm-campos-2,
+.adm-campos-3 {
+  display: grid;
+  gap: 0 1rem;
+}
+
+.adm-campos-2 {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.adm-campos-3 {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.adm-dica {
+  color: var(--text-muted);
+  font-size: 0.78rem;
+  line-height: 1.45;
+}
+
+.adm-interruptor {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.adm-interruptor input {
+  width: 18px;
+  height: 18px;
+  accent-color: var(--primary-wine);
+}
+
+.adm-foto {
+  display: grid;
+  place-items: center;
+  height: 230px;
+  margin-bottom: 1rem;
+  border-radius: 10px;
+  background: #F6F3EE;
+}
+
+.adm-foto img {
+  max-height: 210px;
+  width: auto;
+  object-fit: contain;
+}
+
+.adm-foto-vazia {
+  color: var(--text-muted);
+  font-size: 0.85rem;
+}
+
+.adm-salvar {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.adm-estoque {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.adm-estoque input {
+  width: 80px;
+  padding: 0.35rem 0.5rem;
+}
+
+.adm-estoque--baixo input {
+  border-color: #E3B04B;
+  background: #FFF8E6;
+}
+
+.adm-form-secundario {
+  margin-top: 0.75rem;
+}
+
+/* =================================================================== botões */
+.adm-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.35rem;
+  padding: 0.55rem 1rem;
+  border: 1px solid #D9D3CA;
+  border-radius: 8px;
+  background: #FFFFFF;
+  color: var(--text-charcoal);
+  font: inherit;
+  font-size: 0.88rem;
+  font-weight: 600;
+  text-decoration: none;
+  cursor: pointer;
+  transition: background-color 0.2s ease, border-color 0.2s ease;
+}
+
+.adm-btn:hover {
+  border-color: var(--primary-wine);
+}
+
+.adm-btn:disabled {
+  opacity: 0.6;
+  cursor: wait;
+}
+
+.adm-btn--primario {
+  border-color: var(--primary-wine);
+  background: var(--primary-wine);
+  color: #FFFFFF;
+}
+
+.adm-btn--primario:hover {
+  background: #651D33;
+}
+
+.adm-btn--perigo {
+  border-color: #E4B4B4;
+  color: var(--adm-vermelho);
+}
+
+.adm-btn--perigo:hover {
+  border-color: var(--adm-vermelho);
+  background: var(--adm-vermelho-fundo);
+}
+
+.adm-btn--discreto {
+  border-color: transparent;
+  background: transparent;
+  color: var(--text-muted);
+}
+
+.adm-btn--discreto:hover {
+  border-color: var(--adm-borda);
+  color: var(--text-charcoal);
+}
+
+.adm-btn--pequeno {
+  padding: 0.3rem 0.65rem;
+  font-size: 0.8rem;
+}
+
+.adm-btn--largo {
+  width: 100%;
+  padding: 0.75rem;
+}
+
+.adm-acoes-status {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-top: 0.75rem;
+}
+
+.adm-acoes-status .adm-btn {
+  width: 100%;
+}
+
+/* =================================================================== avisos */
+.adm-aviso {
+  margin-bottom: 1.25rem;
+  padding: 0.85rem 1rem;
+  border: 1px solid;
+  border-radius: 10px;
+  font-size: 0.9rem;
+}
+
+.adm-aviso--sucesso {
+  border-color: #BFDDC1;
+  background: var(--adm-verde-fundo);
+  color: var(--adm-verde);
+}
+
+.adm-aviso--erro {
+  border-color: #EBC1C1;
+  background: var(--adm-vermelho-fundo);
+  color: var(--adm-vermelho);
+}
+
+/* =================================================================== detalhes */
+.adm-dados {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  margin: 0;
+}
+
+.adm-dados dt {
+  color: var(--text-muted);
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+}
+
+.adm-dados dd {
+  margin: 0.1rem 0 0;
+  overflow-wrap: anywhere;
+}
+
+.adm-linha-tempo {
+  margin: 0;
+  padding-left: 1.1rem;
+  font-size: 0.9rem;
+}
+
+.adm-linha-tempo li {
+  margin-bottom: 0.5rem;
+}
+
+.adm-linha-tempo li::marker {
+  color: var(--accent-gold);
+}
+
+.adm-texto-mensagem {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  line-height: 1.65;
+}
+
+.adm-lista-mensagens {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.adm-lista-mensagens li + li {
+  border-top: 1px solid #F1EDE7;
+}
+
+.adm-lista-mensagens a {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 0.15rem 1rem;
+  padding: 0.9rem 0.5rem;
+  text-decoration: none;
+}
+
+.adm-lista-mensagens a:hover {
+  background: #FCFBF9;
+}
+
+.adm-msg-topo {
+  display: flex;
+  gap: 0.75rem;
+  align-items: baseline;
+}
+
+.adm-msg-assunto {
+  grid-column: 1;
+  color: var(--primary-wine);
+  font-size: 0.88rem;
+  font-weight: 600;
+}
+
+.adm-msg-resumo {
+  grid-column: 1;
+  overflow: hidden;
+  color: var(--text-muted);
+  font-size: 0.85rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.adm-lista-mensagens .adm-situacao {
+  grid-column: 2;
+  grid-row: 1 / span 3;
+  align-self: center;
+}
+
+.adm-lista-mensagens li.respondida strong {
+  font-weight: 500;
+}
+
+/* =================================================================== login */
+.adm-login-body {
+  display: grid;
+  place-items: center;
+  min-height: 100vh;
+  padding: 1rem;
+  background: radial-gradient(circle at 30% 20%, #4A1525 0%, #2A0B15 70%);
+}
+
+.adm-login {
+  width: min(400px, 100%);
+  padding: 2.25rem 2rem;
+  border-radius: 16px;
+  background: #FFFFFF;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.3);
+}
+
+.adm-login-marca {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 1.25rem;
+  color: var(--primary-wine);
+  font-family: var(--font-heading);
+  font-weight: 700;
+  letter-spacing: 1px;
+}
+
+.adm-login-taca {
+  height: 32px;
+  color: var(--primary-wine);
+}
+
+.adm-login-sub {
+  margin: 0.35rem 0 1.5rem;
+  color: var(--text-muted);
+}
+
+.adm-login-voltar {
+  display: block;
+  margin-top: 1.25rem;
+  color: var(--text-muted);
+  font-size: 0.85rem;
+  text-align: center;
+  text-decoration: none;
+}
+
+/* =================================================================== telas pequenas */
+@media (max-width: 900px) {
+  /* minmax(0, 1fr) e não 1fr: deixa a tabela rolar dentro do cartão
+     em vez de alargar a página inteira */
+  .adm-body {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .adm-menu {
+    position: static;
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5rem;
+    height: auto;
+    padding: 0.75rem 1rem;
+  }
+
+  .adm-marca {
+    padding: 0;
+    border: none;
+  }
+
+  .adm-nav {
+    flex-direction: row;
+    flex-wrap: wrap;
+    width: 100%;
+    margin: 0;
+  }
+
+  .adm-nav a {
+    padding: 0.45rem 0.6rem;
+    font-size: 0.85rem;
+  }
+
+  .adm-nav a.ativo {
+    box-shadow: inset 0 -2px 0 var(--accent-gold);
+  }
+
+  .adm-menu-rodape {
+    flex-direction: row;
+    align-items: center;
+    width: 100%;
+    margin: 0;
+    padding-top: 0.5rem;
+  }
+
+  .adm-usuario {
+    display: none;
+  }
+
+  .adm-menu-rodape form {
+    margin-left: auto;
+  }
+
+  .adm-sair {
+    width: auto;
+    padding: 0.35rem 0.9rem;
+  }
+
+  .adm-grade-detalhe,
+  .adm-form.adm-grade-detalhe {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .adm-campos-2,
+  .adm-campos-3 {
+    grid-template-columns: 1fr;
+  }
+
+  .adm-busca {
+    width: 100%;
+  }
+
+  .adm-busca input {
+    flex: 1;
+    width: auto;
+  }
+}
+
+/* Nos formulários simples (login, resposta) o espaçamento vem do gap do .adm-form */
+.adm-form > .adm-campo,
+.adm-form > div > .adm-campo:last-child {
+  margin-bottom: 0;
+}

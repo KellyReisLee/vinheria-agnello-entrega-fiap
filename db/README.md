@@ -1,5 +1,28 @@
 # Banco de dados
 
+## Painel administrativo (V6) — rodar ANTES de publicar a versão com o /admin
+
+1. Neon → **SQL Editor** → cole `migracoes/V6__painel_admin.sql` → **Run**.
+   Sem este passo o site novo não abre o catálogo (ele procura a coluna `produtos.ativo`).
+2. Crie a sua conta de administrador no Eclipse:
+   **Run → Run Configurations… → Java Application → New**
+   - Main class: `com.agnello.migracao.CriarAdministrador`
+   - Separador **Environment**: `NEON_DB_URL`, `NEON_DB_USER`, `NEON_DB_PASSWORD`
+   - Separador **Arguments**: `seu@email.com "Seu Nome"`
+   - **Run** → digite a senha no Console (mínimo 12 caracteres). Depois clique no ícone de limpar o Console.
+3. Entre em `/admin/login`.
+
+Rodar o mesmo programa com um e-mail que já existe troca a senha e reativa a conta (útil se esquecer a senha).
+
+| Tabela / coluna | Para quê |
+|---|---|
+| `administradores` | Contas da equipe, separadas dos clientes. Senha em PBKDF2, bloqueio após 5 erros |
+| `produtos.ativo` | Desativar um vinho em vez de apagar (some da loja, continua nos pedidos antigos) |
+| `imagens_produto` | Fotos enviadas pelo painel, guardadas no banco (o disco do Render é apagado a cada deploy) |
+| `historico_pedidos` | Quem mudou o status de cada pedido, de quê para quê e quando |
+| `mensagens_contato.resposta…` | A resposta enviada ao cliente e quem respondeu |
+
+
 ## Pedidos e contato (V5) — rodar ANTES de publicar a versão com pedidos
 
 Neon → **SQL Editor** → cole `migracoes/V5__pedidos_e_contato.sql` → **Run**.

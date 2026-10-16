@@ -12,3 +12,4 @@ Disallow: /redefinir-senha
 Disallow: /ativar
 Disallow: /deletar-conta
 Disallow: /logout
+Disallow: /admin

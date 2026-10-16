@@ -44,7 +44,7 @@ public class ProdutoService {
     }
 
     /**
-     * O vinho pedido, ou null se o id não existir.
+     * O vinho pedido, ou null se o id não existir ou estiver desativado.
      * Aqui o erro de banco NÃO é escondido: sem o produto a página não faz
      * sentido, e o Controller responde com erro 500.
      */
@@ -52,7 +52,9 @@ public class ProdutoService {
         if (id <= 0) {
             return null;
         }
-        return produtoDAO.buscarPorId(id);
+        Produto produto = produtoDAO.buscarPorId(id);
+        // Vinho desativado no painel: para a loja, é como se não existisse
+        return produto != null && produto.isAtivo() ? produto : null;
     }
 
     /** Outros vinhos do mesmo tipo, com estoque (lista vazia se o banco falhar). */
