@@ -210,3 +210,11 @@
     box-shadow: 0 -5px 25px rgba(0, 0, 0, 0.2);
   }
 }
+/* Links dentro das respostas do assistente */
+.chat-bubble a,
+.chat-terms-notice a {
+  color: inherit;
+  font-weight: 600;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}

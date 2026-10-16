@@ -1,0 +1,14 @@
+# Vinheria Agnello
+User-agent: *
+Allow: /
+# Páginas pessoais e de processo: não interessam aos buscadores
+Disallow: /area-pessoal
+Disallow: /checkout
+Disallow: /pedidos
+Disallow: /login
+Disallow: /cadastro
+Disallow: /esqueci-senha
+Disallow: /redefinir-senha
+Disallow: /ativar
+Disallow: /deletar-conta
+Disallow: /logout

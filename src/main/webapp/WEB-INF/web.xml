@@ -42,15 +42,7 @@
         <url-pattern>/sobre</url-pattern>
     </servlet-mapping>
 
-    <!-- Contato -->
-    <servlet>
-        <servlet-name>PaginaContato</servlet-name>
-        <jsp-file>/WEB-INF/views/contato.jsp</jsp-file>
-    </servlet>
-    <servlet-mapping>
-        <servlet-name>PaginaContato</servlet-name>
-        <url-pattern>/contato</url-pattern>
-    </servlet-mapping>
+    <!-- Contato: agora é o ContatoController (@WebServlet("/contato")) -->
 
     <!-- Central de Ajuda (FAQ) -->
     <servlet>
