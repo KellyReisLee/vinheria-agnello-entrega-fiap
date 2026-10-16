@@ -6,7 +6,7 @@
 @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400..900;1,400..900&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap');
 
 /* Confirmação de idade (18+), usada em todas as páginas com header */
-@import url('./sections/_verificacao-idade.css?v=2026.10.16');
+@import url('./sections/_verificacao-idade.css?v=2026.10.16-2');
 
 *,
 *::before,
@@ -102,36 +102,6 @@ body.no-scroll {
   display: block;
   flex-shrink: 0;
   width: auto;
-  overflow: visible;
-  shape-rendering: geometricPrecision; /* desenho com a máxima precisão */
-}
-
-/* O vinho balança de um lado para o outro e sobe um pouquinho no meio
-   do movimento, como um líquido de verdade. Com "reduzir movimento"
-   ativo, o bloco no fim deste arquivo desliga a animação. */
-.taca-vinho {
-  transform-box: fill-box;    /* medidas relativas ao próprio vinho */
-  transform-origin: 50% 6%;   /* gira em volta do centro da superfície */
-  animation: tacaBalanco 4.2s cubic-bezier(0.45, 0, 0.55, 1) infinite;
-}
-
-@keyframes tacaBalanco {
-  0%,
-  100% {
-    transform: rotate(-5deg) translateY(0);
-  }
-
-  25% {
-    transform: rotate(0deg) translateY(-3px);
-  }
-
-  50% {
-    transform: rotate(5deg) translateY(0);
-  }
-
-  75% {
-    transform: rotate(0deg) translateY(-3px);
-  }
 }
 
 /* Texto só para leitores de ecrã */

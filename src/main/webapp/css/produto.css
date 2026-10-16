@@ -3,12 +3,12 @@
    Desktop: foto | informações · Telemóvel: tudo numa coluna + barra de compra fixa.
    Os cards de "Você também pode gostar" usam o visual de sections/_vitrini.css.
    ========================================================================== */
-@import url('./sections/_header.css?v=2026.10.16');
-@import url('./sections/_buttons.css?v=2026.10.16');
-@import url('./sections/_vitrini.css?v=2026.10.16');
-@import url('./sections/_footer-completed.css?v=2026.10.16');
-@import url('./sections/_carrinho.css?v=2026.10.16');
-@import url('./sections/_chat.css?v=2026.10.16');
+@import url('./sections/_header.css?v=2026.10.16-2');
+@import url('./sections/_buttons.css?v=2026.10.16-2');
+@import url('./sections/_vitrini.css?v=2026.10.16-2');
+@import url('./sections/_footer-completed.css?v=2026.10.16-2');
+@import url('./sections/_carrinho.css?v=2026.10.16-2');
+@import url('./sections/_chat.css?v=2026.10.16-2');
 
 .pdp-body {
   display: flex;
