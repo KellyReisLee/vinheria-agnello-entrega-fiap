@@ -197,30 +197,34 @@
               </div>
               <div class="field">
                 <label for="logradouro">Rua / avenida</label>
-                <input type="text" id="logradouro" autocomplete="address-line1" required>
+                <input type="text" id="logradouro" autocomplete="address-line1" maxlength="120" required>
               </div>
             </div>
             <div class="grid-numero">
               <div class="field">
                 <label for="numero">Número</label>
-                <input type="text" id="numero" inputmode="numeric" required>
+                <input type="text" id="numero" inputmode="numeric" maxlength="20" required>
               </div>
               <div class="field">
                 <label for="complemento">Complemento <span class="opcional">(opcional)</span></label>
-                <input type="text" id="complemento" autocomplete="address-line2" placeholder="Apto, bloco…">
+                <input type="text" id="complemento" autocomplete="address-line2" placeholder="Apto, bloco…" maxlength="60">
               </div>
             </div>
             <div class="grid-2">
               <div class="field">
                 <label for="bairro">Bairro</label>
-                <input type="text" id="bairro" required>
+                <input type="text" id="bairro" maxlength="80" required>
               </div>
               <div class="field">
                 <label for="cidade">Cidade / UF</label>
-                <input type="text" id="cidade" autocomplete="address-level2" required>
+                <input type="text" id="cidade" autocomplete="address-level2" maxlength="80" required>
               </div>
             </div>
           </form>
+          <p class="checkout-retirada-aviso" id="aviso-retirada" hidden>
+            Você escolheu <strong>retirar na adega</strong> (passo 3): não precisa informar endereço.
+            Retire na Rua das Videiras, 1978 — Jardins, SP, levando um documento com foto.
+          </p>
         </section>
 
         <!-- ===================== 3. ENVIO ===================== -->
@@ -232,7 +236,7 @@
           <fieldset class="shipping-options">
             <legend class="sr-only">Escolha o envio</legend>
             <label class="shipping-option">
-              <input type="radio" name="shipping" value="25.00" data-nome="Frete Térmico Agnello" checked>
+              <input type="radio" name="shipping" value="25.00" data-tipo="ENTREGA" data-nome="Frete Térmico Agnello" checked>
               <span class="shipping-info">
                 <span class="ship-name">Frete Térmico Agnello</span>
                 <span class="ship-time">Entrega em até 48h com controle de temperatura</span>
@@ -240,7 +244,7 @@
               <span class="ship-price">R$ 25,00</span>
             </label>
             <label class="shipping-option">
-              <input type="radio" name="shipping" value="0" data-nome="Retirada na adega">
+              <input type="radio" name="shipping" value="0" data-tipo="RETIRADA" data-nome="Retirada na adega">
               <span class="shipping-info">
                 <span class="ship-name">Retirada na adega</span>
                 <span class="ship-time">Disponível em 3 horas (Jardins, SP)</span>

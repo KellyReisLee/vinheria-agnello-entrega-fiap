@@ -425,23 +425,6 @@
   padding-bottom: 0;
 }
 
-.pdp-relacionados .product-name a {
-  color: inherit;
-  text-decoration: none;
-}
-
-.pdp-relacionados .product-name a::after {
-  /* o card inteiro fica clicável, mas o botão "Selecionar" continua por cima */
-  content: '';
-  position: absolute;
-  inset: 0;
-}
-
-.pdp-relacionados .agnello-btn-comprar {
-  position: relative;
-  z-index: 1;
-}
-
 .pdp-relacionados .agnello-btn-comprar:disabled {
   background-color: #D9D4D0;
   color: #6B6567;

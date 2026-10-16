@@ -90,6 +90,34 @@
   box-shadow: 0 16px 35px rgba(39, 3, 14, 0.08);
 }
 
+/* Link para a página do produto: o nome é o link e, com o ::after,
+   o card inteiro fica clicável. O botão "Selecionar" fica por cima (z-index). */
+.product-card .product-link {
+  color: inherit;
+  text-decoration: none;
+}
+
+.product-card .product-link::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+}
+
+.product-card .product-link:focus-visible {
+  outline: none;
+}
+
+.product-card:has(.product-link:focus-visible) {
+  outline: 2px solid var(--accent-gold);
+  outline-offset: 3px;
+}
+
+.product-card .agnello-btn-comprar {
+  position: relative;
+  z-index: 1;
+}
+
 /* Selo de desconto (ex.: 17% OFF) */
 .product-card .agnello-badge-off {
   position: absolute;

@@ -1,7 +1,6 @@
 // js/pages/contato.js
-// Valida o formulário de contato e, por enquanto, abre o programa de e-mail do
-// cliente com a mensagem já escrita (mailto:). Quando existir um ContatoController,
-// troque a função enviar() por um fetch POST para o servidor.
+// Valida o formulário de contato e envia para o servidor (POST /contato →
+// ContatoController), que grava a mensagem e avisa a equipe por e-mail.
 (function () {
   const form = document.getElementById('form-contato');
   if (!form) return;
@@ -9,6 +8,8 @@
   const mensagem = document.getElementById('contato-mensagem');
   const contador = document.getElementById('contato-contador');
   const sucesso = document.getElementById('contato-sucesso');
+  const caixaErro = document.getElementById('contato-erro');
+  const botao = document.getElementById('contato-enviar');
   const EMAIL_OK = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
 
   // ---------- Mensagens de erro junto a cada campo ----------
@@ -79,18 +80,45 @@
   atualizarContador();
 
   // ---------- Envio ----------
-  function enviar(dados) {
-    const assunto = `[Site] ${dados.assunto}${dados.pedido ? ' — pedido ' + dados.pedido : ''}`;
-    const corpo = `${dados.mensagem}\n\n—\n${dados.nome}\n${dados.email}`;
-    const destino = form.dataset.destino;
-    window.location.href = `mailto:${destino}?subject=${encodeURIComponent(assunto)}&body=${encodeURIComponent(corpo)}`;
+  async function enviar() {
+    caixaErro.hidden = true;
+    sucesso.hidden = true;
+    botao.disabled = true;
+    const textoBotao = botao.textContent;
+    botao.textContent = 'Enviando…';
 
-    sucesso.hidden = false;
-    sucesso.innerHTML = '';
-    const forte = document.createElement('strong');
-    forte.textContent = 'Mensagem pronta! ';
-    sucesso.append(forte,
-      `Abrimos o seu programa de e-mail com o texto preenchido; é só clicar em enviar. Se nada abriu, escreva para ${destino}.`);
+    try {
+      const resposta = await fetch(form.action, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+          'X-Requested-With': 'fetch' // proteção CSRF (ver ProtecaoCsrf.java)
+        },
+        body: new URLSearchParams(new FormData(form)).toString()
+      });
+      const dados = await resposta.json().catch(() => ({}));
+
+      if (resposta.ok && dados.sucesso) {
+        sucesso.innerHTML = '';
+        const forte = document.createElement('strong');
+        forte.textContent = 'Mensagem enviada! ';
+        sucesso.append(forte, 'Respondemos no seu e-mail em até 1 dia útil.');
+        sucesso.hidden = false;
+        form.querySelectorAll('textarea, #contato-pedido, select').forEach((c) => { c.value = ''; });
+        form.querySelector('#contato-aceite').checked = false;
+        atualizarContador();
+        sucesso.setAttribute('tabindex', '-1');
+        sucesso.focus();
+      } else {
+        caixaErro.textContent = dados.mensagem || 'Não foi possível enviar agora. Tente novamente.';
+        caixaErro.hidden = false;
+      }
+    } catch (e) {
+      caixaErro.textContent = 'Sem ligação com o servidor. Verifique a internet e tente novamente.';
+      caixaErro.hidden = false;
+    }
+    botao.disabled = false;
+    botao.textContent = textoBotao;
   }
 
   form.addEventListener('submit', (e) => {
@@ -100,8 +128,6 @@
       invalidos[0].focus();
       return;
     }
-    const dados = Object.fromEntries(new FormData(form).entries());
-    Object.keys(dados).forEach((k) => { dados[k] = String(dados[k]).trim(); });
-    enviar(dados);
+    enviar();
   });
 })();

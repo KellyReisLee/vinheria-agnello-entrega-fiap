@@ -1,7 +1,11 @@
 package com.agnello.controller;
 
 import java.io.IOException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
+import com.agnello.model.Usuario;
+import com.agnello.service.PedidoService;
 import com.agnello.util.SessaoCliente;
 
 import jakarta.servlet.ServletException;
@@ -14,6 +18,9 @@ import jakarta.servlet.http.HttpServletResponse;
 public class AreaPessoalController extends HttpServlet {
 
     private static final long serialVersionUID = 1L;
+    private static final Logger LOGGER = Logger.getLogger(AreaPessoalController.class.getName());
+
+    private final PedidoService pedidoService = new PedidoService();
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
@@ -23,9 +30,18 @@ public class AreaPessoalController extends HttpServlet {
         response.setHeader("Pragma", "no-cache");
         response.setDateHeader("Expires", 0);
 
-        if (SessaoCliente.atual(request) == null) {
+        Usuario cliente = SessaoCliente.atual(request);
+        if (cliente == null) {
             response.sendRedirect(request.getContextPath() + "/login");
             return;
+        }
+
+        try {
+            request.setAttribute("pedidos", pedidoService.listarDoCliente(cliente));
+        } catch (RuntimeException e) {
+            // A página abre na mesma; só a lista de pedidos mostra um aviso
+            LOGGER.log(Level.SEVERE, "Erro ao carregar os pedidos do cliente id=" + cliente.getId(), e);
+            request.setAttribute("erroPedidos", true);
         }
         request.getRequestDispatcher("/WEB-INF/views/area-pessoal.jsp").forward(request, response);
     }

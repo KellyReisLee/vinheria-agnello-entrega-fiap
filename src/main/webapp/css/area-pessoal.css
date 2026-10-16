@@ -702,3 +702,22 @@
     order: -1;
   }
 }
+
+/* Nome do vinho no pedido leva à página do produto */
+.conta-pedido li a {
+  color: inherit;
+  text-decoration: underline;
+  text-decoration-color: rgba(74, 21, 37, 0.25);
+  text-underline-offset: 3px;
+}
+
+.conta-pedido li a:hover {
+  color: var(--primary-wine);
+  text-decoration-color: currentColor;
+}
+
+/* Linhas de frete e desconto, mais discretas que os vinhos */
+.conta-pedido li.conta-pedido-extra {
+  color: var(--text-muted);
+  font-size: 0.82rem;
+}

@@ -44,7 +44,7 @@
         </details>
 
         <article class="prose">
-          <p class="doc-atualizado">Última atualização: 14 de outubro de 2026</p>
+          <p class="doc-atualizado">Última atualização: 16 de outubro de 2026</p>
 
           <h2 id="quem-somos">Quem somos</h2>
           <p>A <strong>Vinheria Agnello</strong>, com loja na Rua das Videiras, 1978 — São Paulo, SP, é a controladora
@@ -114,14 +114,14 @@
           <ul>
             <li>os vinhos do seu <strong>carrinho</strong>;</li>
             <li>o resultado do <strong>Sommelier Virtual</strong>;</li>
-            <li>o resumo dos <strong>pedidos</strong> feitos neste navegador;</li>
             <li>a sua confirmação de que tem <strong>18 anos ou mais</strong>.</li>
           </ul>
           <p>Você pode apagar essas informações a qualquer momento nas configurações do navegador. Não usamos cookies de publicidade.</p>
 
           <h2 id="retencao">Por quanto tempo guardamos</h2>
           <p>Guardamos os dados da conta enquanto ela estiver ativa. Quando você exclui a conta, apagamos os seus dados
-            pessoais, exceto os que a lei nos obriga a manter, como as informações fiscais dos pedidos, guardadas pelo prazo legal.</p>
+            pessoais, exceto os que a lei nos obriga a manter, como as informações fiscais dos pedidos, guardadas pelo prazo legal
+            e desligadas da sua identificação.</p>
 
           <h2 id="seguranca">Segurança</h2>
           <p>Adotamos medidas técnicas e administrativas para proteger os seus dados:</p>
@@ -129,7 +129,8 @@
             <li>conexão segura (HTTPS) entre o seu navegador e o site, e conexão cifrada entre o site e o banco de dados;</li>
             <li>a sua <strong>senha nunca é guardada</strong>: guardamos apenas um código irreversível gerado a partir dela
               (hash PBKDF2), que não permite descobrir a senha;</li>
-            <li><strong>CPF e telefone ficam cifrados</strong> no banco de dados (AES-256), com chaves guardadas separadamente;</li>
+            <li><strong>CPF, telefone e endereço de entrega ficam cifrados</strong> no banco de dados (AES-256), com chaves guardadas separadamente;</li>
+            <li>os <strong>dados do cartão não passam pelos nossos servidores</strong> nem ficam guardados;</li>
             <li>os links de ativação e de recuperação de senha são de uso único e expiram;</li>
             <li>a conta é bloqueada temporariamente depois de várias tentativas de senha erradas.</li>
           </ul>

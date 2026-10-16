@@ -986,3 +986,20 @@
     opacity: 1;
   }
 }
+
+/* ---------- Aviso de retirada na adega (passo 2) ---------- */
+.checkout-retirada-aviso {
+  margin: 0;
+  padding: 1rem 1.1rem;
+  border-left: 3px solid var(--accent-gold);
+  border-radius: 6px;
+  background-color: #FBF8F2;
+  color: var(--text-charcoal);
+  font-size: 0.92rem;
+  line-height: 1.6;
+}
+
+/* O "display: grid" do formulário venceria o atributo hidden sem esta regra */
+.checkout-form[hidden] {
+  display: none;
+}

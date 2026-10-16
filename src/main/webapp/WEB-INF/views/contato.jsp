@@ -36,8 +36,8 @@
         <%-- Formulário. Por enquanto, ao enviar, abre o e-mail do cliente com a
              mensagem pronta (contato.js). Quando existir um ContatoController,
              basta trocar esse passo por um envio ao servidor. --%>
-        <form class="contato-form" id="form-contato" novalidate
-              data-destino="contato@vinheriaagnello.com.br">
+        <%-- Enviado pelo contato.js (fetch POST /contato → ContatoController) --%>
+        <form class="contato-form" id="form-contato" method="post" action="${ctx}/contato" novalidate>
           <h2>Envie uma mensagem</h2>
           <p>Os campos marcados como opcionais podem ficar em branco.</p>
 
@@ -92,7 +92,14 @@
             </div>
           </div>
 
-          <button type="submit" class="btn-vinho">Enviar mensagem</button>
+          <%-- "Pote de mel" contra robôs: escondido de pessoas e de leitores de tela --%>
+          <div class="campo-armadilha" aria-hidden="true">
+            <label for="contato-site">Não preencha este campo</label>
+            <input type="text" id="contato-site" name="site" tabindex="-1" autocomplete="off">
+          </div>
+
+          <button type="submit" class="btn-vinho" id="contato-enviar">Enviar mensagem</button>
+          <div class="contato-erro" id="contato-erro" role="alert" hidden></div>
           <div class="contato-sucesso" id="contato-sucesso" role="status" hidden></div>
         </form>
 

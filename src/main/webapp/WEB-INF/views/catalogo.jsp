@@ -122,7 +122,7 @@
 
 							<div class="product-info">
 								<span class="product-meta">${p.origem} • ${p.tipo}</span>
-								<h3 class="product-name">${p.nome}</h3>
+								<h3 class="product-name"><a class="product-link" href="${ctx}/produto?id=${p.id}"><c:out value="${p.nome}" /></a></h3>
 
 								<c:if test="${not empty p.pontuacao}">
 									<ul class="product-scores">

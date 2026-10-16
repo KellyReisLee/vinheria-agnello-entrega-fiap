@@ -3,16 +3,9 @@
 <%@ taglib prefix="fmt" uri="jakarta.tags.fmt" %>
 <%@ taglib prefix="fn" uri="jakarta.tags.functions" %>
 <%--
-  PÁGINA DO PRODUTO  —  /produto?id=12
-
-  O que esta página espera receber do servidor (ProdutoController, a criar):
-    produto      → com.agnello.model.Produto   (obrigatório; vazio = "não encontrado")
-    relacionados → List<Produto>               (opcional; outros vinhos do mesmo tipo)
-
-  Exemplo do doGet do controller:
-    Produto p = new ProdutoDAO().buscarPorId(id);
-    request.setAttribute("produto", p);
-    request.getRequestDispatcher("/WEB-INF/views/produto.jsp").forward(request, response);
+  PÁGINA DO PRODUTO  —  /produto?id=12   (preenchida pelo ProdutoController)
+    produto      → com.agnello.model.Produto   (vazio = "não encontrado", status 404)
+    relacionados → List<Produto>               (outros vinhos do mesmo tipo, até 4)
 --%>
 <fmt:setLocale value="pt_BR" />
 <c:set var="ctx" value="${pageContext.request.contextPath}" />
@@ -243,7 +236,7 @@
                   </a>
                   <div class="product-info">
                     <span class="product-meta"><c:out value="${r.origem}" /> • <c:out value="${r.tipo}" /></span>
-                    <h3 class="product-name"><a href="${ctx}/produto?id=${r.id}"><c:out value="${r.nome}" /></a></h3>
+                    <h3 class="product-name"><a class="product-link" href="${ctx}/produto?id=${r.id}"><c:out value="${r.nome}" /></a></h3>
                   </div>
                   <div class="product-footer">
                     <div class="price-box"><span class="product-price">R$ ${precoRel}</span></div>
