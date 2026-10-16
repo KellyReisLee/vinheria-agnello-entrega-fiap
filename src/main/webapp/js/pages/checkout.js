@@ -1,9 +1,10 @@
 // js/pages/checkout.js
 // Checkout: resumo do carrinho, identificação (AJAX ao CheckoutController),
-// endereço com preenchimento pelo CEP, envio, pagamento e confirmação do pedido.
+// endereço com preenchimento pelo CEP, envio, pagamento e envio do pedido ao
+// servidor (POST /pedidos → PedidoController).
 //
-// Nota: ainda não há back-end de pedidos. O pedido confirmado fica guardado no
-// browser (localStorage 'agnello_pedidos') e aparece em "Meus pedidos" na área pessoal.
+// Os valores mostrados aqui são só uma prévia: o servidor recalcula tudo com os
+// preços do banco, e a confirmação mostra os valores que ele devolveu.
 document.addEventListener('DOMContentLoaded', () => {
   const ctx = window.CONTEXT_PATH || '';
   const urlCheckout = `${ctx}/checkout`;
@@ -106,7 +107,16 @@ document.addEventListener('DOMContentLoaded', () => {
     if (anterior && Number(anterior) <= max) select.value = anterior;
   }
 
-  document.querySelectorAll('input[name="shipping"]').forEach((r) => r.addEventListener('change', atualizarTotais));
+  // Na retirada na adega o endereço não é necessário: o formulário fica escondido
+  function atualizarEnvio() {
+    const envio = document.querySelector('input[name="shipping"]:checked');
+    const retirada = !!envio && envio.dataset.tipo === 'RETIRADA';
+    $('form-endereco').hidden = retirada;
+    $('aviso-retirada').hidden = !retirada;
+    $('passo2').textContent = retirada ? 'Retirada na adega' : 'Endereço de entrega';
+    atualizarTotais();
+  }
+  document.querySelectorAll('input[name="shipping"]').forEach((r) => r.addEventListener('change', atualizarEnvio));
 
   // Abas de pagamento (com setas do teclado)
   const abasPagamento = [...document.querySelectorAll('.pay-tab')];
@@ -130,7 +140,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   });
 
-  atualizarTotais();
+  atualizarEnvio();
 
   // ======================================================
   // 2) MÁSCARAS
@@ -346,7 +356,9 @@ document.addEventListener('DOMContentLoaded', () => {
   function validarPedido() {
     if (!logado) return ['Identifique-se no passo 1 (entre ou crie a sua conta) para concluir.', emailInput];
 
-    const obrigatorios = [
+    const entrega = document.querySelector('input[name="shipping"]:checked');
+    const ehRetirada = entrega && entrega.dataset.tipo === 'RETIRADA';
+    const obrigatorios = ehRetirada ? [] : [
       ['cep', 'Informe o CEP.', (v) => so(v).length === 8],
       ['logradouro', 'Informe a rua.'],
       ['numero', 'Informe o número.'],
@@ -364,19 +376,23 @@ document.addEventListener('DOMContentLoaded', () => {
       if (so($('card-cvv').value).length < 3) return ['Informe o CVV (3 ou 4 dígitos).', $('card-cvv')];
       if ($('card-name').value.trim().length < 3) return ['Informe o nome impresso no cartão.', $('card-name')];
     }
+    if (itens.some((i) => !Number.isInteger(Number(i.id)) || Number(i.id) <= 0)) {
+      return ['Há um vinho antigo no carrinho que já não está disponível. Remova-o e adicione de novo pelo catálogo.', null];
+    }
     return null;
   }
 
   const btnConcluir = $('btn-concluir');
-  btnConcluir.addEventListener('click', () => {
+  const textoBotao = btnConcluir.querySelector('span').textContent;
+
+  btnConcluir.addEventListener('click', async () => {
     const erroPedido = $('pedido-erro');
     const problema = validarPedido();
     if (problema) {
       mostrarAlerta(erroPedido, problema[0]);
-      if (problema[1]) {
-        problema[1].focus({ preventScroll: true });
-        problema[1].scrollIntoView({ behavior: 'smooth', block: 'center' });
-      }
+      const campo = problema[1] || erroPedido;
+      campo.focus({ preventScroll: true });
+      campo.scrollIntoView({ behavior: 'smooth', block: 'center' });
       return;
     }
     mostrarAlerta(erroPedido, '');
@@ -384,36 +400,61 @@ document.addEventListener('DOMContentLoaded', () => {
     btnConcluir.disabled = true;
     btnConcluir.querySelector('span').textContent = 'Processando…';
 
-    // Pequena espera para dar feedback (aqui entraria a chamada ao back-end de pedidos)
-    setTimeout(() => confirmarPedido(), 900);
+    try {
+      const resposta = await fetch(`${ctx}/pedidos`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+          'X-Requested-With': 'fetch' // proteção CSRF (ver ProtecaoCsrf.java)
+        },
+        body: montarDadosPedido().toString()
+      });
+      const dados = await resposta.json().catch(() => ({}));
+      if (resposta.ok && dados.sucesso) {
+        confirmarPedido(dados.pedido);
+        return;
+      }
+      mostrarAlerta(erroPedido, dados.mensagem || 'Não foi possível registrar o pedido. Tente novamente.');
+    } catch (e) {
+      mostrarAlerta(erroPedido, 'Sem ligação com o servidor. Verifique a internet e tente novamente.');
+    }
+    btnConcluir.disabled = false;
+    btnConcluir.querySelector('span').textContent = textoBotao;
+    erroPedido.scrollIntoView({ behavior: 'smooth', block: 'center' });
   });
 
-  function confirmarPedido() {
-    const t = calcularTotais();
-    const forma = formaPagamento();
-    const numero = `AG-${Date.now().toString(36).toUpperCase().slice(-6)}`;
-    const nomesPagamento = { pix: 'Pix', credit: `Cartão de crédito (${$('card-parcelas').value}x)`, boleto: 'Boleto bancário' };
+  // Só vai para o servidor o que ele precisa: QUAIS vinhos e QUANTOS.
+  // Preços não são enviados (o servidor usa os do banco) e os dados do cartão
+  // também não (num site real, iriam direto para o gateway de pagamento).
+  function montarDadosPedido() {
+    const dados = new URLSearchParams();
+    itens.forEach((i) => {
+      dados.append('produto_id', String(Number(i.id)));
+      dados.append('quantidade', String(i.quantidade || 1));
+    });
+    const envio = document.querySelector('input[name="shipping"]:checked');
+    dados.set('entrega', envio ? envio.dataset.tipo : '');
+    dados.set('pagamento', formaPagamento());
+    if (formaPagamento() === 'credit') dados.set('parcelas', $('card-parcelas').value);
+    ['cep', 'logradouro', 'numero', 'complemento', 'bairro', 'cidade'].forEach((id) => {
+      dados.set(id, $(id).value.trim());
+    });
+    return dados;
+  }
 
-    const pedido = {
-      numero,
-      data: new Date().toISOString(),
-      email: emailSessao,
-      itens: itens.map((i) => ({ nome: i.nome, quantidade: i.quantidade || 1, preco: precoParaNumero(i.preco), imagem: i.imagem })),
-      ...t,
-      pagamento: nomesPagamento[forma],
-      endereco: `${$('logradouro').value}, ${$('numero').value}${$('complemento').value ? ` – ${$('complemento').value}` : ''} · ${$('bairro').value} · ${$('cidade').value} · CEP ${$('cep').value}`,
-      status: forma === 'credit' ? 'Pagamento aprovado' : 'Aguardando pagamento'
-    };
+  // Mostra a confirmação com os dados devolvidos pelo servidor
+  function confirmarPedido(pedido) {
+    const forma = pedido.pagamento;
+    const numero = pedido.numero;
+    const total = Number(pedido.total);
 
     try {
-      const pedidos = JSON.parse(localStorage.getItem('agnello_pedidos')) || [];
-      pedidos.unshift(pedido);
-      localStorage.setItem('agnello_pedidos', JSON.stringify(pedidos));
       localStorage.removeItem('agnello_carrinho'); // esvazia o carrinho
+      localStorage.removeItem('agnello_pedidos'); // pedidos antigos guardados só no navegador
     } catch (e) { /* sem localStorage: a confirmação aparece na mesma */ }
 
     // Instruções conforme a forma de pagamento (valores de demonstração)
-    const codigoPix = `00020126580014BR.GOV.BCB.PIX0136agnello-${numero.toLowerCase()}5204000053039865406${t.total.toFixed(2)}5802BR`;
+    const codigoPix = `00020126580014BR.GOV.BCB.PIX0136agnello-${numero.toLowerCase()}5204000053039865406${total.toFixed(2)}5802BR`;
     const instrucoes = {
       pix: `
         <h2>Pague com Pix</h2>
@@ -424,7 +465,8 @@ document.addEventListener('DOMContentLoaded', () => {
         </div>`,
       credit: `
         <h2>Pagamento aprovado</h2>
-        <p>O pagamento no cartão foi aprovado. Você receberá um e-mail quando o pedido for enviado.</p>`,
+        <p>O pagamento foi aprovado em ${pedido.parcelas}x de ${brl(Number(pedido.valorParcela))} sem juros.
+          Você receberá um e-mail quando o pedido for enviado.</p>`,
       boleto: `
         <h2>Boleto gerado</h2>
         <p>O boleto vence em 2 dias úteis. O pedido é liberado após a compensação bancária.</p>`
@@ -435,17 +477,17 @@ document.addEventListener('DOMContentLoaded', () => {
       <div class="confirmacao-icone" aria-hidden="true">✓</div>
       <span class="confirmacao-eyebrow">Pedido ${numero}</span>
       <h1 id="confirmacao-titulo">Obrigado! O seu pedido foi recebido.</h1>
-      <p class="confirmacao-lead">Enviaremos as atualizações para <strong>${escapar(emailSessao)}</strong>.</p>
+      <p class="confirmacao-lead">Enviamos a confirmação para <strong>${escapar(emailSessao)}</strong>.</p>
 
-      <div class="confirmacao-pagamento">${instrucoes[forma]}</div>
+      <div class="confirmacao-pagamento">${instrucoes[forma] || ''}</div>
 
       <div class="confirmacao-resumo">
-        <ul>${pedido.itens.map((i) => `<li><span>${i.quantidade}× ${escapar(i.nome)}</span><span>${brl(i.preco * i.quantidade)}</span></li>`).join('')}</ul>
+        <ul>${pedido.itens.map((i) => `<li><span>${i.quantidade}× ${escapar(i.nome)}</span><span>${brl(Number(i.total))}</span></li>`).join('')}</ul>
         <dl>
-          <div><dt>Envio</dt><dd>${escapar(t.envio)} · ${t.frete === 0 ? 'Grátis' : brl(t.frete)}</dd></div>
-          ${t.desconto ? `<div><dt>Desconto Pix</dt><dd>− ${brl(t.desconto)}</dd></div>` : ''}
-          <div class="confirmacao-total"><dt>Total</dt><dd>${brl(t.total)}</dd></div>
-          <div><dt>Entrega</dt><dd>${escapar(pedido.endereco)}</dd></div>
+          <div><dt>Envio</dt><dd>${escapar(pedido.entrega)} · ${Number(pedido.frete) === 0 ? 'Grátis' : brl(Number(pedido.frete))}</dd></div>
+          ${Number(pedido.desconto) ? `<div><dt>Desconto Pix</dt><dd>− ${brl(Number(pedido.desconto))}</dd></div>` : ''}
+          <div class="confirmacao-total"><dt>Total</dt><dd>${brl(total)}</dd></div>
+          <div><dt>Entrega</dt><dd>${pedido.endereco ? escapar(pedido.endereco) : 'Retirada na adega · Rua das Videiras, 1978 — Jardins, SP'}</dd></div>
         </dl>
       </div>
 

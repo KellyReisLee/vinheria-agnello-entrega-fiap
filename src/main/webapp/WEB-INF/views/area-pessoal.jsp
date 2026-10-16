@@ -1,6 +1,9 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <%@ taglib prefix="c" uri="jakarta.tags.core" %>
 <%@ taglib prefix="fn" uri="jakarta.tags.functions" %>
+<%@ taglib prefix="fmt" uri="jakarta.tags.fmt" %>
+<fmt:setLocale value="pt_BR" />
+<fmt:setTimeZone value="America/Sao_Paulo" />
 <c:set var="ctx" value="${pageContext.request.contextPath}" />
 
 <%-- Dados do cliente (ClientePF ou ClientePJ) preparados uma só vez --%>
@@ -83,8 +86,23 @@
           <div class="conta-boas-vindas">
             <span class="conta-eyebrow">Espaço do apreciador</span>
             <h1 id="titulo-visao">Olá, <c:out value="${primeiroNome}" />!</h1>
-            <p id="resumo-conta">Bem-vindo à sua adega particular.</p>
-            <div class="conta-ultimo-pedido" id="ultimo-pedido" hidden></div>
+            <%-- "pedidos" vem do AreaPessoalController (já ordenados do mais recente) --%>
+            <c:set var="qtdPedidos" value="${fn:length(pedidos)}" />
+            <p id="resumo-conta">
+              <c:choose>
+                <c:when test="${qtdPedidos eq 1}">Você tem 1 pedido na sua conta.</c:when>
+                <c:when test="${qtdPedidos gt 1}">Você tem ${qtdPedidos} pedidos na sua conta.</c:when>
+                <c:otherwise>Bem-vindo à sua adega particular.</c:otherwise>
+              </c:choose>
+            </p>
+            <c:if test="${qtdPedidos gt 0}">
+              <c:set var="ultimo" value="${pedidos[0]}" />
+              <div class="conta-ultimo-pedido" id="ultimo-pedido">
+                <span class="conta-ultimo-label">Último pedido · <c:out value="${ultimo.numero}" /></span>
+                <strong><c:out value="${ultimo.status.descricao}" /></strong>
+                <a href="#pedidos" data-secao="pedidos">Ver detalhes →</a>
+              </div>
+            </c:if>
           </div>
 
           <div class="conta-atalhos">
@@ -114,8 +132,70 @@
         <!-- ===================== PEDIDOS ===================== -->
         <section class="conta-secao" id="pedidos" aria-labelledby="titulo-pedidos" tabindex="-1" hidden>
           <h1 class="conta-secao-titulo" id="titulo-pedidos">Meus pedidos</h1>
-          <%-- Lista preenchida pelo area-pessoal.js a partir dos pedidos feitos no checkout --%>
-          <div id="lista-pedidos" class="conta-pedidos"></div>
+          <div id="lista-pedidos" class="conta-pedidos">
+            <c:choose>
+              <c:when test="${erroPedidos}">
+                <div class="conta-vazio" role="alert">
+                  <h2>Não foi possível carregar os pedidos</h2>
+                  <p>Tente novamente em alguns instantes.</p>
+                  <a href="${ctx}/area-pessoal#pedidos" class="conta-btn-primario">Recarregar</a>
+                </div>
+              </c:when>
+              <c:when test="${empty pedidos}">
+                <div class="conta-vazio">
+                  <img src="${ctx}/assets/icons/package.svg" alt="" width="40" height="40">
+                  <h2>Ainda não tem pedidos</h2>
+                  <p>Quando fizer a sua primeira compra, ela aparece aqui.</p>
+                  <a href="${ctx}/catalogo" class="conta-btn-primario">Explorar a adega</a>
+                </div>
+              </c:when>
+              <c:otherwise>
+                <c:forEach var="pedido" items="${pedidos}">
+                  <article class="conta-pedido" aria-labelledby="pedido-${pedido.id}">
+                    <header>
+                      <div>
+                        <h2 id="pedido-${pedido.id}">Pedido <c:out value="${pedido.numero}" /></h2>
+                        <span>
+                          <fmt:formatDate value="${pedido.dataCriacao}" pattern="dd 'de' MMM 'de' yyyy, HH:mm" />
+                          · <c:out value="${pedido.formaPagamento.descricao}" /><c:if test="${pedido.parcelas gt 1}"> (${pedido.parcelas}x)</c:if>
+                        </span>
+                      </div>
+                      <span class="conta-status${pedido.status.positivo ? ' conta-status--ok' : ''}"><c:out value="${pedido.status.descricao}" /></span>
+                    </header>
+                    <ul>
+                      <c:forEach var="item" items="${pedido.itens}">
+                        <li>
+                          <span>${item.quantidade}×
+                            <c:choose>
+                              <c:when test="${not empty item.produtoId}"><a href="${ctx}/produto?id=${item.produtoId}"><c:out value="${item.nomeProduto}" /></a></c:when>
+                              <c:otherwise><c:out value="${item.nomeProduto}" /></c:otherwise>
+                            </c:choose>
+                          </span>
+                          <span><fmt:formatNumber value="${item.total}" type="currency" currencySymbol="R$" /></span>
+                        </li>
+                      </c:forEach>
+                      <li class="conta-pedido-extra">
+                        <span><c:out value="${pedido.tipoEntrega.descricao}" /></span>
+                        <span><c:choose><c:when test="${pedido.frete.signum() eq 0}">Grátis</c:when><c:otherwise><fmt:formatNumber value="${pedido.frete}" type="currency" currencySymbol="R$" /></c:otherwise></c:choose></span>
+                      </li>
+                      <c:if test="${pedido.desconto.signum() gt 0}">
+                        <li class="conta-pedido-extra">
+                          <span>Desconto Pix</span>
+                          <span>− <fmt:formatNumber value="${pedido.desconto}" type="currency" currencySymbol="R$" /></span>
+                        </li>
+                      </c:if>
+                    </ul>
+                    <footer>
+                      <span class="conta-pedido-endereco">
+                        <c:out value="${empty pedido.endereco ? 'Retirada na adega · Rua das Videiras, 1978 — Jardins, SP' : pedido.endereco}" />
+                      </span>
+                      <strong><fmt:formatNumber value="${pedido.total}" type="currency" currencySymbol="R$" /></strong>
+                    </footer>
+                  </article>
+                </c:forEach>
+              </c:otherwise>
+            </c:choose>
+          </div>
         </section>
 
         <!-- ===================== DADOS ===================== -->
