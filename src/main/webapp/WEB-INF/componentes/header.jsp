@@ -68,5 +68,5 @@
   </div>
 </header>
 <div class="nav-backdrop" hidden></div>
-<script src="${ctx}/js/components/header.js" defer></script>
-<script src="${ctx}/js/components/verificacao-idade.js" defer></script>
+<script src="${ctx}/js/components/header.js?v=${initParam.versaoArquivos}" defer></script>
+<script src="${ctx}/js/components/verificacao-idade.js?v=${initParam.versaoArquivos}" defer></script>

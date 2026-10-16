@@ -223,3 +223,10 @@
 .sugestoes-actions [hidden] {
   display: none;
 }
+
+/* Botão "Mostrar mais sugestões" abaixo da grelha */
+.sugestoes-mais {
+  display: flex;
+  margin: 1.5rem auto 0;
+  cursor: pointer;
+}

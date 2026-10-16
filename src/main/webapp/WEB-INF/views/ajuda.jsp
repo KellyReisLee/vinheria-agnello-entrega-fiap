@@ -9,7 +9,7 @@
   <title>Central de Ajuda | Vinheria Agnello</title>
   <meta name="description" content="Perguntas frequentes da Vinheria Agnello: pedidos, prazos de entrega, formas de pagamento, trocas e devoluções, conta e Sommelier Virtual.">
   <jsp:include page="/WEB-INF/componentes/site-head.jsp" />
-  <link rel="stylesheet" href="${ctx}/css/institucional.css">
+  <link rel="stylesheet" href="${ctx}/css/institucional.css?v=${initParam.versaoArquivos}">
 </head>
 
 <body class="inst-body">
@@ -245,6 +245,6 @@
 
   <jsp:include page="/WEB-INF/componentes/footer.jsp" />
   <jsp:include page="/WEB-INF/componentes/carrinho-gaveta.jsp" />
-  <script src="${ctx}/js/pages/ajuda.js"></script>
+  <script src="${ctx}/js/pages/ajuda.js?v=${initParam.versaoArquivos}"></script>
 </body>
 </html>

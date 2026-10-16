@@ -64,7 +64,7 @@
     </c:otherwise>
   </c:choose>
   <jsp:include page="/WEB-INF/componentes/site-head.jsp" />
-  <link rel="stylesheet" href="${ctx}/css/produto.css">
+  <link rel="stylesheet" href="${ctx}/css/produto.css?v=${initParam.versaoArquivos}">
 </head>
 
 <body class="pdp-body">
@@ -276,6 +276,6 @@
 
   <jsp:include page="/WEB-INF/componentes/footer.jsp" />
   <jsp:include page="/WEB-INF/componentes/carrinho-gaveta.jsp" />
-  <script src="${ctx}/js/pages/produto.js"></script>
+  <script src="${ctx}/js/pages/produto.js?v=${initParam.versaoArquivos}"></script>
 </body>
 </html>

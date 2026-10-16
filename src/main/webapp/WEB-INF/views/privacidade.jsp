@@ -13,7 +13,7 @@
   <title>Política de Privacidade | Vinheria Agnello</title>
   <meta name="description" content="Política de Privacidade da Vinheria Agnello: dados recolhidos, finalidades, compartilhamento, armazenamento local e os seus direitos pela LGPD.">
   <jsp:include page="/WEB-INF/componentes/site-head.jsp" />
-  <link rel="stylesheet" href="${ctx}/css/institucional.css">
+  <link rel="stylesheet" href="${ctx}/css/institucional.css?v=${initParam.versaoArquivos}">
 </head>
 
 <body class="inst-body">
@@ -169,6 +169,6 @@
 
   <jsp:include page="/WEB-INF/componentes/footer.jsp" />
   <jsp:include page="/WEB-INF/componentes/carrinho-gaveta.jsp" />
-  <script src="${ctx}/js/pages/documento.js"></script>
+  <script src="${ctx}/js/pages/documento.js?v=${initParam.versaoArquivos}"></script>
 </body>
 </html>

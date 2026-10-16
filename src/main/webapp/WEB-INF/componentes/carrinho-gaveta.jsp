@@ -9,5 +9,5 @@
   </div>
   <div id="agnello-cart-body" class="agnello-cart-body"></div>
 </div>
-<script src="${pageContext.request.contextPath}/js/components/carrinho.js"></script>
-<script src="${pageContext.request.contextPath}/js/components/chat.js"></script>
+<script src="${pageContext.request.contextPath}/js/components/carrinho.js?v=${initParam.versaoArquivos}"></script>
+<script src="${pageContext.request.contextPath}/js/components/chat.js?v=${initParam.versaoArquivos}"></script>

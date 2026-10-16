@@ -1,9 +1,10 @@
 // js/pages/sugestoes-sommelier.js
 // Lê o perfil guardado pelo quiz (localStorage 'vinhoQuizResult') e:
 //   1) escolhe os TIPOS de vinho certos para o prato (tabela PERFIS abaixo);
-//   2) ordena os vinhos desses tipos por afinidade com a 3.ª resposta
-//      (taninos / acidez) e depois pela pontuação;
-//   3) destaca o 1.º como "Escolha do Sommelier".
+//   2) dá a cada vinho uma nota de afinidade com a 3.ª resposta (taninos /
+//      acidez): sobe com palavras que combinam e desce com as que contradizem;
+//   3) mostra os 6 melhores (o resto fica em "Mostrar mais");
+//   4) destaca o 1.º como "Escolha do Sommelier".
 //
 // Antes, as palavras de TODAS as respostas eram somadas; por exemplo,
 // "molho branco com queijos" contém "queijo" e mostrava tintos, e quase todos
@@ -48,13 +49,31 @@ document.addEventListener('DOMContentLoaded', () => {
     'rose-elegante': { tipos: ['rose', 'tinto'], frase: 'rosés gastronômicos e tintos frutados e leves' }
   };
 
-  // Palavras que aproximam um vinho da 3.ª resposta (procuradas no tipo e na descrição)
+  // ---------- 2) Afinidade com a 3.ª resposta ----------
+  // "mais": palavras que combinam com a resposta; "menos": palavras que a contradizem.
+  // O tipo cadastrado (ex.: "Tinto ENCORPADO", "Tinto SUAVE") pesa 3 vezes mais que
+  // a descrição, porque é a classificação feita pela própria loja.
   const AFINIDADE = {
-    'taninos-potentes': ['encorpado', 'potente', 'estrutur', 'barrica', 'carvalho', 'tanino', 'cabernet', 'malbec', 'tannat'],
-    'taninos-macios': ['macio', 'suave', 'frutado', 'redondo', 'merlot', 'pinot', 'leve', 'aveludado'],
-    'fresco-mineral': ['mineral', 'fresco', 'acidez', 'citric', 'sauvignon', 'brut', 'vibrante', 'prosecco'],
-    'frutado-equilibrado': ['frutado', 'macio', 'versatil', 'aromatico', 'chardonnay', 'rose', 'equilibr']
+    'taninos-potentes': {
+      mais: ['encorpad', 'potente', 'estrutur', 'iconico', 'nobre', 'robust', 'barrica', 'carvalho', 'taninos firmes', 'guarda', 'cabernet', 'malbec', 'tannat', 'gran reserva'],
+      menos: ['suave', 'leve', 'frutado', 'versatil', 'macio']
+    },
+    'taninos-macios': {
+      mais: ['suave', 'frutado', 'versatil', 'equilibr', 'macio', 'maciez', 'sedoso', 'redondo', 'aveludado', 'merlot', 'pinot', 'tempranillo', 'chianti', 'crianza', 'ripasso'],
+      menos: ['potente', 'encorpad', 'estrutur', 'iconico', 'taninos firmes']
+    },
+    'fresco-mineral': {
+      mais: ['citric', 'mineral', 'fresc', 'organico', 'acidez', 'vibrante', 'vivacidade', 'sauvignon', 'brut', 'cava', 'prosecco'],
+      menos: ['untuoso', 'amanteigado', 'manteiga', 'doce', 'adocicado', 'carvalho']
+    },
+    'frutado-equilibrado': {
+      mais: ['frutad', 'fruta', 'aromatic', 'floral', 'elegante', 'sofisticado', 'untuoso', 'equilibr', 'versatil', 'chardonnay', 'rose', 'moscatel', 'cremosidade'],
+      menos: ['acidez cortante', 'herbace', 'potente', 'encorpad', 'estrutur', 'iconico', 'taninos firmes']
+    }
   };
+
+  // Quantos vinhos mostrar logo de início (os outros ficam atrás de "Mostrar mais")
+  const MAX_SUGESTOES = 6;
 
   const escapar = (t) => String(t ?? '').replace(/[&<>"']/g, (c) => ({
     '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
@@ -63,28 +82,35 @@ document.addEventListener('DOMContentLoaded', () => {
   // "Rosé" -> "rose", "Itália" -> "italia"
   const normalizar = (t) => String(t || '').normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase();
 
-  // Classifica o tipo do vinho num dos 4 grupos usados acima
-  function grupoDoVinho(tipo) {
+  // Grupos do vinho: "Espumante Rosé" pertence a espumante E a rosé
+  function gruposDoVinho(tipo) {
     const t = normalizar(tipo);
-    if (t.includes('espumante') || t.includes('prosecco') || t.includes('cava') || t.includes('champagne')) return 'espumante';
-    if (t.includes('rose')) return 'rose';
-    if (t.includes('branco')) return 'branco';
-    if (t.includes('tinto')) return 'tinto';
-    return '';
+    const grupos = [];
+    if (t.includes('espumante') || t.includes('prosecco') || t.includes('cava') || t.includes('champagne')) grupos.push('espumante');
+    if (t.includes('rose')) grupos.push('rose');
+    if (t.includes('branco') && !grupos.includes('espumante')) grupos.push('branco');
+    if (t.includes('tinto')) grupos.push('tinto');
+    return grupos;
   }
 
-  const regra = PERFIS[perfil.etapa2] || { tipos: [], frase: '' };
-  const palavras = AFINIDADE[perfil.etapa3] || [];
+  const conta = (texto, lista) => lista.filter((p) => texto.includes(p)).length;
 
-  // ---------- 2) Pontuar e ordenar ----------
+  const regra = PERFIS[perfil.etapa2] || { tipos: [], frase: '' };
+  const afinidade = AFINIDADE[perfil.etapa3] || { mais: [], menos: [] };
+
+  // ---------- 3) Pontuar e ordenar ----------
   const avaliados = cards.map((card) => {
-    const grupo = grupoDoVinho(card.dataset.tipo);
-    const posTipo = regra.tipos.indexOf(grupo);           // 0 = tipo ideal, -1 = fora do perfil
-    const texto = normalizar(`${card.dataset.tipo} ${card.dataset.nome} ${card.querySelector('.product-desc')?.textContent || ''}`);
-    const afinidade = palavras.filter((p) => texto.includes(p)).length;
+    const posicoes = gruposDoVinho(card.dataset.tipo)
+      .map((g) => regra.tipos.indexOf(g))
+      .filter((i) => i !== -1);
+    const posTipo = posicoes.length ? Math.min(...posicoes) : -1; // 0 = tipo ideal, -1 = fora do perfil
+    const tipo = normalizar(card.dataset.tipo);
+    const resto = normalizar(`${card.dataset.nome} ${card.querySelector('.product-desc')?.textContent || ''}`);
+    const nota = 3 * (conta(tipo, afinidade.mais) - conta(tipo, afinidade.menos))
+      + conta(resto, afinidade.mais) - conta(resto, afinidade.menos);
     const pontos = parseInt(card.dataset.pontuacao, 10) || 0;
     const esgotado = card.classList.contains('is-esgotado');
-    return { card, posTipo, afinidade, pontos, esgotado, ordem: Number(card.dataset.ordem) || 0 };
+    return { card, posTipo, nota, pontos, esgotado, ordem: Number(card.dataset.ordem) || 0 };
   });
 
   let recomendados = avaliados.filter((v) => v.posTipo !== -1);
@@ -93,19 +119,38 @@ document.addEventListener('DOMContentLoaded', () => {
 
   recomendados.sort((a, b) =>
     (a.esgotado - b.esgotado) ||                   // disponíveis primeiro
+    (b.nota - a.nota) ||                           // mais próximo da 3.ª resposta
     (a.posTipo - b.posTipo) ||                     // tipo mais indicado primeiro
-    (b.afinidade - a.afinidade) ||                 // mais próximo da 3.ª resposta
-    (b.pontos - a.pontos) ||                       // melhor pontuação
+    (b.pontos - a.pontos) ||                       // melhor pontuação da crítica
     (a.ordem - b.ordem));
+
+  // Vinhos que CONTRADIZEM a resposta (nota negativa) só aparecem se faltarem opções
+  const bons = recomendados.filter((v) => v.nota >= 0 && !v.esgotado);
+  if (bons.length >= 3) recomendados = recomendados.filter((v) => v.nota >= 0);
 
   // Esconde todos e volta a mostrar só os recomendados, pela nova ordem
   avaliados.forEach((v) => { v.card.hidden = true; });
-  recomendados.forEach((v) => {
-    v.card.hidden = false;
+  recomendados.forEach((v, i) => {
+    v.card.hidden = i >= MAX_SUGESTOES;
     container.appendChild(v.card);
   });
 
-  // ---------- 3) Destaque "Escolha do Sommelier" ----------
+  // "Mostrar mais": revela o resto da seleção
+  const restantes = recomendados.length - MAX_SUGESTOES;
+  if (restantes > 0) {
+    const btnMais = document.createElement('button');
+    btnMais.type = 'button';
+    btnMais.className = 'btn-outline-dark sugestoes-mais';
+    btnMais.textContent = `Mostrar mais ${restantes} ${restantes === 1 ? 'sugestão' : 'sugestões'}`;
+    btnMais.addEventListener('click', () => {
+      recomendados.forEach((v) => { v.card.hidden = false; });
+      btnMais.remove();
+      recomendados[MAX_SUGESTOES].card.querySelector('a, button')?.focus();
+    });
+    container.insertAdjacentElement('afterend', btnMais);
+  }
+
+  // ---------- 4) Destaque "Escolha do Sommelier" ----------
   const destaque = recomendados.find((v) => !v.esgotado);
   if (destaque && encontrouPerfil) {
     destaque.card.classList.add('is-destaque');
@@ -117,9 +162,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // ---------- Texto e resumo do perfil ----------
   if (descricao) {
-    const total = recomendados.length;
+    const total = Math.min(recomendados.length, MAX_SUGESTOES);
     descricao.textContent = encontrouPerfil
-      ? `Para o seu momento, o Sommelier recomenda ${regra.frase}. Selecionamos ${total} ${total === 1 ? 'rótulo' : 'rótulos'} da nossa adega:`
+      ? `Para o seu momento, o Sommelier recomenda ${regra.frase}. ${total === 1 ? 'Este é o rótulo' : `Estes são os ${total} rótulos`} da nossa adega que mais combinam com você:`
       : 'Não encontramos um rótulo 100% correspondente à sua escolha, mas estas são as nossas melhores sugestões:';
   }
 

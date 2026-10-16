@@ -41,9 +41,9 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400..900;1,400..900&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="${ctx}/css/variables.css">
-  <link rel="stylesheet" href="${ctx}/css/global.css">
-  <link rel="stylesheet" href="${ctx}/css/area-pessoal.css">
+  <link rel="stylesheet" href="${ctx}/css/variables.css?v=${initParam.versaoArquivos}">
+  <link rel="stylesheet" href="${ctx}/css/global.css?v=${initParam.versaoArquivos}">
+  <link rel="stylesheet" href="${ctx}/css/area-pessoal.css?v=${initParam.versaoArquivos}">
   <script>
     window.CONTEXT_PATH = '${ctx}';
     // Ao voltar com o botão "Voltar" depois de sair, não mostra a página em cache
@@ -245,9 +245,9 @@
     <div id="agnello-cart-body" class="agnello-cart-body"></div>
   </div>
 
-  <script src="${ctx}/js/pages/area-pessoal.js"></script>
-  <script src="${ctx}/js/components/modal-deletar-conta.js"></script>
-  <script src="${ctx}/js/components/carrinho.js"></script>
-  <script src="${ctx}/js/components/chat.js"></script>
+  <script src="${ctx}/js/pages/area-pessoal.js?v=${initParam.versaoArquivos}"></script>
+  <script src="${ctx}/js/components/modal-deletar-conta.js?v=${initParam.versaoArquivos}"></script>
+  <script src="${ctx}/js/components/carrinho.js?v=${initParam.versaoArquivos}"></script>
+  <script src="${ctx}/js/components/chat.js?v=${initParam.versaoArquivos}"></script>
 </body>
 </html>

@@ -32,10 +32,10 @@
 	rel="stylesheet">
 
 <!-- Estilos: home.css já importa header, secções, carrinho e chat -->
-<link rel="stylesheet" href="${ctx}/css/variables.css">
-<link rel="stylesheet" href="${ctx}/css/global.css">
-<link rel="stylesheet" href="${ctx}/css/home.css">
-<link rel="stylesheet" href="${ctx}/css/animations.css">
+<link rel="stylesheet" href="${ctx}/css/variables.css?v=${initParam.versaoArquivos}">
+<link rel="stylesheet" href="${ctx}/css/global.css?v=${initParam.versaoArquivos}">
+<link rel="stylesheet" href="${ctx}/css/home.css?v=${initParam.versaoArquivos}">
+<link rel="stylesheet" href="${ctx}/css/animations.css?v=${initParam.versaoArquivos}">
 
 <!-- A imagem do topo começa a descarregar antes do CSS ser lido -->
 <link rel="preload" href="${ctx}/assets/images/hero-image.webp" as="image" type="image/webp">
@@ -313,10 +313,10 @@
 		<div id="agnello-cart-body" class="agnello-cart-body"></div>
 	</div>
 
-	<script src="${ctx}/js/components/calculadora.js"></script>
-	<script src="${ctx}/js/pages/home.js"></script>
-	<script src="${ctx}/js/components/carrinho.js"></script>
-	<script src="${ctx}/js/components/chat.js"></script>
+	<script src="${ctx}/js/components/calculadora.js?v=${initParam.versaoArquivos}"></script>
+	<script src="${ctx}/js/pages/home.js?v=${initParam.versaoArquivos}"></script>
+	<script src="${ctx}/js/components/carrinho.js?v=${initParam.versaoArquivos}"></script>
+	<script src="${ctx}/js/components/chat.js?v=${initParam.versaoArquivos}"></script>
 </body>
 
 </html>
