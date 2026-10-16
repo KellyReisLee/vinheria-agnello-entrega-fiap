@@ -44,12 +44,11 @@
 }
 
 .logo-img {
-  /* O PNG do logo é quadrado (1024x1024) com muito espaço transparente dos
-     lados. object-fit: cover + largura estreita "recorta" esse espaço vazio. */
+  /* logo-taca-*.png já vem recortada à volta da taça e em 3 resoluções
+     (o srcset escolhe a nítida para cada ecrã, inclusive Retina) */
   display: block;
-  width: 22px;
-  height: 56px;
-  object-fit: cover;
+  width: auto;
+  height: 48px;
 }
 
 .logo-text {
@@ -298,8 +297,7 @@
 /* Telemóvel */
 @media (max-width: 650px) {
   .logo-img {
-    width: 18px;
-    height: 46px;
+    height: 40px;
   }
 
   .navbar {
