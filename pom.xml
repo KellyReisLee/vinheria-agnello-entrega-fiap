@@ -51,6 +51,15 @@
       <artifactId>jakarta.mail</artifactId>
       <version>2.0.2</version>
     </dependency>
+
+    <!-- JUnit 5 (testes automáticos: rode com "mvn test" ou, no Eclipse,
+         botão direito em src/test/java > Run As > JUnit Test) -->
+    <dependency>
+      <groupId>org.junit.jupiter</groupId>
+      <artifactId>junit-jupiter</artifactId>
+      <version>5.10.2</version>
+      <scope>test</scope>
+    </dependency>
   </dependencies>
 
   <build>
@@ -60,6 +69,12 @@
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-war-plugin</artifactId>
         <version>3.4.0</version>
+      </plugin>
+      <!-- Executa os testes do JUnit 5 no "mvn test" / "mvn package" -->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-surefire-plugin</artifactId>
+        <version>3.2.5</version>
       </plugin>
     </plugins>
   </build>
