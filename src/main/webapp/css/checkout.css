@@ -1,8 +1,8 @@
 /* ==========================================================================
    CHECKOUT (WEB-INF/views/checkout.jsp)
    ========================================================================== */
-@import url('./sections/_footer-completed.css?v=2026.10.16');
-@import url('./sections/_chat.css?v=2026.10.16');
+@import url('./sections/_footer-completed.css?v=2026.10.16-2');
+@import url('./sections/_chat.css?v=2026.10.16-2');
 
 .checkout-body {
   display: flex;
@@ -31,7 +31,7 @@
 }
 
 .checkout-logo-img {
-  height: 38px;
+  height: 40px;
   color: var(--primary-wine);
 }
 
