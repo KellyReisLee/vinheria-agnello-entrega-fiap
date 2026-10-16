@@ -249,7 +249,7 @@
 
 								<div class="product-info">
 									<span class="product-meta">${vinho.origem} • ${vinho.tipo}</span>
-									<h3 class="product-name">${vinho.nome}</h3>
+									<h3 class="product-name"><a class="product-link" href="${ctx}/produto?id=${vinho.id}"><c:out value="${vinho.nome}" /></a></h3>
 
 									<c:if test="${not empty vinho.pontuacao}">
 										<ul class="product-scores">
