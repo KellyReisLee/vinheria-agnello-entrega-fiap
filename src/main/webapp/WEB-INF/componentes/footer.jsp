@@ -3,7 +3,7 @@
   <div class="footer-content">
     <div class="footer-col">
       <div class="footer-logo">
-        <img src="${pageContext.request.contextPath}/assets/images/logo-white-sem-fundo.png" alt="" class="footer-logo-img" width="22" height="52">
+        <img src="${pageContext.request.contextPath}/assets/images/logo-taca-branca-48.png" srcset="${pageContext.request.contextPath}/assets/images/logo-taca-branca-96.png 2x, ${pageContext.request.contextPath}/assets/images/logo-taca-branca-144.png 3x" alt="" class="footer-logo-img" width="20" height="48">
         Vinheria Agnello
       </div>
       <p>O autêntico sabor da curadoria familiar, entregue na sua porta com segurança e temperatura ideal.</p>

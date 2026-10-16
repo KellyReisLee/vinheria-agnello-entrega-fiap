@@ -39,10 +39,9 @@
 
 .idade-logo {
   display: block;
-  width: 22px;
-  height: 56px;
-  margin: 0 auto 0.4rem;
-  object-fit: cover;
+  width: auto;
+  height: 52px;
+  margin: 0 auto 0.6rem;
 }
 
 .idade-marca {
