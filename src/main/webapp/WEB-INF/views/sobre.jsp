@@ -13,7 +13,7 @@
   <title>Nossa História | Vinheria Agnello</title>
   <meta name="description" content="Conheça a história da Vinheria Agnello: loja de vinhos da família Agnello em São Paulo desde 1978, com curadoria feita por Giulio e Bianca.">
   <jsp:include page="/WEB-INF/componentes/site-head.jsp" />
-  <link rel="stylesheet" href="${ctx}/css/institucional.css">
+  <link rel="stylesheet" href="${ctx}/css/institucional.css?v=${initParam.versaoArquivos}">
 </head>
 
 <body class="inst-body">

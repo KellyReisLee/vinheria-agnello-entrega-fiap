@@ -7,6 +7,6 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400..900;1,400..900&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="${pageContext.request.contextPath}/css/variables.css">
-<link rel="stylesheet" href="${pageContext.request.contextPath}/css/global.css">
+<link rel="stylesheet" href="${pageContext.request.contextPath}/css/variables.css?v=${initParam.versaoArquivos}">
+<link rel="stylesheet" href="${pageContext.request.contextPath}/css/global.css?v=${initParam.versaoArquivos}">
 <script>window.CONTEXT_PATH = '${pageContext.request.contextPath}';</script>

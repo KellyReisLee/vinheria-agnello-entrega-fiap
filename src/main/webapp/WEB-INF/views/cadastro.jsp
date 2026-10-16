@@ -168,8 +168,8 @@
     <div id="agnello-cart-body" class="agnello-cart-body"></div>
   </div>
 
-  <script src="${ctx}/js/pages/auth.js"></script>
-  <script src="${ctx}/js/components/carrinho.js"></script>
-  <script src="${ctx}/js/components/chat.js"></script>
+  <script src="${ctx}/js/pages/auth.js?v=${initParam.versaoArquivos}"></script>
+  <script src="${ctx}/js/components/carrinho.js?v=${initParam.versaoArquivos}"></script>
+  <script src="${ctx}/js/components/chat.js?v=${initParam.versaoArquivos}"></script>
 </body>
 </html>

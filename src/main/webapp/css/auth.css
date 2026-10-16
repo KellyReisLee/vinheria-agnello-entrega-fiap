@@ -4,11 +4,11 @@
    (4 ficheiros que repetiam a mesma estrutura com nomes diferentes).
    Estrutura: cartão dividido em formulário (esquerda) + painel da marca (direita).
    ========================================================================== */
-@import url('./sections/_header.css');
-@import url('./sections/_buttons.css');
-@import url('./sections/_footer-completed.css');
-@import url('./sections/_carrinho.css');
-@import url('./sections/_chat.css');
+@import url('./sections/_header.css?v=2026.10.16');
+@import url('./sections/_buttons.css?v=2026.10.16');
+@import url('./sections/_footer-completed.css?v=2026.10.16');
+@import url('./sections/_carrinho.css?v=2026.10.16');
+@import url('./sections/_chat.css?v=2026.10.16');
 
 .auth-body {
   display: flex;

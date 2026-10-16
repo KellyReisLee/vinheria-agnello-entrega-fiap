@@ -13,7 +13,7 @@
   <title>Entregas e Trocas | Vinheria Agnello</title>
   <meta name="description" content="Prazos e formas de entrega da Vinheria Agnello, direito de arrependimento em 7 dias, trocas de produtos danificados ou com defeito e reembolsos.">
   <jsp:include page="/WEB-INF/componentes/site-head.jsp" />
-  <link rel="stylesheet" href="${ctx}/css/institucional.css">
+  <link rel="stylesheet" href="${ctx}/css/institucional.css?v=${initParam.versaoArquivos}">
 </head>
 
 <body class="inst-body">
@@ -130,6 +130,6 @@
 
   <jsp:include page="/WEB-INF/componentes/footer.jsp" />
   <jsp:include page="/WEB-INF/componentes/carrinho-gaveta.jsp" />
-  <script src="${ctx}/js/pages/documento.js"></script>
+  <script src="${ctx}/js/pages/documento.js?v=${initParam.versaoArquivos}"></script>
 </body>
 </html>

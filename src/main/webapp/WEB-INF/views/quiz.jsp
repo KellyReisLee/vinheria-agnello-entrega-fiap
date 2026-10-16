@@ -18,9 +18,9 @@
     href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400..900;1,400..900&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap"
     rel="stylesheet">
 
-  <link rel="stylesheet" href="${ctx}/css/variables.css">
-  <link rel="stylesheet" href="${ctx}/css/global.css">
-  <link rel="stylesheet" href="${ctx}/css/quiz.css">
+  <link rel="stylesheet" href="${ctx}/css/variables.css?v=${initParam.versaoArquivos}">
+  <link rel="stylesheet" href="${ctx}/css/global.css?v=${initParam.versaoArquivos}">
+  <link rel="stylesheet" href="${ctx}/css/quiz.css?v=${initParam.versaoArquivos}">
 
   <script>
     window.CONTEXT_PATH = '${ctx}';
@@ -81,9 +81,9 @@
     <div id="agnello-cart-body" class="agnello-cart-body"></div>
   </div>
 
-  <script src="${ctx}/js/pages/quiz.js"></script>
-  <script src="${ctx}/js/components/carrinho.js"></script>
-  <script src="${ctx}/js/components/chat.js"></script>
+  <script src="${ctx}/js/pages/quiz.js?v=${initParam.versaoArquivos}"></script>
+  <script src="${ctx}/js/components/carrinho.js?v=${initParam.versaoArquivos}"></script>
+  <script src="${ctx}/js/components/chat.js?v=${initParam.versaoArquivos}"></script>
 </body>
 
 </html>

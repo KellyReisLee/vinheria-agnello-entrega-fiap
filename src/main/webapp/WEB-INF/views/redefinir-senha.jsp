@@ -103,7 +103,7 @@
 
   <jsp:include page="/WEB-INF/componentes/footer.jsp" />
 
-  <script src="${ctx}/js/pages/auth.js"></script>
-  <script src="${ctx}/js/components/chat.js"></script>
+  <script src="${ctx}/js/pages/auth.js?v=${initParam.versaoArquivos}"></script>
+  <script src="${ctx}/js/components/chat.js?v=${initParam.versaoArquivos}"></script>
 </body>
 </html>
