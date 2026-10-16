@@ -30,9 +30,9 @@
   text-decoration: none;
 }
 
-.checkout-logo img {
-  width: auto;
-  height: 48px;
+.checkout-logo-img {
+  height: 38px;
+  color: var(--primary-wine);
 }
 
 .checkout-logo > span {

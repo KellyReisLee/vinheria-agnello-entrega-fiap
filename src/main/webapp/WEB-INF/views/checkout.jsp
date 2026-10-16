@@ -31,7 +31,7 @@
   <%-- Header reduzido: no checkout tiramos a navegação para a pessoa não se distrair --%>
   <header class="checkout-top-bar">
     <a href="${ctx}/home" class="checkout-logo" aria-label="Vinheria Agnello — voltar à loja">
-      <img src="${ctx}/assets/images/logo-taca-48.png" srcset="${ctx}/assets/images/logo-taca-96.png 2x, ${ctx}/assets/images/logo-taca-144.png 3x" alt="" width="20" height="48">
+      <jsp:include page="/WEB-INF/componentes/logo-taca.jsp"><jsp:param name="id" value="checkout" /><jsp:param name="classe" value="checkout-logo-img" /></jsp:include>
       <span>
         <span class="checkout-logo-title">VINHERIA AGNELLO</span>
         <span class="checkout-logo-sub">DESDE 1978</span>
