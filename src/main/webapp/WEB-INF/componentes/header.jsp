@@ -18,7 +18,7 @@
 <header class="navbar" id="site-navbar">
   <a href="${ctx}/home" class="agnello-logo-link" aria-label="Vinheria Agnello — página inicial">
     <span class="logo">
-      <img class="logo-img" src="${ctx}/assets/images/logo-no-bg.png" alt="" width="22" height="56">
+      <img class="logo-img" src="${ctx}/assets/images/logo-taca-48.png" srcset="${ctx}/assets/images/logo-taca-96.png 2x, ${ctx}/assets/images/logo-taca-144.png 3x" alt="" width="20" height="48">
       <span class="logo-text">
         <span class="logo-title">VINHERIA AGNELLO</span>
         <span class="logo-subtitle">DESDE 1978</span>

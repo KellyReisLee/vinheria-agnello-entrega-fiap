@@ -16,7 +16,7 @@
   dialogo.setAttribute('aria-labelledby', 'idade-titulo');
   dialogo.setAttribute('aria-describedby', 'idade-texto');
   dialogo.innerHTML = `
-    <img class="idade-logo" src="${ctx}/assets/images/logo-no-bg.png" alt="" width="22" height="56">
+    <img class="idade-logo" src="${ctx}/assets/images/logo-taca-48.png" srcset="${ctx}/assets/images/logo-taca-96.png 2x, ${ctx}/assets/images/logo-taca-144.png 3x" alt="" width="20" height="48">
     <p class="idade-marca">VINHERIA AGNELLO</p>
     <h2 id="idade-titulo">Você tem 18 anos ou mais?</h2>
     <p id="idade-texto">Este site vende bebidas alcoólicas. Para continuar, confirme que você é maior de idade.</p>

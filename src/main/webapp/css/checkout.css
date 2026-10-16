@@ -31,9 +31,8 @@
 }
 
 .checkout-logo img {
-  width: 22px;
-  height: 56px;
-  object-fit: cover;
+  width: auto;
+  height: 48px;
 }
 
 .checkout-logo > span {
