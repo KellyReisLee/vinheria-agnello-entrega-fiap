@@ -12,6 +12,7 @@ import com.agnello.dao.PedidoDAO;
 import com.agnello.dao.ProdutoDAO;
 import com.agnello.exception.EstoqueInsuficienteException;
 import com.agnello.exception.RegraNegocioException;
+import com.agnello.model.Administrador;
 import com.agnello.model.FormaPagamento;
 import com.agnello.model.ItemPedido;
 import com.agnello.model.Pedido;
@@ -124,7 +125,7 @@ public class PedidoService {
         List<ItemPedido> itens = new ArrayList<>();
         for (Map.Entry<Integer, Integer> e : solicitados.entrySet()) {
             Produto produto = produtos.get(e.getKey());
-            if (produto == null) {
+            if (produto == null || !produto.isAtivo()) {
                 throw new RegraNegocioException("Um dos vinhos do carrinho não está mais disponível. "
                         + "Remova-o e tente novamente.");
             }
@@ -231,5 +232,65 @@ public class PedidoService {
             return new ArrayList<>();
         }
         return pedidoDAO.listarPorCliente(cliente.getId());
+    }
+
+    // ===================================================================== painel administrativo
+
+    public static final int PEDIDOS_POR_PAGINA = 20;
+
+    public List<Pedido> listarParaAdmin(StatusPedido status, String busca, int pagina) {
+        int paginaValida = Math.max(1, pagina);
+        // Pede um a mais para saber se existe próxima página
+        return pedidoDAO.listarParaAdmin(status, busca, PEDIDOS_POR_PAGINA + 1, (paginaValida - 1) * PEDIDOS_POR_PAGINA);
+    }
+
+    public Map<StatusPedido, Integer> contarPorStatus() {
+        return pedidoDAO.contarPorStatus();
+    }
+
+    public BigDecimal faturamentoDoMes() {
+        return pedidoDAO.faturamentoDoMes();
+    }
+
+    public Pedido buscarParaAdmin(int id) {
+        return id <= 0 ? null : pedidoDAO.buscarParaAdmin(id);
+    }
+
+    /**
+     * Muda o status de um pedido pelo painel e avisa o cliente por e-mail.
+     * @param statusVisto o status que o administrador via na tela (proteção contra
+     *                    duas pessoas a mudar o mesmo pedido ao mesmo tempo)
+     */
+    public Pedido mudarStatus(Administrador admin, int pedidoId, String statusVisto, String statusNovo)
+            throws RegraNegocioException {
+        Pedido pedido = buscarParaAdmin(pedidoId);
+        if (pedido == null) {
+            throw new RegraNegocioException("Pedido não encontrado.");
+        }
+        StatusPedido novo = StatusPedido.doCodigo(statusNovo);
+        StatusPedido visto = StatusPedido.doCodigo(statusVisto);
+        if (visto != pedido.getStatus()) {
+            throw new RegraNegocioException("Este pedido foi alterado por outra pessoa. Confira o status atual.");
+        }
+        if (novo == null || !pedido.getProximosStatus().contains(novo)) {
+            throw new RegraNegocioException("Não é possível passar de \"" + pedido.getStatus().getDescricao()
+                    + "\" para o status escolhido.");
+        }
+
+        pedidoDAO.mudarStatus(pedidoId, pedido.getStatus(), novo, admin.getId());
+        LOGGER.log(Level.INFO, "Pedido {0}: {1} → {2} (administrador id={3})",
+                new Object[] {pedido.getNumero(), pedido.getStatus(), novo, admin.getId()});
+        pedido.setStatus(novo);
+
+        if (pedido.getEmailCliente() != null) {
+            try {
+                emailService.enviarEmailAssincrono(pedido.getEmailCliente(),
+                        "Pedido " + pedido.getNumero() + ": " + novo.getDescricao() + " - Vinheria Agnello",
+                        EmailTemplateUtil.getCorpoMudancaStatus(pedido, pedido.getNomeCliente()));
+            } catch (RuntimeException e) {
+                LOGGER.log(Level.WARNING, "Falha ao enviar o e-mail de status do pedido " + pedido.getNumero(), e);
+            }
+        }
+        return pedido;
     }
 }

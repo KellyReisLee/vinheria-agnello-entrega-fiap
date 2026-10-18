@@ -6,6 +6,7 @@ import java.util.logging.Logger;
 
 import com.agnello.dao.ContatoDAO;
 import com.agnello.exception.RegraNegocioException;
+import com.agnello.model.Administrador;
 import com.agnello.model.MensagemContato;
 import com.agnello.model.Usuario;
 import com.agnello.util.EmailTemplateUtil;
@@ -98,5 +99,65 @@ public class ContatoService {
         m.setNumeroPedido(pedido);
         m.setMensagem(texto);
         return m;
+    }
+
+    // ===================================================================== painel administrativo
+
+    public static final int RESPOSTA_MAX = 5000;
+
+    public List<MensagemContato> listar(boolean pendentes) {
+        return contatoDAO.listar(pendentes, 200);
+    }
+
+    public int contarPendentes() {
+        return contatoDAO.contarPendentes();
+    }
+
+    public MensagemContato buscar(int id) {
+        return id <= 0 ? null : contatoDAO.buscarPorId(id);
+    }
+
+    /**
+     * Envia a resposta ao cliente por e-mail e guarda-a. O e-mail é enviado
+     * ANTES de marcar como respondida (e sem ser em segundo plano): se o envio
+     * falhar, a mensagem continua pendente e o administrador vê o erro.
+     */
+    public void responder(Administrador admin, int id, String resposta) throws RegraNegocioException {
+        String texto = resposta == null ? "" : resposta.trim();
+        if (texto.length() < MENSAGEM_MIN) {
+            throw new RegraNegocioException("Escreva a resposta (pelo menos " + MENSAGEM_MIN + " caracteres).");
+        }
+        if (texto.length() > RESPOSTA_MAX) {
+            throw new RegraNegocioException("A resposta pode ter no máximo " + RESPOSTA_MAX + " caracteres.");
+        }
+        MensagemContato m = buscar(id);
+        if (m == null) {
+            throw new RegraNegocioException("Mensagem não encontrada.");
+        }
+        if (m.isRespondida()) {
+            throw new RegraNegocioException("Esta mensagem já foi respondida.");
+        }
+
+        try {
+            emailService.enviarEmail(m.getEmail(), "Re: " + m.getAssunto() + " - Vinheria Agnello",
+                    EmailTemplateUtil.getCorpoRespostaContato(m.getNome(), m.getMensagem(), texto, admin.getNome()),
+                    EmailService.emailDaLoja());
+        } catch (RuntimeException e) {
+            LOGGER.log(Level.SEVERE, "Falha ao enviar a resposta da mensagem id=" + id, e);
+            throw new RegraNegocioException("O e-mail não pôde ser enviado agora. A mensagem continua pendente; "
+                    + "tente novamente em alguns minutos.");
+        }
+
+        if (!contatoDAO.registrarResposta(id, texto, admin.getId())) {
+            LOGGER.warning("Mensagem id=" + id + " respondida em duplicado (outra pessoa respondeu ao mesmo tempo).");
+        }
+        LOGGER.log(Level.INFO, "Mensagem id={0} respondida pelo administrador id={1}", new Object[] {id, admin.getId()});
+    }
+
+    /** Fecha a mensagem sem enviar e-mail. */
+    public void marcarResolvida(Administrador admin, int id) throws RegraNegocioException {
+        if (!contatoDAO.marcarResolvida(id, admin.getId())) {
+            throw new RegraNegocioException("Esta mensagem já estava resolvida.");
+        }
     }
 }

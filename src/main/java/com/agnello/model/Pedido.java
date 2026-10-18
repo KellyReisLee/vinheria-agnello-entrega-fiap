@@ -32,6 +32,15 @@ public class Pedido implements Serializable {
     private String endereco;
     private OffsetDateTime criadoEm;
     private List<ItemPedido> itens = new ArrayList<>();
+    /** Só no painel: quem comprou (null se a conta foi excluída) e o histórico de status. */
+    private String nomeCliente;
+    private String emailCliente;
+    private List<RegistroStatus> historico = new ArrayList<>();
+
+    /** Status para os quais o painel pode mudar este pedido. */
+    public List<StatusPedido> getProximosStatus() {
+        return status.proximos(tipoEntrega);
+    }
 
     /** Soma das quantidades (ex.: 2 Malbec + 1 Chablis = 3 garrafas). */
     public int getQuantidadeGarrafas() {
@@ -90,6 +99,15 @@ public class Pedido implements Serializable {
 
     public OffsetDateTime getCriadoEm() { return criadoEm; }
     public void setCriadoEm(OffsetDateTime criadoEm) { this.criadoEm = criadoEm; }
+
+    public String getNomeCliente() { return nomeCliente; }
+    public void setNomeCliente(String nomeCliente) { this.nomeCliente = nomeCliente; }
+
+    public String getEmailCliente() { return emailCliente; }
+    public void setEmailCliente(String emailCliente) { this.emailCliente = emailCliente; }
+
+    public List<RegistroStatus> getHistorico() { return historico; }
+    public void setHistorico(List<RegistroStatus> historico) { this.historico = historico; }
 
     public List<ItemPedido> getItens() { return itens; }
     public void setItens(List<ItemPedido> itens) { this.itens = itens; }

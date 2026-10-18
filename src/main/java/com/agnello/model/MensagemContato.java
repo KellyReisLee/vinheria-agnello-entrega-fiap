@@ -1,6 +1,8 @@
 package com.agnello.model;
 
 import java.io.Serializable;
+import java.time.OffsetDateTime;
+import java.util.Date;
 
 /** Mensagem enviada pelo formulário da página Contato. */
 public class MensagemContato implements Serializable {
@@ -14,6 +16,44 @@ public class MensagemContato implements Serializable {
     private String assunto;
     private String numeroPedido;
     private String mensagem;
+    private OffsetDateTime criadoEm;
+    private boolean respondida;
+    private String resposta;
+    private OffsetDateTime respondidaEm;
+    private String nomeAdministrador;
+
+    /** Datas como java.util.Date, o tipo que o fmt:formatDate entende. */
+    public Date getDataCriacao() {
+        return criadoEm == null ? null : Date.from(criadoEm.toInstant());
+    }
+
+    public Date getDataResposta() {
+        return respondidaEm == null ? null : Date.from(respondidaEm.toInstant());
+    }
+
+    /** Início da mensagem para a lista do painel. */
+    public String getResumo() {
+        if (mensagem == null) {
+            return "";
+        }
+        String uma = mensagem.replaceAll("\\s+", " ");
+        return uma.length() <= 110 ? uma : uma.substring(0, 110) + "…";
+    }
+
+    public OffsetDateTime getCriadoEm() { return criadoEm; }
+    public void setCriadoEm(OffsetDateTime criadoEm) { this.criadoEm = criadoEm; }
+
+    public boolean isRespondida() { return respondida; }
+    public void setRespondida(boolean respondida) { this.respondida = respondida; }
+
+    public String getResposta() { return resposta; }
+    public void setResposta(String resposta) { this.resposta = resposta; }
+
+    public OffsetDateTime getRespondidaEm() { return respondidaEm; }
+    public void setRespondidaEm(OffsetDateTime respondidaEm) { this.respondidaEm = respondidaEm; }
+
+    public String getNomeAdministrador() { return nomeAdministrador; }
+    public void setNomeAdministrador(String nomeAdministrador) { this.nomeAdministrador = nomeAdministrador; }
 
     public int getId() { return id; }
     public void setId(int id) { this.id = id; }

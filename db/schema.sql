@@ -161,4 +161,54 @@ CREATE TRIGGER pedidos_atualizado_em
     BEFORE UPDATE ON pedidos
     FOR EACH ROW EXECUTE FUNCTION definir_atualizado_em();
 
+-- ----------------------------------------------------------------- painel administrativo (V6)
+
+CREATE TABLE IF NOT EXISTS administradores (
+    id                       SERIAL        PRIMARY KEY,
+    nome                     VARCHAR(100)  NOT NULL,
+    email                    VARCHAR(254)  NOT NULL,
+    senha_hash               VARCHAR(255)  NOT NULL,
+    ativo                    BOOLEAN       NOT NULL DEFAULT TRUE,
+    tentativas_login_falhas  INTEGER       NOT NULL DEFAULT 0,
+    bloqueado_ate            TIMESTAMPTZ,
+    ultimo_login_em          TIMESTAMPTZ,
+    criado_em                TIMESTAMPTZ   NOT NULL DEFAULT now()
+);
+
+CREATE UNIQUE INDEX IF NOT EXISTS administradores_email_unico ON administradores (lower(email));
+
+-- ----------------------------------------------------------------- produtos
+ALTER TABLE produtos ADD COLUMN IF NOT EXISTS ativo BOOLEAN NOT NULL DEFAULT TRUE;
+ALTER TABLE produtos ADD COLUMN IF NOT EXISTS atualizado_em TIMESTAMPTZ NOT NULL DEFAULT now();
+
+CREATE TABLE IF NOT EXISTS imagens_produto (
+    id            SERIAL       PRIMARY KEY,
+    tipo_conteudo VARCHAR(30)  NOT NULL,
+    dados         BYTEA        NOT NULL,
+    criado_em     TIMESTAMPTZ  NOT NULL DEFAULT now(),
+
+    CONSTRAINT imagens_tipo_valido    CHECK (tipo_conteudo IN ('image/png', 'image/jpeg', 'image/webp')),
+    CONSTRAINT imagens_tamanho_maximo CHECK (octet_length(dados) <= 2097152)  -- 2 MB
+);
+
+-- ----------------------------------------------------------------- contato
+ALTER TABLE mensagens_contato ADD COLUMN IF NOT EXISTS resposta       TEXT;
+ALTER TABLE mensagens_contato ADD COLUMN IF NOT EXISTS respondida_em  TIMESTAMPTZ;
+ALTER TABLE mensagens_contato ADD COLUMN IF NOT EXISTS respondida_por INTEGER
+    REFERENCES administradores (id) ON DELETE SET NULL;
+
+-- ----------------------------------------------------------------- pedidos
+-- Histórico de mudanças de status: quem mudou, de quê para quê e quando.
+CREATE TABLE IF NOT EXISTS historico_pedidos (
+    id               SERIAL       PRIMARY KEY,
+    pedido_id        INTEGER      NOT NULL REFERENCES pedidos (id) ON DELETE CASCADE,
+    status_anterior  VARCHAR(30)  NOT NULL,
+    status_novo      VARCHAR(30)  NOT NULL,
+    administrador_id INTEGER      REFERENCES administradores (id) ON DELETE SET NULL,
+    criado_em        TIMESTAMPTZ  NOT NULL DEFAULT now()
+);
+
+CREATE INDEX IF NOT EXISTS historico_pedidos_pedido ON historico_pedidos (pedido_id, criado_em);
+CREATE INDEX IF NOT EXISTS pedidos_status_data ON pedidos (status, criado_em DESC);
+
 COMMIT;
