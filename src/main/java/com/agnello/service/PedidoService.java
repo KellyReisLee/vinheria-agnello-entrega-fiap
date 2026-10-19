@@ -293,4 +293,69 @@ public class PedidoService {
         }
         return pedido;
     }
+
+    // ===================================================================== área pessoal do cliente
+
+    /** O cliente cancela um pedido seu que ainda não foi pago. */
+    public void cancelarPeloCliente(Usuario cliente, int pedidoId) throws RegraNegocioException {
+        Pedido pedido = null;
+        for (Pedido p : pedidoDAO.listarPorCliente(cliente.getId())) {
+            if (p.getId() == pedidoId) {
+                pedido = p;
+            }
+        }
+        if (pedido == null) {
+            throw new RegraNegocioException("Pedido não encontrado.");
+        }
+        if (pedido.getStatus() != StatusPedido.AGUARDANDO_PAGAMENTO
+                || !pedidoDAO.cancelarPeloCliente(pedidoId, cliente.getId())) {
+            throw new RegraNegocioException("Só é possível cancelar pedidos que ainda aguardam pagamento. "
+                    + "Para os outros, fale conosco.");
+        }
+        LOGGER.log(Level.INFO, "Pedido {0} cancelado pelo cliente id={1}",
+                new Object[] {pedido.getNumero(), cliente.getId()});
+        pedido.setStatus(StatusPedido.CANCELADO);
+        try {
+            emailService.enviarEmailAssincrono(cliente.getEmail(),
+                    "Pedido " + pedido.getNumero() + " cancelado - Vinheria Agnello",
+                    EmailTemplateUtil.getCorpoMudancaStatus(pedido, cliente.getNomeExibicao()));
+        } catch (RuntimeException e) {
+            LOGGER.log(Level.WARNING, "Falha ao enviar o e-mail de cancelamento", e);
+        }
+    }
+
+    /**
+     * "Comprar novamente": os vinhos de um pedido antigo, com o preço e o
+     * estoque de HOJE. Os que já não estão à venda vêm em "indisponiveis".
+     */
+    public RepeticaoPedido repetir(Usuario cliente, int pedidoId) throws RegraNegocioException {
+        Pedido pedido = null;
+        for (Pedido p : pedidoDAO.listarPorCliente(cliente.getId())) {
+            if (p.getId() == pedidoId) {
+                pedido = p;
+            }
+        }
+        if (pedido == null) {
+            throw new RegraNegocioException("Pedido não encontrado.");
+        }
+
+        java.util.Set<Integer> ids = new java.util.LinkedHashSet<>();
+        for (ItemPedido i : pedido.getItens()) {
+            if (i.getProdutoId() != null) {
+                ids.add(i.getProdutoId());
+            }
+        }
+        Map<Integer, Produto> atuais = produtoDAO.buscarPorIds(ids);
+
+        RepeticaoPedido r = new RepeticaoPedido();
+        for (ItemPedido i : pedido.getItens()) {
+            Produto p = i.getProdutoId() == null ? null : atuais.get(i.getProdutoId());
+            if (p == null || !p.isAtivo() || p.getEstoque() <= 0) {
+                r.getIndisponiveis().add(i.getNomeProduto());
+            } else {
+                r.getItens().add(new RepeticaoPedido.Item(p, Math.min(i.getQuantidade(), p.getEstoque())));
+            }
+        }
+        return r;
+    }
 }

@@ -13,6 +13,8 @@ public class RegistroStatus implements Serializable {
     private StatusPedido novo;
     private String nomeAdministrador;
     private OffsetDateTime criadoEm;
+    /** true quando foi o próprio cliente (ex.: cancelou um pedido não pago). */
+    private boolean peloCliente;
 
     public Date getData() {
         return criadoEm == null ? null : Date.from(criadoEm.toInstant());
@@ -26,6 +28,9 @@ public class RegistroStatus implements Serializable {
 
     public String getNomeAdministrador() { return nomeAdministrador; }
     public void setNomeAdministrador(String nomeAdministrador) { this.nomeAdministrador = nomeAdministrador; }
+
+    public boolean isPeloCliente() { return peloCliente; }
+    public void setPeloCliente(boolean peloCliente) { this.peloCliente = peloCliente; }
 
     public OffsetDateTime getCriadoEm() { return criadoEm; }
     public void setCriadoEm(OffsetDateTime criadoEm) { this.criadoEm = criadoEm; }

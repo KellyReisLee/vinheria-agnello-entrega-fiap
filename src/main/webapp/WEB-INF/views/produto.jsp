@@ -167,6 +167,13 @@
               </c:otherwise>
             </c:choose>
 
+            <%-- Favoritos (favoritos.js): sem conta, leva ao login e volta para aqui --%>
+            <button type="button" class="fav-btn pdp-fav${favorito ? ' is-favorito' : ''}" data-produto="${p.id}"
+                    data-nome="${fn:escapeXml(p.nome)}" aria-pressed="${favorito ? 'true' : 'false'}">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21s-7.5-4.6-9.5-9.2C1.2 8.7 3.3 5 7 5c2.1 0 3.6 1.1 5 2.8C13.4 6.1 14.9 5 17 5c3.7 0 5.8 3.7 4.5 6.8C19.5 16.4 12 21 12 21z"/></svg>
+              <span class="fav-texto">${favorito ? 'Nos favoritos' : 'Guardar nos favoritos'}</span>
+            </button>
+
             <ul class="pdp-garantias">
               <li>
                 <img src="${ctx}/assets/icons/truck.svg" alt="" width="20" height="20">
@@ -277,5 +284,6 @@
   <jsp:include page="/WEB-INF/componentes/footer.jsp" />
   <jsp:include page="/WEB-INF/componentes/carrinho-gaveta.jsp" />
   <script src="${ctx}/js/pages/produto.js?v=${initParam.versaoArquivos}"></script>
+  <script src="${ctx}/js/components/favoritos.js?v=${initParam.versaoArquivos}"></script>
 </body>
 </html>

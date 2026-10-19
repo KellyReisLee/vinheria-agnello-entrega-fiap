@@ -7,6 +7,7 @@ import java.util.logging.Logger;
 import com.agnello.exception.RegraNegocioException;
 import com.agnello.model.Usuario;
 import com.agnello.service.ClienteService;
+import com.agnello.service.EnderecoService;
 import com.agnello.util.RespostaJson;
 import com.agnello.util.SessaoCliente;
 import com.agnello.util.UrlAplicacao;
@@ -31,6 +32,7 @@ public class CheckoutController extends HttpServlet {
     private static final String MSG_ERRO_INTERNO = "Não foi possível concluir agora. Tente novamente em alguns instantes.";
 
     private final ClienteService clienteService = new ClienteService();
+    private final EnderecoService enderecoService = new EnderecoService();
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
@@ -38,6 +40,13 @@ public class CheckoutController extends HttpServlet {
         Usuario usuario = SessaoCliente.atual(request);
         if (usuario != null) {
             request.setAttribute("usuarioLogado", usuario);
+            try {
+                // Endereços guardados: o cliente escolhe um em vez de digitar de novo
+                request.setAttribute("enderecos", enderecoService.listar(usuario));
+                request.setAttribute("maxEnderecos", EnderecoService.MAX_ENDERECOS);
+            } catch (RuntimeException e) {
+                LOGGER.log(Level.WARNING, "Não foi possível carregar os endereços no checkout", e);
+            }
         }
         request.getRequestDispatcher("/WEB-INF/views/checkout.jsp").forward(request, response);
     }

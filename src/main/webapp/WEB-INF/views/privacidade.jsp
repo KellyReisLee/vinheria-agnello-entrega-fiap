@@ -44,7 +44,7 @@
         </details>
 
         <article class="prose">
-          <p class="doc-atualizado">Última atualização: 16 de outubro de 2026</p>
+          <p class="doc-atualizado">Última atualização: 19 de outubro de 2026</p>
 
           <h2 id="quem-somos">Quem somos</h2>
           <p>A <strong>Vinheria Agnello</strong>, com loja na Rua das Videiras, 1978 — São Paulo, SP, é a controladora
@@ -70,6 +70,11 @@
                   <td>Endereço de entrega</td>
                   <td>No checkout</td>
                   <td>Calcular e fazer a entrega</td>
+                </tr>
+                <tr>
+                  <td>Endereços guardados e vinhos favoritos</td>
+                  <td>Quando você escolhe guardá-los na área pessoal ou no checkout</td>
+                  <td>Agilizar as próximas compras. Pode editá-los ou apagá-los a qualquer momento na sua conta</td>
                 </tr>
                 <tr>
                   <td>Dados de pagamento</td>
@@ -129,7 +134,7 @@
             <li>conexão segura (HTTPS) entre o seu navegador e o site, e conexão cifrada entre o site e o banco de dados;</li>
             <li>a sua <strong>senha nunca é guardada</strong>: guardamos apenas um código irreversível gerado a partir dela
               (hash PBKDF2), que não permite descobrir a senha;</li>
-            <li><strong>CPF, telefone e endereço de entrega ficam cifrados</strong> no banco de dados (AES-256), com chaves guardadas separadamente;</li>
+            <li><strong>CPF, telefone, endereço de entrega e endereços guardados ficam cifrados</strong> no banco de dados (AES-256), com chaves guardadas separadamente;</li>
             <li>os <strong>dados do cartão não passam pelos nossos servidores</strong> nem ficam guardados;</li>
             <li>os links de ativação e de recuperação de senha são de uso único e expiram;</li>
             <li>a conta é bloqueada temporariamente depois de várias tentativas de senha erradas.</li>
@@ -141,7 +146,7 @@
           <p>Pelo artigo 18 da LGPD, você pode, a qualquer momento:</p>
           <ul>
             <li>confirmar se tratamos os seus dados e ter acesso a eles;</li>
-            <li>corrigir dados incompletos, inexatos ou desatualizados;</li>
+            <li>corrigir dados incompletos, inexatos ou desatualizados (o nome, o telefone e a senha pode mudar você mesmo em <a href="${pageContext.request.contextPath}/area-pessoal#dados">Minha conta</a>);</li>
             <li>pedir a anonimização, o bloqueio ou a eliminação de dados desnecessários;</li>
             <li>pedir a portabilidade dos dados para outro fornecedor;</li>
             <li>saber com quem compartilhamos os seus dados;</li>

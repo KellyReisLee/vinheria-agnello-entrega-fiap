@@ -36,6 +36,7 @@
         </c:if>
 
         <form class="auth-form" action="${ctx}/login" method="POST" novalidate>
+          <c:if test="${not empty voltar}"><input type="hidden" name="voltar" value="<c:out value='${voltar}' />"></c:if>
           <div class="auth-field">
             <label for="email">E-mail</label>
             <%-- Mantém o e-mail digitado se o login falhar (c:out evita injeção de HTML) --%>

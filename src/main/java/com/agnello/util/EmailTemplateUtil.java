@@ -251,6 +251,18 @@ public class EmailTemplateUtil {
                 + RODAPE;
     }
 
+    /** Aviso de segurança depois da troca de senha na área pessoal. */
+    public static String getCorpoSenhaAlterada(String nomeCliente) {
+        return CABECALHO
+                + "<h2 style=\"color: #4A1525; font-size: 21px; margin: 0 0 16px; font-family: Georgia, serif;\">Senha alterada</h2>"
+                + "<p style=\"font-size: 15px; line-height: 1.7; color: #555555; margin: 0 0 18px;\">Olá, " + escapar(nomeCliente)
+                + ". A senha da sua conta na Vinheria Agnello acabou de ser alterada na área pessoal.</p>"
+                + "<p style=\"font-size: 14px; line-height: 1.6; color: #4A1525; background: #fdfbf7; border-left: 4px solid #c5a059; padding: 12px 16px; margin: 0;\">"
+                + "<strong>Não foi você?</strong> Use \"Esqueci a senha\" na página de login para criar uma nova "
+                + "imediatamente e responda a este e-mail para avisar a nossa equipe.</p>"
+                + RODAPE;
+    }
+
     private static String reais(BigDecimal valor) {
         return NumberFormat.getCurrencyInstance(Locale.forLanguageTag("pt-BR")).format(valor).replace('\u00a0', ' ');
     }

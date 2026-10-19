@@ -5,7 +5,10 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.agnello.model.Usuario;
+import com.agnello.service.EnderecoService;
+import com.agnello.service.FavoritoService;
 import com.agnello.service.PedidoService;
+import com.agnello.util.MensagemFlash;
 import com.agnello.util.SessaoCliente;
 
 import jakarta.servlet.ServletException;
@@ -14,6 +17,7 @@ import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
+/** Área pessoal: visão geral, pedidos, favoritos, endereços e dados da conta. */
 @WebServlet(name = "AreaPessoalController", urlPatterns = {"/area-pessoal"})
 public class AreaPessoalController extends HttpServlet {
 
@@ -21,6 +25,8 @@ public class AreaPessoalController extends HttpServlet {
     private static final Logger LOGGER = Logger.getLogger(AreaPessoalController.class.getName());
 
     private final PedidoService pedidoService = new PedidoService();
+    private final FavoritoService favoritoService = new FavoritoService();
+    private final EnderecoService enderecoService = new EnderecoService();
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
@@ -36,13 +42,29 @@ public class AreaPessoalController extends HttpServlet {
             return;
         }
 
+        MensagemFlash.transferir(request);
+        request.setAttribute("csrf", SessaoCliente.tokenCsrf(request));
+
+        // Cada bloco carrega separado: se um falhar, o resto da página abre na mesma
         try {
             request.setAttribute("pedidos", pedidoService.listarDoCliente(cliente));
         } catch (RuntimeException e) {
-            // A página abre na mesma; só a lista de pedidos mostra um aviso
             LOGGER.log(Level.SEVERE, "Erro ao carregar os pedidos do cliente id=" + cliente.getId(), e);
             request.setAttribute("erroPedidos", true);
         }
+        try {
+            request.setAttribute("favoritos", favoritoService.listar(cliente));
+        } catch (RuntimeException e) {
+            LOGGER.log(Level.SEVERE, "Erro ao carregar os favoritos do cliente id=" + cliente.getId(), e);
+            request.setAttribute("erroFavoritos", true);
+        }
+        try {
+            request.setAttribute("enderecos", enderecoService.listar(cliente));
+        } catch (RuntimeException e) {
+            LOGGER.log(Level.SEVERE, "Erro ao carregar os endereços do cliente id=" + cliente.getId(), e);
+            request.setAttribute("erroEnderecos", true);
+        }
+        request.setAttribute("maxEnderecos", EnderecoService.MAX_ENDERECOS);
         request.getRequestDispatcher("/WEB-INF/views/area-pessoal.jsp").forward(request, response);
     }
 }

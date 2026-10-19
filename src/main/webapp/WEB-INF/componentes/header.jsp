@@ -30,12 +30,15 @@
     <a href="${ctx}/sobre" ${rotaAtual == '/sobre' ? 'class="active" aria-current="page"' : ''}>Nossa História</a>
     <a href="${ctx}/catalogo" ${rotaAtual == '/catalogo' ? 'class="active" aria-current="page"' : ''}>Nossos Rótulos</a>
     <a href="${ctx}/quiz" id="open-quiz" ${rotaAtual == '/quiz' or rotaAtual == '/sugestoes' ? 'class="active" aria-current="page"' : ''}>✨ Sommelier Virtual</a>
-    <a href="${ctx}/catalogo#input-busca" class="nav-link-mobile">Pesquisar vinhos</a>
+    <a href="${ctx}/catalogo#input-busca" class="nav-link-mobile" data-abrir-busca>Pesquisar vinhos</a>
     <a href="${ctx}/ajuda" class="nav-link-mobile" ${rotaAtual == '/ajuda' ? 'aria-current="page"' : ''}>Central de Ajuda</a>
   </nav>
 
   <div class="nav-icons">
-    <a href="${ctx}/catalogo#input-busca" class="icon-btn search-btn" aria-label="Pesquisar vinhos" title="Pesquisar">
+    <%-- Sem JavaScript, a lupa leva ao campo de pesquisa do catálogo;
+         com JavaScript, abre o painel de pesquisa abaixo (header.js) --%>
+    <a href="${ctx}/catalogo#input-busca" class="icon-btn search-btn" aria-label="Pesquisar vinhos" title="Pesquisar"
+       data-abrir-busca aria-controls="busca-global" aria-expanded="false">
       <img src="${ctx}/assets/icons/search.svg" alt="" width="22" height="22">
     </a>
 
@@ -67,6 +70,25 @@
     </button>
   </div>
 </header>
+
+<%-- Painel de pesquisa (abre pela lupa). É um formulário GET normal para /catalogo;
+     enquanto o cliente escreve, header.js mostra sugestões vindas de /busca/sugestoes. --%>
+<div class="busca-global" id="busca-global" hidden>
+  <form class="busca-global-form" action="${ctx}/catalogo" method="get" role="search" autocomplete="off">
+    <label for="busca-global-input" class="sr-only">Pesquisar vinhos</label>
+    <svg class="busca-global-icone" viewBox="0 0 24 24" aria-hidden="true">
+      <circle cx="11" cy="11" r="7"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+    </svg>
+    <input type="search" id="busca-global-input" name="busca" maxlength="80" required
+           placeholder="Que vinho procura? Ex.: Malbec, Chile, espumante"
+           enterkeyhint="search" role="combobox" aria-autocomplete="list"
+           aria-expanded="false" aria-controls="busca-global-sugestoes">
+    <button type="submit" class="busca-global-ir">Buscar</button>
+    <button type="button" class="busca-global-fechar" aria-label="Fechar pesquisa">&times;</button>
+  </form>
+  <ul class="busca-global-sugestoes" id="busca-global-sugestoes" role="listbox" aria-label="Sugestões" hidden></ul>
+  <p class="busca-global-status sr-only" aria-live="polite"></p>
+</div>
 <div class="nav-backdrop" hidden></div>
 <script src="${ctx}/js/components/header.js?v=${initParam.versaoArquivos}" defer></script>
 <script src="${ctx}/js/components/verificacao-idade.js?v=${initParam.versaoArquivos}" defer></script>

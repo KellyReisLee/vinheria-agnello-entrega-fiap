@@ -1,5 +1,5 @@
 /* ==========================================================================
-   HEADER (partilhado por todas as páginas)
+   HEADER (compartilhado por todas as páginas)
    Desktop: logo | links | ícones
    ≤ 900px: os links passam para um painel que abre com o botão "hambúrguer"
    ========================================================================== */
@@ -293,7 +293,7 @@
   }
 }
 
-/* Telemóvel */
+/* Celular */
 @media (max-width: 650px) {
   .logo-img {
     height: 32px;
@@ -347,4 +347,229 @@
     width: 36px;
     height: 36px;
   }
+}
+
+/* ==========================================================================
+   PAINEL DE PESQUISA (lupa do header)
+   ========================================================================== */
+.busca-global {
+  position: fixed;
+  top: var(--header-height);
+  left: 0;
+  right: 0;
+  z-index: calc(var(--z-header) - 1);
+  padding: 1rem var(--page-gutter) 1.25rem;
+  border-bottom: 1px solid var(--border-soft);
+  background: var(--bg-offwhite);
+  box-shadow: 0 14px 30px rgba(39, 3, 14, 0.1);
+  opacity: 0;
+  transform: translateY(-6px);
+  transition: opacity 0.2s ease, transform 0.2s ease;
+}
+
+.busca-global.aberta {
+  opacity: 1;
+  transform: none;
+}
+
+.busca-global[hidden] {
+  display: none;
+}
+
+.busca-global-form,
+.busca-global-sugestoes {
+  max-width: 760px;
+  margin: 0 auto;
+}
+
+.busca-global-form {
+  position: relative;
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.busca-global-icone {
+  position: absolute;
+  left: 0.95rem;
+  width: 19px;
+  height: 19px;
+  fill: none;
+  stroke: #8A8083;
+  stroke-width: 2;
+  stroke-linecap: round;
+  pointer-events: none;
+}
+
+.busca-global-form input {
+  flex: 1;
+  min-width: 0;
+  min-height: 48px;
+  padding: 0.7rem 1rem 0.7rem 2.75rem;
+  border: 1px solid #DDD3C5;
+  border-radius: 6px;
+  background: #FFFFFF;
+  color: var(--text-charcoal);
+  font-size: 1rem;
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+.busca-global-form input::-webkit-search-cancel-button {
+  -webkit-appearance: none;
+}
+
+.busca-global-form input:focus {
+  outline: none;
+  border-color: var(--accent-gold);
+  box-shadow: 0 0 0 3px rgba(212, 175, 55, 0.2);
+}
+
+.busca-global-ir {
+  min-height: 48px;
+  padding: 0 1.3rem;
+  border: none;
+  border-radius: 6px;
+  background: var(--primary-wine);
+  color: #FFFFFF;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.busca-global-ir:hover {
+  background: var(--primary-wine-dark);
+}
+
+.busca-global-fechar {
+  width: 44px;
+  height: 44px;
+  border: none;
+  border-radius: 50%;
+  background: transparent;
+  color: var(--text-muted);
+  font-size: 1.6rem;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.busca-global-fechar:hover {
+  background: rgba(74, 21, 37, 0.06);
+  color: var(--primary-wine);
+}
+
+.busca-global-sugestoes {
+  max-height: min(60vh, 420px);
+  margin-top: 0.6rem;
+  padding: 0.35rem;
+  overflow-y: auto;
+  border: 1px solid var(--border-soft);
+  border-radius: var(--radius-md);
+  background: #FFFFFF;
+  list-style: none;
+}
+
+.busca-global-sugestoes[hidden] {
+  display: none;
+}
+
+.busca-sugestao {
+  display: grid;
+  grid-template-columns: 36px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 0.85rem;
+  padding: 0.5rem 0.7rem;
+  border-radius: 6px;
+  color: var(--text-charcoal);
+  text-decoration: none;
+}
+
+.busca-sugestao img {
+  width: 36px;
+  height: 44px;
+  object-fit: contain;
+}
+
+.busca-sugestao-texto {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.busca-sugestao-texto strong {
+  overflow: hidden;
+  font-size: 0.92rem;
+  font-weight: 600;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.busca-sugestao-texto small {
+  color: var(--text-muted);
+  font-size: 0.75rem;
+}
+
+.busca-sugestao-preco {
+  color: var(--primary-wine);
+  font-size: 0.9rem;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.busca-sugestao:hover,
+.ativa > .busca-sugestao {
+  background: #F7EEF0;
+}
+
+.busca-sugestao-todos {
+  display: block;
+  margin-top: 0.2rem;
+  border-top: 1px solid var(--border-soft);
+  border-radius: 0 0 6px 6px;
+  color: var(--primary-wine);
+  font-size: 0.88rem;
+  font-weight: 600;
+}
+
+.search-btn[aria-expanded="true"] {
+  background: rgba(74, 21, 37, 0.07);
+}
+
+@media (max-width: 640px) {
+  .busca-global {
+    padding: 0.75rem var(--page-gutter) 1rem;
+  }
+
+  .busca-global-ir {
+    display: none;            /* no celular, o "Ir/Pesquisar" do teclado envia */
+  }
+
+  .busca-sugestao {
+    gap: 0.6rem;
+    padding: 0.5rem;
+  }
+}
+
+/* Aviso dos favoritos ("Guardado nos seus favoritos") — fica aqui porque o header está em todas as páginas */
+.fav-aviso {
+  position: fixed;
+  left: 50%;
+  bottom: 1.5rem;
+  z-index: var(--z-overlay);
+  max-width: calc(100vw - 2rem);
+  padding: 0.75rem 1.2rem;
+  border-radius: 999px;
+  background: var(--primary-wine);
+  box-shadow: 0 10px 30px rgba(39, 3, 14, 0.25);
+  color: #FFFFFF;
+  font-size: 0.9rem;
+  font-weight: 600;
+  opacity: 0;
+  pointer-events: none;
+  transform: translate(-50%, 12px);
+  transition: opacity 0.25s ease, transform 0.25s ease;
+}
+
+.fav-aviso.visivel {
+  opacity: 1;
+  transform: translate(-50%, 0);
 }

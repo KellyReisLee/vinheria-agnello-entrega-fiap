@@ -236,7 +236,7 @@ public class PedidoDAO {
                 + " p.subtotal, p.frete, p.desconto, p.total, p.endereco_cifrado, p.criado_em,"
                 + " " + NOME_CLIENTE + " AS nome_cliente, c.email AS email_cliente"
                 + " FROM pedidos p LEFT JOIN clientes c ON c.id = p.cliente_id WHERE p.id = ?";
-        String sqlHistorico = "SELECT h.status_anterior, h.status_novo, h.criado_em, a.nome AS nome_admin"
+        String sqlHistorico = "SELECT h.status_anterior, h.status_novo, h.criado_em, h.pelo_cliente, a.nome AS nome_admin"
                 + " FROM historico_pedidos h LEFT JOIN administradores a ON a.id = h.administrador_id"
                 + " WHERE h.pedido_id = ? ORDER BY h.criado_em, h.id";
 
@@ -266,6 +266,7 @@ public class PedidoDAO {
                         r.setNovo(StatusPedido.valueOf(rs.getString("status_novo")));
                         r.setCriadoEm(rs.getObject("criado_em", OffsetDateTime.class));
                         r.setNomeAdministrador(rs.getString("nome_admin"));
+                        r.setPeloCliente(rs.getBoolean("pelo_cliente"));
                         pedido.getHistorico().add(r);
                     }
                 }
@@ -322,6 +323,47 @@ public class PedidoDAO {
             }
         } catch (SQLException e) {
             throw new RuntimeException("Erro ao mudar o status do pedido id=" + pedidoId, e);
+        }
+    }
+
+    /**
+     * O cliente cancela o próprio pedido. Só funciona se o pedido for dele e
+     * ainda estiver "Aguardando pagamento" (as duas condições estão no WHERE).
+     * Devolve false se não puder cancelar. As garrafas voltam ao estoque.
+     */
+    public boolean cancelarPeloCliente(int pedidoId, int clienteId) {
+        try (Connection conn = ConnectionFactory.getConnection()) {
+            conn.setAutoCommit(false);
+            try {
+                try (PreparedStatement stmt = conn.prepareStatement("UPDATE pedidos SET status = 'CANCELADO'"
+                        + " WHERE id = ? AND cliente_id = ? AND status = 'AGUARDANDO_PAGAMENTO'")) {
+                    stmt.setInt(1, pedidoId);
+                    stmt.setInt(2, clienteId);
+                    if (stmt.executeUpdate() == 0) {
+                        conn.rollback();
+                        return false;
+                    }
+                }
+                try (PreparedStatement stmt = conn.prepareStatement(
+                        "UPDATE produtos p SET estoque = p.estoque + i.quantidade FROM itens_pedido i"
+                                + " WHERE i.pedido_id = ? AND i.produto_id = p.id")) {
+                    stmt.setInt(1, pedidoId);
+                    stmt.executeUpdate();
+                }
+                try (PreparedStatement stmt = conn.prepareStatement("INSERT INTO historico_pedidos"
+                        + " (pedido_id, status_anterior, status_novo, pelo_cliente)"
+                        + " VALUES (?, 'AGUARDANDO_PAGAMENTO', 'CANCELADO', TRUE)")) {
+                    stmt.setInt(1, pedidoId);
+                    stmt.executeUpdate();
+                }
+                conn.commit();
+                return true;
+            } catch (SQLException | RuntimeException e) {
+                conn.rollback();
+                throw e;
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException("Erro ao cancelar o pedido id=" + pedidoId, e);
         }
     }
 

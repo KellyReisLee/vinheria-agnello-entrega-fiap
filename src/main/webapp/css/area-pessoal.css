@@ -2,11 +2,11 @@
    ÁREA PESSOAL (WEB-INF/views/area-pessoal.jsp) + modais de exclusão de conta
    Substitui sections/_modal-deletar.css e sections/modal-delecao-sucesso.css.
    ========================================================================== */
-@import url('./sections/_header.css?v=2026.10.16-2');
-@import url('./sections/_buttons.css?v=2026.10.16-2');
-@import url('./sections/_footer-completed.css?v=2026.10.16-2');
-@import url('./sections/_carrinho.css?v=2026.10.16-2');
-@import url('./sections/_chat.css?v=2026.10.16-2');
+@import url('./sections/_header.css?v=2026.10.19-1');
+@import url('./sections/_buttons.css?v=2026.10.19-1');
+@import url('./sections/_footer-completed.css?v=2026.10.19-1');
+@import url('./sections/_carrinho.css?v=2026.10.19-1');
+@import url('./sections/_chat.css?v=2026.10.19-1');
 
 .conta-body {
   display: flex;
@@ -720,4 +720,529 @@
 .conta-pedido li.conta-pedido-extra {
   color: var(--text-muted);
   font-size: 0.82rem;
+}
+
+/* ==========================================================================
+   CONTA COMPLETA: avisos, formulários, favoritos, endereços e ações do pedido
+   ========================================================================== */
+.conta-nav-contador {
+  margin-left: auto;
+  padding: 0.05rem 0.5rem;
+  border-radius: 999px;
+  background: #F3E7EA;
+  color: var(--primary-wine);
+  font-size: 0.72rem;
+  font-weight: 700;
+}
+
+.conta-nav-item.ativo .conta-nav-contador {
+  background: rgba(255, 255, 255, 0.2);
+  color: #FFFFFF;
+}
+
+.conta-secao-desc {
+  margin: -0.6rem 0 1.25rem;
+  color: var(--text-muted);
+  font-size: 0.92rem;
+}
+
+/* Aviso com o resultado da última ação */
+.conta-flash {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1.25rem;
+  padding: 0.85rem 1rem 0.85rem 1.1rem;
+  border: 1px solid #BFE0C0;
+  border-left: 4px solid #2E7D32;
+  border-radius: 10px;
+  background: #EEF8EE;
+  color: #1F5422;
+  font-size: 0.92rem;
+  font-weight: 500;
+  transition: opacity 0.4s ease;
+}
+
+.conta-flash--erro {
+  border-color: #F0C5CC;
+  border-left-color: #B3263E;
+  background: #FDF3F4;
+  color: #8B1E33;
+}
+
+.conta-flash--sumindo {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.conta-flash-fechar {
+  flex-shrink: 0;
+  width: 28px;
+  height: 28px;
+  margin: -0.2rem -0.3rem 0 0;
+  border: none;
+  border-radius: 50%;
+  background: transparent;
+  color: inherit;
+  font-size: 1.25rem;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.conta-flash-fechar:hover {
+  background: rgba(0, 0, 0, 0.06);
+}
+
+/* Blocos que abrem e fecham (<details>) com um formulário dentro */
+.conta-card-form {
+  margin-bottom: 1rem;
+  border: 1px solid #E8E1D6;
+  border-radius: 12px;
+  background: #FFFFFF;
+}
+
+.conta-card-form > summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-height: 56px;
+  padding: 0.9rem 1.25rem;
+  color: var(--primary-wine);
+  font-weight: 600;
+  cursor: pointer;
+  list-style: none;
+}
+
+.conta-card-form > summary::-webkit-details-marker {
+  display: none;
+}
+
+.conta-card-form > summary::after {
+  content: '';
+  width: 9px;
+  height: 9px;
+  border-right: 2px solid currentColor;
+  border-bottom: 2px solid currentColor;
+  transform: rotate(45deg) translateY(-3px);
+  transition: transform 0.2s ease;
+}
+
+.conta-card-form[open] > summary {
+  border-bottom: 1px solid #F0EAE1;
+}
+
+.conta-card-form[open] > summary::after {
+  transform: rotate(-135deg) translateY(-3px);
+}
+
+.conta-card-form > summary:focus-visible {
+  outline: 2px solid var(--accent-gold);
+  outline-offset: -2px;
+  border-radius: 12px;
+}
+
+.conta-form {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: 1rem;
+  padding: 1.25rem;
+}
+
+.conta-campo {
+  grid-column: 1 / -1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  min-width: 0;
+}
+
+.conta-campo--meio { grid-column: span 3; }
+.conta-campo--terco { grid-column: span 2; }
+.conta-campo--doisTercos { grid-column: span 4; }
+
+.conta-campo label {
+  color: var(--text-charcoal);
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.conta-opcional {
+  color: var(--text-muted);
+  font-weight: 400;
+}
+
+.conta-campo input {
+  width: 100%;
+  min-height: 46px;
+  padding: 0.65rem 0.85rem;
+  border: 1px solid #DDD3C5;
+  border-radius: 8px;
+  background: #FCFBF9;
+  color: var(--text-charcoal);
+  font-size: 1rem;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.conta-campo input:focus {
+  outline: none;
+  border-color: var(--accent-gold);
+  background: #FFFFFF;
+  box-shadow: 0 0 0 3px rgba(212, 175, 55, 0.18);
+}
+
+.conta-campo input:user-invalid {
+  border-color: #B3263E;
+}
+
+.conta-ajuda,
+.conta-nota {
+  color: var(--text-muted);
+  font-size: 0.8rem;
+}
+
+.conta-form-nota {
+  grid-column: 1 / -1;
+  margin: -0.25rem 0 0;
+}
+
+.conta-nota a {
+  color: var(--primary-wine);
+}
+
+.conta-check {
+  grid-column: 1 / -1;
+  display: inline-flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 0.55rem;
+  font-size: 0.9rem;
+  cursor: pointer;
+}
+
+.conta-check input {
+  width: 18px;
+  height: 18px;
+  accent-color: var(--primary-wine);
+}
+
+.conta-form-acoes {
+  grid-column: 1 / -1;
+  display: flex;
+  justify-content: flex-end;
+}
+
+.conta-btn-primario {
+  cursor: pointer;
+}
+
+.conta-btn-primario:hover {
+  background: var(--primary-wine-dark);
+}
+
+.conta-btn-primario[aria-busy="true"],
+.conta-btn-secundario:disabled {
+  opacity: 0.6;
+  cursor: progress;
+}
+
+.conta-btn-pequeno {
+  min-height: 40px;
+  padding: 0.45rem 1rem;
+  font-size: 0.86rem;
+  cursor: pointer;
+}
+
+.conta-btn-link {
+  padding: 0.3rem 0;
+  border: none;
+  background: none;
+  color: var(--primary-wine);
+  font-size: 0.85rem;
+  font-weight: 600;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  cursor: pointer;
+}
+
+.conta-btn-link--perigo,
+.conta-btn-texto-perigo {
+  color: #B3263E;
+}
+
+.conta-btn-texto-perigo {
+  min-height: 40px;
+  padding: 0.45rem 0.6rem;
+  border: none;
+  background: none;
+  font-size: 0.86rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.conta-btn-texto-perigo:hover {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+/* ---------- Ações do pedido ---------- */
+.conta-pedido-acoes {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem 1rem;
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid #F0EAE1;
+}
+
+.conta-pedido-acoes form {
+  margin-left: auto;
+}
+
+.conta-aviso-repetir {
+  margin-bottom: 1rem;
+  padding: 0.8rem 1rem;
+  border: 1px solid #F1DDA6;
+  border-radius: 10px;
+  background: #FFF8E6;
+  color: #6F4E00;
+  font-size: 0.9rem;
+}
+
+.conta-aviso-repetir[hidden] {
+  display: none;
+}
+
+/* ---------- Favoritos ---------- */
+.conta-favoritos {
+  display: grid;
+  gap: 0.75rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.conta-favoritos:empty {
+  display: none;
+}
+
+.conta-favorito {
+  display: grid;
+  grid-template-columns: 64px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.85rem 1rem;
+  border: 1px solid #E8E1D6;
+  border-radius: 12px;
+  background: #FFFFFF;
+  transition: opacity 0.25s ease, transform 0.25s ease;
+}
+
+.conta-favorito--saindo {
+  opacity: 0;
+  transform: translateX(12px);
+}
+
+.conta-favorito-img img {
+  width: 64px;
+  height: 80px;
+  object-fit: contain;
+}
+
+.conta-favorito-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  min-width: 0;
+}
+
+.conta-favorito-meta {
+  color: var(--text-muted);
+  font-size: 0.72rem;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+}
+
+.conta-favorito-nome {
+  color: var(--text-charcoal);
+  font-family: var(--font-heading);
+  font-size: 1.05rem;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.conta-favorito-nome:hover {
+  color: var(--primary-wine);
+}
+
+.conta-favorito-preco {
+  color: var(--primary-wine);
+  font-size: 0.95rem;
+}
+
+.conta-favorito-acoes {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.conta-favorito-esgotado {
+  color: var(--text-muted);
+  font-size: 0.82rem;
+  font-weight: 600;
+}
+
+.conta-favorito-remover {
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  padding: 0;
+  border: 1px solid #EAD3D8;
+  border-radius: 50%;
+  background: #FFFFFF;
+  color: #8B263E;
+  cursor: pointer;
+}
+
+.conta-favorito-remover svg {
+  width: 18px;
+  height: 18px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  stroke-linejoin: round;
+}
+
+.conta-favorito-remover.is-favorito svg {
+  fill: currentColor;
+}
+
+.conta-favorito-remover:hover {
+  background: #FDF3F4;
+}
+
+.conta-favorito-remover:focus-visible {
+  outline: 2px solid var(--accent-gold);
+  outline-offset: 2px;
+}
+
+/* ---------- Endereços ---------- */
+.conta-enderecos {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.75rem;
+  margin: 0 0 1rem;
+  padding: 0;
+  list-style: none;
+}
+
+.conta-endereco {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 1rem 1.1rem;
+  border: 1px solid #E8E1D6;
+  border-radius: 12px;
+  background: #FFFFFF;
+  font-size: 0.88rem;
+}
+
+.conta-endereco--principal {
+  border-color: rgba(74, 21, 37, 0.35);
+  box-shadow: inset 3px 0 0 var(--primary-wine);
+}
+
+.conta-endereco p {
+  color: var(--text-muted);
+  line-height: 1.5;
+  overflow-wrap: anywhere;
+}
+
+.conta-endereco-apelido {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.25rem;
+  color: var(--text-charcoal);
+  font-size: 0.98rem;
+}
+
+.conta-tag {
+  padding: 0.1rem 0.55rem;
+  border-radius: 999px;
+  background: var(--primary-wine);
+  color: #FFFFFF;
+  font-size: 0.66rem;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+}
+
+.conta-endereco-acoes {
+  display: flex;
+  gap: 1.25rem;
+}
+
+/* Botão "Adicionar" ao carrinho (o clique é tratado por carrinho.js) */
+.conta-favorito .agnello-btn-comprar {
+  min-height: 40px;
+  padding: 0.45rem 1.1rem;
+  border: 1px solid var(--primary-wine);
+  border-radius: 8px;
+  background: var(--primary-wine);
+  color: #FFFFFF;
+  font-size: 0.86rem;
+  font-weight: 600;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.conta-favorito .agnello-btn-comprar:hover {
+  background: var(--primary-wine-dark);
+}
+
+@media (max-width: 700px) {
+  .conta-enderecos {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+@media (max-width: 560px) {
+  .conta-form {
+    grid-template-columns: minmax(0, 1fr);
+    padding: 1rem;
+  }
+
+  .conta-campo--meio,
+  .conta-campo--terco,
+  .conta-campo--doisTercos {
+    grid-column: 1 / -1;
+  }
+
+  .conta-form-acoes .conta-btn-primario {
+    width: 100%;
+  }
+
+  .conta-favorito {
+    grid-template-columns: 52px minmax(0, 1fr);
+    padding: 0.75rem;
+  }
+
+  .conta-favorito-img img {
+    width: 52px;
+    height: 66px;
+  }
+
+  .conta-favorito-acoes {
+    grid-column: 1 / -1;
+    justify-content: space-between;
+  }
+
+  .conta-pedido-acoes .conta-btn-secundario {
+    flex: 1;
+  }
 }

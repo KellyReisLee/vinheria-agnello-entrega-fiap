@@ -72,6 +72,10 @@
             <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 10.5 12 3l9 7.5V21H3z"></path></svg>Visão geral</a>
           <a href="#pedidos" class="conta-nav-item" data-secao="pedidos">
             <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M21 8 12 3 3 8v8l9 5 9-5z"></path><path d="M3 8l9 5 9-5M12 13v8"></path></svg>Meus pedidos</a>
+          <a href="#favoritos" class="conta-nav-item" data-secao="favoritos">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21s-7.5-4.6-9.5-9.2C1.2 8.7 3.3 5 7 5c2.1 0 3.6 1.1 5 2.8C13.4 6.1 14.9 5 17 5c3.7 0 5.8 3.7 4.5 6.8C19.5 16.4 12 21 12 21z"></path></svg>Favoritos<c:if test="${not empty favoritos}"><span class="conta-nav-contador">${fn:length(favoritos)}</span></c:if></a>
+          <a href="#enderecos" class="conta-nav-item" data-secao="enderecos">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21s-7-6.1-7-11.5A7 7 0 0 1 19 9.5C19 14.9 12 21 12 21z"></path><circle cx="12" cy="9.5" r="2.5"></circle></svg>Endereços</a>
           <a href="#dados" class="conta-nav-item" data-secao="dados">
             <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="4"></circle><path d="M4 21a8 8 0 0 1 16 0"></path></svg>Meus dados</a>
           <a href="${ctx}/logout" class="conta-nav-item conta-nav-item--sair">
@@ -80,6 +84,14 @@
       </aside>
 
       <div class="conta-conteudo">
+
+        <%-- Resultado da última ação (ex.: "Senha alterada."), vindo do ContaController --%>
+        <c:if test="${not empty flash}">
+          <div class="conta-flash conta-flash--${flashTipo eq 'erro' ? 'erro' : 'ok'}" role="${flashTipo eq 'erro' ? 'alert' : 'status'}">
+            <span><c:out value="${flash}" /></span>
+            <button type="button" class="conta-flash-fechar" aria-label="Fechar aviso">&times;</button>
+          </div>
+        </c:if>
 
         <!-- ===================== VISÃO GERAL ===================== -->
         <section class="conta-secao" id="visao-geral" aria-labelledby="titulo-visao" tabindex="-1">
@@ -111,20 +123,24 @@
               <h2>Meus pedidos</h2>
               <p>Acompanhe o estado das suas compras</p>
             </a>
-            <a href="${ctx}/catalogo" class="conta-atalho">
+            <a href="#favoritos" class="conta-atalho" data-secao="favoritos">
               <img src="${ctx}/assets/icons/wine.svg" alt="" width="24" height="24">
-              <h2>Nossa adega</h2>
-              <p>Explore todos os rótulos</p>
+              <h2>Favoritos</h2>
+              <p><c:choose>
+                <c:when test="${empty favoritos}">Guarde os rótulos que quer provar</c:when>
+                <c:when test="${fn:length(favoritos) eq 1}">1 vinho guardado</c:when>
+                <c:otherwise>${fn:length(favoritos)} vinhos guardados</c:otherwise>
+              </c:choose></p>
             </a>
-            <a href="${ctx}/quiz" class="conta-atalho">
-              <img src="${ctx}/assets/icons/star-check.svg" alt="" width="24" height="24">
-              <h2>Sommelier Virtual</h2>
-              <p>Receba sugestões para o seu paladar</p>
+            <a href="#enderecos" class="conta-atalho" data-secao="enderecos">
+              <img src="${ctx}/assets/icons/package.svg" alt="" width="24" height="24">
+              <h2>Endereços</h2>
+              <p>Agilize o checkout com endereços guardados</p>
             </a>
             <a href="#dados" class="conta-atalho" data-secao="dados">
               <img src="${ctx}/assets/icons/user.svg" alt="" width="24" height="24">
               <h2>Meus dados</h2>
-              <p>Informações da sua conta</p>
+              <p>Editar dados e trocar a senha</p>
             </a>
           </div>
         </section>
@@ -132,6 +148,8 @@
         <!-- ===================== PEDIDOS ===================== -->
         <section class="conta-secao" id="pedidos" aria-labelledby="titulo-pedidos" tabindex="-1" hidden>
           <h1 class="conta-secao-titulo" id="titulo-pedidos">Meus pedidos</h1>
+          <p class="conta-secao-desc">Pedidos que ainda aguardam pagamento podem ser cancelados aqui mesmo.</p>
+          <p class="conta-aviso-repetir" id="aviso-repetir" role="status" hidden></p>
           <div id="lista-pedidos" class="conta-pedidos">
             <c:choose>
               <c:when test="${erroPedidos}">
@@ -191,11 +209,175 @@
                       </span>
                       <strong><fmt:formatNumber value="${pedido.total}" type="currency" currencySymbol="R$" /></strong>
                     </footer>
+                    <div class="conta-pedido-acoes">
+                      <%-- Repete os vinhos no carrinho com o preço e o estoque de HOJE (area-pessoal.js) --%>
+                      <button type="button" class="conta-btn-secundario conta-btn-pequeno" data-repetir="${pedido.id}">
+                        Comprar novamente
+                      </button>
+                      <c:if test="${pedido.status.name() eq 'AGUARDANDO_PAGAMENTO'}">
+                        <form method="post" action="${ctx}/conta/pedidos/cancelar" class="conta-form-cancelar"
+                              data-confirmar="Cancelar o pedido ${fn:escapeXml(pedido.numero)}? As garrafas voltam para a adega e esta ação não pode ser desfeita.">
+                          <input type="hidden" name="csrf" value="${csrf}">
+                          <input type="hidden" name="id" value="${pedido.id}">
+                          <button type="submit" class="conta-btn-texto-perigo">Cancelar pedido</button>
+                        </form>
+                      </c:if>
+                    </div>
                   </article>
                 </c:forEach>
               </c:otherwise>
             </c:choose>
           </div>
+        </section>
+
+        <!-- ===================== FAVORITOS ===================== -->
+        <section class="conta-secao" id="favoritos" aria-labelledby="titulo-favoritos" tabindex="-1" hidden>
+          <h1 class="conta-secao-titulo" id="titulo-favoritos">Favoritos</h1>
+          <c:choose>
+            <c:when test="${erroFavoritos}">
+              <div class="conta-vazio" role="alert">
+                <h2>Não foi possível carregar os favoritos</h2>
+                <p>Tente novamente em alguns instantes.</p>
+              </div>
+            </c:when>
+            <c:otherwise>
+              <div class="conta-vazio" id="favoritos-vazio" ${empty favoritos ? '' : 'hidden'}>
+                <img src="${ctx}/assets/icons/wine.svg" alt="" width="40" height="40">
+                <h2>A sua lista está vazia</h2>
+                <p>Toque no coração de um vinho no catálogo para guardá-lo aqui.</p>
+                <a href="${ctx}/catalogo" class="conta-btn-primario">Explorar a adega</a>
+              </div>
+              <ul class="conta-favoritos" id="lista-favoritos">
+                <c:forEach var="v" items="${favoritos}">
+                  <c:set var="esgotadoFav" value="${v.estoque le 0}" />
+                  <fmt:formatNumber var="precoFav" value="${v.preco}" minFractionDigits="2" maxFractionDigits="2" />
+                  <li class="conta-favorito" data-produto-card="${v.id}">
+                    <a href="${ctx}/produto?id=${v.id}" class="conta-favorito-img">
+                      <img src="${ctx}${v.imagemUrl}" alt="" width="64" height="80" loading="lazy" onerror="this.style.visibility='hidden'">
+                    </a>
+                    <div class="conta-favorito-info">
+                      <span class="conta-favorito-meta"><c:out value="${v.origem}" /> · <c:out value="${v.tipo}" /></span>
+                      <a href="${ctx}/produto?id=${v.id}" class="conta-favorito-nome"><c:out value="${v.nome}" /></a>
+                      <strong class="conta-favorito-preco">R$ ${precoFav}</strong>
+                    </div>
+                    <div class="conta-favorito-acoes">
+                      <c:choose>
+                        <c:when test="${esgotadoFav}"><span class="conta-favorito-esgotado">Esgotado</span></c:when>
+                        <c:otherwise>
+                          <button type="button" class="agnello-btn-comprar conta-btn-pequeno"
+                                  data-id="${v.id}" data-nome="<c:out value='${v.nome}' />" data-preco="R$ ${precoFav}"
+                                  data-origem="<c:out value='${v.origem} • ${v.tipo}' />" data-imagem="${ctx}${v.imagemUrl}"
+                                  aria-label="Adicionar <c:out value='${v.nome}' /> ao carrinho">Adicionar</button>
+                        </c:otherwise>
+                      </c:choose>
+                      <button type="button" class="fav-btn conta-favorito-remover is-favorito" data-produto="${v.id}"
+                              data-nome="${fn:escapeXml(v.nome)}" aria-pressed="true"
+                              aria-label="Remover ${fn:escapeXml(v.nome)} dos favoritos">
+                        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21s-7.5-4.6-9.5-9.2C1.2 8.7 3.3 5 7 5c2.1 0 3.6 1.1 5 2.8C13.4 6.1 14.9 5 17 5c3.7 0 5.8 3.7 4.5 6.8C19.5 16.4 12 21 12 21z"></path></svg>
+                      </button>
+                    </div>
+                  </li>
+                </c:forEach>
+              </ul>
+            </c:otherwise>
+          </c:choose>
+        </section>
+
+        <!-- ===================== ENDEREÇOS ===================== -->
+        <section class="conta-secao" id="enderecos" aria-labelledby="titulo-enderecos" tabindex="-1" hidden>
+          <h1 class="conta-secao-titulo" id="titulo-enderecos">Endereços</h1>
+          <p class="conta-secao-desc">Guarde até ${maxEnderecos} endereços e escolha-os no checkout com um toque.
+            Ficam cifrados no nosso banco de dados.</p>
+
+          <c:choose>
+            <c:when test="${erroEnderecos}">
+              <div class="conta-vazio" role="alert">
+                <h2>Não foi possível carregar os endereços</h2>
+                <p>Tente novamente em alguns instantes.</p>
+              </div>
+            </c:when>
+            <c:otherwise>
+              <c:if test="${not empty enderecos}">
+                <ul class="conta-enderecos">
+                  <c:forEach var="e" items="${enderecos}">
+                    <li class="conta-endereco${e.principal ? ' conta-endereco--principal' : ''}">
+                      <div>
+                        <strong class="conta-endereco-apelido"><c:out value="${e.apelido}" />
+                          <c:if test="${e.principal}"><span class="conta-tag">Principal</span></c:if></strong>
+                        <p><c:out value="${e.logradouro}" />, <c:out value="${e.numero}" /><c:if test="${not empty e.complemento}"> — <c:out value="${e.complemento}" /></c:if></p>
+                        <p><c:out value="${e.bairro}" /> · <c:out value="${e.cidade}" /> · CEP <c:out value="${e.cepFormatado}" /></p>
+                      </div>
+                      <div class="conta-endereco-acoes">
+                        <c:if test="${not e.principal}">
+                          <form method="post" action="${ctx}/conta/enderecos/principal">
+                            <input type="hidden" name="csrf" value="${csrf}">
+                            <input type="hidden" name="id" value="${e.id}">
+                            <button type="submit" class="conta-btn-link">Tornar principal</button>
+                          </form>
+                        </c:if>
+                        <form method="post" action="${ctx}/conta/enderecos/excluir"
+                              data-confirmar="Excluir o endereço &quot;${fn:escapeXml(e.apelido)}&quot;?">
+                          <input type="hidden" name="csrf" value="${csrf}">
+                          <input type="hidden" name="id" value="${e.id}">
+                          <button type="submit" class="conta-btn-link conta-btn-link--perigo">Excluir</button>
+                        </form>
+                      </div>
+                    </li>
+                  </c:forEach>
+                </ul>
+              </c:if>
+
+              <c:choose>
+                <c:when test="${fn:length(enderecos) ge maxEnderecos}">
+                  <p class="conta-nota">Você atingiu o limite de ${maxEnderecos} endereços. Exclua um para adicionar outro.</p>
+                </c:when>
+                <c:otherwise>
+                  <details class="conta-card-form" id="form-novo-endereco" ${empty enderecos ? 'open' : ''}>
+                    <summary>+ Adicionar endereço</summary>
+                    <form method="post" action="${ctx}/conta/enderecos" class="conta-form conta-form-endereco" novalidate>
+                      <input type="hidden" name="csrf" value="${csrf}">
+                      <div class="conta-campo conta-campo--meio">
+                        <label for="end-apelido">Nome do endereço <span class="conta-opcional">(opcional)</span></label>
+                        <input id="end-apelido" name="apelido" maxlength="40" placeholder="Casa, Trabalho…">
+                      </div>
+                      <div class="conta-campo conta-campo--meio">
+                        <label for="end-cep">CEP</label>
+                        <input id="end-cep" name="cep" inputmode="numeric" autocomplete="postal-code" maxlength="9"
+                               placeholder="00000-000" required aria-describedby="end-cep-status">
+                        <small id="end-cep-status" class="conta-ajuda" aria-live="polite"></small>
+                      </div>
+                      <div class="conta-campo">
+                        <label for="end-logradouro">Rua / Avenida</label>
+                        <input id="end-logradouro" name="logradouro" maxlength="120" autocomplete="address-line1" required>
+                      </div>
+                      <div class="conta-campo conta-campo--terco">
+                        <label for="end-numero">Número</label>
+                        <input id="end-numero" name="numero" maxlength="20" required>
+                      </div>
+                      <div class="conta-campo conta-campo--doisTercos">
+                        <label for="end-complemento">Complemento <span class="conta-opcional">(opcional)</span></label>
+                        <input id="end-complemento" name="complemento" maxlength="60" autocomplete="address-line2">
+                      </div>
+                      <div class="conta-campo conta-campo--meio">
+                        <label for="end-bairro">Bairro</label>
+                        <input id="end-bairro" name="bairro" maxlength="80" required>
+                      </div>
+                      <div class="conta-campo conta-campo--meio">
+                        <label for="end-cidade">Cidade / UF</label>
+                        <input id="end-cidade" name="cidade" maxlength="80" autocomplete="address-level2" placeholder="São Paulo - SP" required>
+                      </div>
+                      <label class="conta-check">
+                        <input type="checkbox" name="principal" ${empty enderecos ? 'checked' : ''}> Usar como endereço principal
+                      </label>
+                      <div class="conta-form-acoes">
+                        <button type="submit" class="conta-btn-primario">Guardar endereço</button>
+                      </div>
+                    </form>
+                  </details>
+                </c:otherwise>
+              </c:choose>
+            </c:otherwise>
+          </c:choose>
         </section>
 
         <!-- ===================== DADOS ===================== -->
@@ -219,6 +401,75 @@
             </c:if>
             <div><dt>Tipo de conta</dt><dd>${ehPJ ? 'Pessoa jurídica' : 'Pessoa física'}</dd></div>
           </dl>
+
+          <%-- Editar dados: e-mail e CPF/CNPJ identificam a conta e não mudam por aqui --%>
+          <details class="conta-card-form" id="editar-dados">
+            <summary>Editar dados pessoais</summary>
+            <form method="post" action="${ctx}/conta/dados" class="conta-form" novalidate>
+              <input type="hidden" name="csrf" value="${csrf}">
+              <c:choose>
+                <c:when test="${ehPJ}">
+                  <div class="conta-campo">
+                    <label for="dados-razao">Razão social</label>
+                    <input id="dados-razao" name="razaoSocial" maxlength="120" required autocomplete="organization"
+                           value="<c:out value='${clienteLogado.razaoSocial}' />">
+                  </div>
+                </c:when>
+                <c:otherwise>
+                  <div class="conta-campo conta-campo--meio">
+                    <label for="dados-nome">Nome</label>
+                    <input id="dados-nome" name="nome" maxlength="60" required autocomplete="given-name"
+                           value="<c:out value='${clienteLogado.nome}' />">
+                  </div>
+                  <div class="conta-campo conta-campo--meio">
+                    <label for="dados-sobrenome">Sobrenome</label>
+                    <input id="dados-sobrenome" name="sobrenome" maxlength="80" required autocomplete="family-name"
+                           value="<c:out value='${clienteLogado.sobrenome}' />">
+                  </div>
+                </c:otherwise>
+              </c:choose>
+              <div class="conta-campo conta-campo--meio">
+                <label for="dados-telefone">Telefone com DDD <span class="conta-opcional">(opcional)</span></label>
+                <input id="dados-telefone" name="telefone" type="tel" inputmode="tel" maxlength="15" autocomplete="tel"
+                       placeholder="(11) 99999-9999" value="<c:out value='${empty tel ? "" : telFormatado}' />">
+              </div>
+              <p class="conta-nota conta-form-nota">Para mudar o e-mail ou o ${ehPJ ? 'CNPJ' : 'CPF'}, fale com a nossa equipe em
+                <a href="${ctx}/contato">Contato</a>.</p>
+              <div class="conta-form-acoes">
+                <button type="submit" class="conta-btn-primario">Guardar alterações</button>
+              </div>
+            </form>
+          </details>
+
+          <details class="conta-card-form" id="trocar-senha">
+            <summary>Trocar a senha</summary>
+            <form method="post" action="${ctx}/conta/senha" class="conta-form conta-form-senha" novalidate>
+              <input type="hidden" name="csrf" value="${csrf}">
+              <%-- Ajuda os gestores de senhas a associar a nova senha à conta certa --%>
+              <input type="email" name="email" value="<c:out value='${clienteLogado.email}' />" autocomplete="username" hidden>
+              <div class="conta-campo">
+                <label for="senha-atual">Senha atual</label>
+                <input id="senha-atual" name="senhaAtual" type="password" required autocomplete="current-password">
+              </div>
+              <div class="conta-campo conta-campo--meio">
+                <label for="senha-nova">Nova senha</label>
+                <input id="senha-nova" name="novaSenha" type="password" required minlength="8" maxlength="128"
+                       autocomplete="new-password" aria-describedby="senha-nova-ajuda">
+                <small id="senha-nova-ajuda" class="conta-ajuda">Mínimo de 8 caracteres. Uma frase longa é mais segura.</small>
+              </div>
+              <div class="conta-campo conta-campo--meio">
+                <label for="senha-confirma">Repita a nova senha</label>
+                <input id="senha-confirma" name="confirmaSenha" type="password" required minlength="8" maxlength="128"
+                       autocomplete="new-password">
+              </div>
+              <label class="conta-check">
+                <input type="checkbox" class="conta-mostrar-senhas"> Mostrar senhas
+              </label>
+              <div class="conta-form-acoes">
+                <button type="submit" class="conta-btn-primario">Alterar senha</button>
+              </div>
+            </form>
+          </details>
 
           <div class="conta-perigo">
             <div>
@@ -246,6 +497,7 @@
   </div>
 
   <script src="${ctx}/js/pages/area-pessoal.js?v=${initParam.versaoArquivos}"></script>
+  <script src="${ctx}/js/components/favoritos.js?v=${initParam.versaoArquivos}"></script>
   <script src="${ctx}/js/components/modal-deletar-conta.js?v=${initParam.versaoArquivos}"></script>
   <script src="${ctx}/js/components/carrinho.js?v=${initParam.versaoArquivos}"></script>
   <script src="${ctx}/js/components/chat.js?v=${initParam.versaoArquivos}"></script>

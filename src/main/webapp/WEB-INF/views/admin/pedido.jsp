@@ -67,7 +67,7 @@
                 <li><strong>Pedido feito</strong> · <fmt:formatDate value="${p.dataCriacao}" pattern="dd/MM/yyyy HH:mm" /></li>
                 <c:forEach var="h" items="${p.historico}">
                   <li><strong><c:out value="${h.novo.descricao}" /></strong> · <fmt:formatDate value="${h.data}" pattern="dd/MM/yyyy HH:mm" />
-                    <c:if test="${not empty h.nomeAdministrador}"><span class="adm-mudo">por <c:out value="${h.nomeAdministrador}" /></span></c:if></li>
+                    <c:choose><c:when test="${h.peloCliente}"><span class="adm-mudo">pelo cliente</span></c:when><c:when test="${not empty h.nomeAdministrador}"><span class="adm-mudo">por <c:out value="${h.nomeAdministrador}" /></span></c:when></c:choose></li>
                 </c:forEach>
               </ol>
             </section>
