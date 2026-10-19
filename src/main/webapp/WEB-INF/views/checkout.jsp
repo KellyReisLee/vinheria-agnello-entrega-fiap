@@ -1,5 +1,6 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <%@ taglib prefix="c" uri="jakarta.tags.core" %>
+<%@ taglib prefix="fn" uri="jakarta.tags.functions" %>
 <c:set var="ctx" value="${pageContext.request.contextPath}" />
 <%-- "usuarioLogado" é posto no request pelo CheckoutController quando há sessão --%>
 <c:set var="logado" value="${not empty usuarioLogado}" />
@@ -187,6 +188,32 @@
             <h2 id="passo2">Endereço de entrega</h2>
           </div>
 
+          <%-- Endereços guardados na conta: um toque preenche o formulário (checkout.js) --%>
+          <c:if test="${not empty enderecos}">
+            <fieldset class="enderecos-salvos" id="enderecos-salvos">
+              <legend>Os seus endereços</legend>
+              <div class="enderecos-salvos-lista">
+                <c:forEach var="e" items="${enderecos}">
+                  <label class="endereco-salvo">
+                    <input type="radio" name="endereco-salvo" value="${e.id}" ${e.principal ? 'checked' : ''}
+                           data-cep="${fn:escapeXml(e.cepFormatado)}" data-logradouro="${fn:escapeXml(e.logradouro)}"
+                           data-numero="${fn:escapeXml(e.numero)}" data-complemento="${fn:escapeXml(e.complemento)}"
+                           data-bairro="${fn:escapeXml(e.bairro)}" data-cidade="${fn:escapeXml(e.cidade)}">
+                    <span class="endereco-salvo-texto">
+                      <strong><c:out value="${e.apelido}" /><c:if test="${e.principal}"> <span class="endereco-salvo-tag">Principal</span></c:if></strong>
+                      <span><c:out value="${e.logradouro}" />, <c:out value="${e.numero}" /><c:if test="${not empty e.complemento}"> — <c:out value="${e.complemento}" /></c:if></span>
+                      <span><c:out value="${e.bairro}" /> · <c:out value="${e.cidade}" /> · <c:out value="${e.cepFormatado}" /></span>
+                    </span>
+                  </label>
+                </c:forEach>
+                <label class="endereco-salvo endereco-salvo--novo">
+                  <input type="radio" name="endereco-salvo" value="novo">
+                  <span class="endereco-salvo-texto"><strong>+ Usar outro endereço</strong></span>
+                </label>
+              </div>
+            </fieldset>
+          </c:if>
+
           <form class="checkout-form" id="form-endereco" novalidate>
             <div class="grid-cep">
               <div class="field">
@@ -220,6 +247,19 @@
                 <input type="text" id="cidade" autocomplete="address-level2" maxlength="80" required>
               </div>
             </div>
+            <%-- Só para clientes com conta e com espaço para mais um endereço --%>
+            <c:if test="${logado and fn:length(enderecos) lt (empty maxEnderecos ? 5 : maxEnderecos)}">
+              <div class="guardar-endereco" id="guardar-endereco">
+                <label class="guardar-endereco-check">
+                  <input type="checkbox" id="salvar-endereco" ${empty enderecos ? 'checked' : ''}>
+                  Guardar este endereço na minha conta para as próximas compras
+                </label>
+                <div class="field guardar-endereco-apelido" id="campo-apelido">
+                  <label for="apelido-endereco">Dê um nome <span class="opcional">(opcional)</span></label>
+                  <input type="text" id="apelido-endereco" maxlength="40" placeholder="Casa, Trabalho…">
+                </div>
+              </div>
+            </c:if>
           </form>
           <p class="checkout-retirada-aviso" id="aviso-retirada" hidden>
             Você escolheu <strong>retirar na adega</strong> (passo 3): não precisa informar endereço.

@@ -112,6 +112,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const envio = document.querySelector('input[name="shipping"]:checked');
     const retirada = !!envio && envio.dataset.tipo === 'RETIRADA';
     $('form-endereco').hidden = retirada;
+    if ($('enderecos-salvos')) $('enderecos-salvos').hidden = retirada;
     $('aviso-retirada').hidden = !retirada;
     $('passo2').textContent = retirada ? 'Retirada na adega' : 'Endereço de entrega';
     atualizarTotais();
@@ -190,6 +191,60 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     });
   }
+
+  // ======================================================
+  // 3b) ENDEREÇOS GUARDADOS NA CONTA
+  // Escolher um cartão preenche o formulário; "Usar outro endereço" limpa-o.
+  // A opção "Guardar este endereço" só aparece quando se digita um endereço novo.
+  // ======================================================
+  const CAMPOS_ENDERECO = ['cep', 'logradouro', 'numero', 'complemento', 'bairro', 'cidade'];
+  const opcoesSalvas = [...document.querySelectorAll('input[name="endereco-salvo"]')];
+  const blocoGuardar = $('guardar-endereco');
+  const checkGuardar = $('salvar-endereco');
+  const campoApelido = $('campo-apelido');
+
+  function atualizarGuardar() {
+    const escolhido = opcoesSalvas.find((o) => o.checked);
+    const novo = !escolhido || escolhido.value === 'novo';
+    if (blocoGuardar) blocoGuardar.hidden = !novo;
+    if (campoApelido) campoApelido.hidden = !(checkGuardar && checkGuardar.checked);
+  }
+
+  function usarEndereco(opcao) {
+    if (opcao.value === 'novo') {
+      CAMPOS_ENDERECO.forEach((id) => { $(id).value = ''; });
+      if (cepStatus) cepStatus.textContent = '';
+      $('cep').focus();
+    } else {
+      CAMPOS_ENDERECO.forEach((id) => { $(id).value = opcao.dataset[id] || ''; });
+      if (cepStatus) cepStatus.textContent = '';
+      // Remove avisos de erro que tenham ficado de uma tentativa anterior
+      CAMPOS_ENDERECO.forEach((id) => $(id).removeAttribute('aria-invalid'));
+    }
+    atualizarGuardar();
+  }
+
+  opcoesSalvas.forEach((o) => o.addEventListener('change', () => usarEndereco(o)));
+  if (checkGuardar) checkGuardar.addEventListener('change', atualizarGuardar);
+
+  // Ao mudar à mão um campo de um endereço guardado, passa a ser "outro endereço"
+  CAMPOS_ENDERECO.forEach((id) => {
+    const campo = $(id);
+    if (!campo) return;
+    campo.addEventListener('input', () => {
+      const escolhido = opcoesSalvas.find((o) => o.checked);
+      if (escolhido && escolhido.value !== 'novo' && campo.value !== (escolhido.dataset[id] || '')) {
+        const novo = opcoesSalvas.find((o) => o.value === 'novo');
+        if (novo) novo.checked = true;
+        atualizarGuardar();
+      }
+    });
+  });
+
+  // Ao abrir: o endereço principal já vem escolhido e preenchido
+  const inicial = opcoesSalvas.find((o) => o.checked);
+  if (inicial && !$('cep').value) usarEndereco(inicial);
+  else atualizarGuardar();
 
   // ======================================================
   // 4) IDENTIFICAÇÃO (só quando não há sessão)
@@ -439,6 +494,12 @@ document.addEventListener('DOMContentLoaded', () => {
     ['cep', 'logradouro', 'numero', 'complemento', 'bairro', 'cidade'].forEach((id) => {
       dados.set(id, $(id).value.trim());
     });
+    // "Guardar este endereço na minha conta" (o servidor ignora se já existir)
+    if (checkGuardar && checkGuardar.checked && blocoGuardar && !blocoGuardar.hidden) {
+      dados.set('salvarEndereco', '1');
+      const apelido = $('apelido-endereco').value.trim();
+      if (apelido) dados.set('apelido', apelido);
+    }
     return dados;
   }
 

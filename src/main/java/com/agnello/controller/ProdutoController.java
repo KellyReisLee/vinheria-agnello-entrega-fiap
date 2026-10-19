@@ -5,7 +5,10 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.agnello.model.Produto;
+import com.agnello.model.Usuario;
+import com.agnello.service.FavoritoService;
 import com.agnello.service.ProdutoService;
+import com.agnello.util.SessaoCliente;
 
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
@@ -28,6 +31,7 @@ public class ProdutoController extends HttpServlet {
     private static final Logger LOGGER = Logger.getLogger(ProdutoController.class.getName());
 
     private final ProdutoService produtoService = new ProdutoService();
+    private final FavoritoService favoritoService = new FavoritoService();
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
@@ -48,6 +52,10 @@ public class ProdutoController extends HttpServlet {
             response.setStatus(HttpServletResponse.SC_NOT_FOUND);
         } else {
             request.setAttribute("relacionados", produtoService.buscarRelacionados(produto));
+            // Coração preenchido se o cliente já guardou este vinho
+            Usuario cliente = SessaoCliente.atual(request);
+            request.setAttribute("favorito",
+                    cliente != null && favoritoService.idsDoCliente(cliente).contains(produto.getId()));
         }
         request.setAttribute("produto", produto);
         request.getRequestDispatcher("/WEB-INF/views/produto.jsp").forward(request, response);

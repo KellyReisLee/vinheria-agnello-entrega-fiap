@@ -1,8 +1,8 @@
 /* ==========================================================================
    CHECKOUT (WEB-INF/views/checkout.jsp)
    ========================================================================== */
-@import url('./sections/_footer-completed.css?v=2026.10.16-2');
-@import url('./sections/_chat.css?v=2026.10.16-2');
+@import url('./sections/_footer-completed.css?v=2026.10.19-1');
+@import url('./sections/_chat.css?v=2026.10.19-1');
 
 .checkout-body {
   display: flex;
@@ -1002,4 +1002,142 @@
 /* O "display: grid" do formulário venceria o atributo hidden sem esta regra */
 .checkout-form[hidden] {
   display: none;
+}
+
+/* ---------- Endereços guardados na conta ---------- */
+.enderecos-salvos {
+  margin: 0 0 1.25rem;
+  padding: 0;
+  border: 0;
+}
+
+.enderecos-salvos[hidden] {
+  display: none;
+}
+
+.enderecos-salvos legend {
+  margin-bottom: 0.6rem;
+  color: var(--text-muted);
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.6px;
+  text-transform: uppercase;
+}
+
+.enderecos-salvos-lista {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.6rem;
+}
+
+.endereco-salvo {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  padding: 0.85rem 1rem;
+  border: 1px solid #E2D9CB;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: border-color 0.2s, background-color 0.2s, box-shadow 0.2s;
+}
+
+.endereco-salvo:hover {
+  border-color: var(--accent-gold);
+}
+
+.endereco-salvo:has(input:checked) {
+  border-color: var(--primary-wine);
+  background: #FCF8F5;
+  box-shadow: 0 0 0 1px var(--primary-wine);
+}
+
+.endereco-salvo input {
+  width: 18px;
+  height: 18px;
+  margin-top: 0.15rem;
+  flex-shrink: 0;
+  accent-color: var(--primary-wine);
+}
+
+.endereco-salvo-texto {
+  display: flex;
+  flex-direction: column;
+  gap: 0.1rem;
+  min-width: 0;
+  color: var(--text-muted);
+  font-size: 0.84rem;
+  line-height: 1.45;
+  overflow-wrap: anywhere;
+}
+
+.endereco-salvo-texto strong {
+  color: var(--text-charcoal);
+  font-size: 0.92rem;
+}
+
+.endereco-salvo-tag {
+  margin-left: 0.3rem;
+  padding: 0.05rem 0.45rem;
+  border-radius: 999px;
+  background: var(--primary-wine);
+  color: #FFFFFF;
+  font-size: 0.62rem;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  vertical-align: middle;
+}
+
+.endereco-salvo--novo {
+  align-items: center;
+  border-style: dashed;
+}
+
+.endereco-salvo--novo strong {
+  color: var(--primary-wine);
+}
+
+/* "Guardar este endereço na minha conta" */
+.guardar-endereco {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 0.75rem 1.25rem;
+  margin-top: 0.25rem;
+  padding: 0.9rem 1rem;
+  border-radius: 10px;
+  background: #FAF6F0;
+}
+
+.guardar-endereco[hidden],
+.guardar-endereco-apelido[hidden] {
+  display: none;
+}
+
+.guardar-endereco-check {
+  display: flex;
+  flex: 1 1 260px;
+  align-items: center;
+  gap: 0.6rem;
+  color: var(--text-charcoal);
+  font-size: 0.9rem;
+  cursor: pointer;
+}
+
+.guardar-endereco-check input {
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+  accent-color: var(--primary-wine);
+}
+
+.guardar-endereco-apelido {
+  flex: 1 1 200px;
+  margin: 0;
+}
+
+@media (max-width: 640px) {
+  .enderecos-salvos-lista {
+    grid-template-columns: minmax(0, 1fr);
+  }
 }

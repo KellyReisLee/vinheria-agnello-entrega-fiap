@@ -12,6 +12,8 @@ import com.agnello.exception.RegraNegocioException;
 import com.agnello.model.ItemPedido;
 import com.agnello.model.Pedido;
 import com.agnello.model.Usuario;
+import com.agnello.model.TipoEntrega;
+import com.agnello.service.EnderecoService;
 import com.agnello.service.NovoPedido;
 import com.agnello.service.PedidoService;
 import com.agnello.util.ProtecaoCsrf;
@@ -47,6 +49,7 @@ public class PedidoController extends HttpServlet {
     private static final Logger LOGGER = Logger.getLogger(PedidoController.class.getName());
 
     private final PedidoService pedidoService = new PedidoService();
+    private final EnderecoService enderecoService = new EnderecoService();
 
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
@@ -70,6 +73,11 @@ public class PedidoController extends HttpServlet {
 
         try {
             Pedido pedido = pedidoService.criarPedido(cliente, lerDados(request));
+
+            // "Guardar este endereço na minha conta" (marcado no checkout)
+            if (pedido.getTipoEntrega() == TipoEntrega.ENTREGA && request.getParameter("salvarEndereco") != null) {
+                enderecoService.guardarSeNovo(cliente, ContaController.lerEndereco(request));
+            }
             response.setStatus(HttpServletResponse.SC_CREATED);
             RespostaJson.enviar(response, "sucesso", true, "pedido", paraMapa(pedido));
 

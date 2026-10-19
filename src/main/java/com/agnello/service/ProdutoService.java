@@ -6,6 +6,8 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.agnello.dao.ProdutoDAO;
+import com.agnello.model.FiltroCatalogo;
+import com.agnello.model.Pagina;
 import com.agnello.model.Produto;
 
 /**
@@ -68,5 +70,31 @@ public class ProdutoService {
             LOGGER.log(Level.WARNING, "Erro ao buscar vinhos relacionados ao id=" + produto.getId(), e);
             return new ArrayList<>();
         }
+    }
+
+    // ===================================================================== catálogo
+
+    /** Uma página do catálogo com busca, filtros e ordenação feitos pelo banco. */
+    public Pagina<Produto> buscarCatalogo(FiltroCatalogo filtro) {
+        return produtoDAO.buscarCatalogo(filtro);
+    }
+
+    /** Países para o filtro (lista vazia se o banco falhar: o catálogo abre na mesma). */
+    public List<String> listarPaises() {
+        try {
+            return produtoDAO.listarPaises();
+        } catch (RuntimeException e) {
+            LOGGER.log(Level.WARNING, "Não foi possível carregar a lista de países", e);
+            return new ArrayList<>();
+        }
+    }
+
+    /** Sugestões da lupa: só busca a partir de 2 letras. */
+    public List<Produto> sugerir(String termo) {
+        if (termo == null || termo.trim().length() < 2) {
+            return new ArrayList<>();
+        }
+        String t = termo.trim();
+        return produtoDAO.sugerir(t.length() > 60 ? t.substring(0, 60) : t, 6);
     }
 }

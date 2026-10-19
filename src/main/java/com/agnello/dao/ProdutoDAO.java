@@ -13,7 +13,10 @@ import java.util.List;
 import java.util.Map;
 
 import com.agnello.connection.ConnectionFactory;
+import com.agnello.model.Pagina;
 import com.agnello.model.Produto;
+import com.agnello.model.FiltroCatalogo;
+import com.agnello.util.Texto;
 
 /**
  * Acesso à tabela "produtos".
@@ -99,6 +102,159 @@ public class ProdutoDAO {
             throw new RuntimeException("Erro ao buscar produtos por id", e);
         }
         return produtos;
+    }
+
+    // ================================================================== catálogo com filtros
+
+    /** Texto sem acentos e em minúsculas, feito pelo próprio PostgreSQL ("Rosé" → "rose"). */
+    private static String semAcento(String coluna) {
+        return "translate(lower(COALESCE(" + coluna + ", '')), 'áàâãäéèêëíìîïóòôõöúùûüçñ', 'aaaaaeeeeiiiiooooouuuucn')";
+    }
+
+    /** País = o que vem depois da última vírgula da origem ("Mendoza, Argentina" → "Argentina"). */
+    private static final String PAIS = "trim(regexp_replace(COALESCE(origem, ''), '^.*,', ''))";
+
+    /** Pedaços de SQL FIXOS para cada tipo (escolhidos por uma lista fechada, nunca pelo texto do usuário). */
+    private static final java.util.Map<String, String> SQL_TIPO = java.util.Map.of(
+            "tinto", semAcento("tipo") + " LIKE '%tinto%'",
+            "branco", "(" + semAcento("tipo") + " LIKE '%branco%' AND " + semAcento("tipo") + " NOT LIKE '%espumante%')",
+            "rose", semAcento("tipo") + " LIKE '%rose%'",
+            "espumante", "(" + semAcento("tipo") + " LIKE '%espumante%' OR " + semAcento("tipo") + " LIKE '%prosecco%' OR "
+                    + semAcento("tipo") + " LIKE '%cava%' OR " + semAcento("tipo") + " LIKE '%champagne%')");
+
+    private static final String PONTOS = "NULLIF(substring(COALESCE(pontuacao, '') from '^[0-9]+'), '')::int";
+
+    /** Ordenações FIXAS; esgotados vão sempre para o fim. */
+    private static final java.util.Map<String, String> SQL_ORDEM = java.util.Map.of(
+            "relevancia", "id",
+            "menor-preco", "preco ASC, id",
+            "maior-preco", "preco DESC, id",
+            "pontuacao", PONTOS + " DESC NULLS LAST, id",
+            "novidades", "id DESC");
+
+    /**
+     * Uma página do catálogo com busca, filtros e ordenação, tudo feito pelo banco.
+     * Só entram vinhos ativos.
+     */
+    public Pagina<Produto> buscarCatalogo(FiltroCatalogo f) {
+        List<Object> parametros = new ArrayList<>();
+        StringBuilder where = new StringBuilder(" WHERE ativo");
+
+        // Cada palavra da busca tem de aparecer no nome, tipo, origem ou descrição
+        List<String> palavras = f.getPalavras();
+        String textoBusca = semAcento("concat_ws(' ', nome, tipo, origem, descricao)");
+        for (String palavra : palavras) {
+            where.append(" AND ").append(textoBusca).append(" LIKE ?");
+            parametros.add("%" + Texto.paraBusca(palavra) + "%");
+        }
+        if (!f.getTipo().isEmpty()) {
+            where.append(" AND ").append(SQL_TIPO.get(f.getTipo()));
+        }
+        if (!f.getPais().isEmpty()) {
+            where.append(" AND lower(").append(PAIS).append(") = lower(?)");
+            parametros.add(f.getPais());
+        }
+        if (f.getPrecoMin() != null) {
+            where.append(" AND preco >= ?");
+            parametros.add(f.getPrecoMin());
+        }
+        if (f.getPrecoMax() != null) {
+            where.append(" AND preco <= ?");
+            parametros.add(f.getPrecoMax());
+        }
+        if (f.isSoDisponiveis()) {
+            where.append(" AND estoque > 0");
+        }
+
+        // Na "relevância" com busca, quem tem a 1.ª palavra no NOME vem antes
+        StringBuilder ordem = new StringBuilder(" ORDER BY (estoque <= 0)");
+        List<Object> parametrosOrdem = new ArrayList<>();
+        if ("relevancia".equals(f.getOrdem()) && !palavras.isEmpty()) {
+            ordem.append(", (").append(semAcento("nome")).append(" LIKE ?) DESC");
+            parametrosOrdem.add("%" + Texto.paraBusca(palavras.get(0)) + "%");
+        }
+        ordem.append(", ").append(SQL_ORDEM.get(f.getOrdem()));
+
+        try (Connection conn = ConnectionFactory.getConnection()) {
+            int total;
+            try (PreparedStatement stmt = conn.prepareStatement("SELECT count(*) FROM produtos" + where)) {
+                preencherParametros(stmt, parametros, 1);
+                try (ResultSet rs = stmt.executeQuery()) {
+                    rs.next();
+                    total = rs.getInt(1);
+                }
+            }
+
+            // Página pedida além da última (ex.: link antigo) → mostra a última
+            int totalPaginas = Math.max(1, (total + FiltroCatalogo.POR_PAGINA - 1) / FiltroCatalogo.POR_PAGINA);
+            int pagina = Math.min(f.getPagina(), totalPaginas);
+
+            List<Produto> itens = new ArrayList<>();
+            String sql = "SELECT " + COLUNAS + " FROM produtos" + where + ordem + " LIMIT ? OFFSET ?";
+            try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+                int i = preencherParametros(stmt, parametros, 1);
+                i = preencherParametros(stmt, parametrosOrdem, i);
+                stmt.setInt(i++, FiltroCatalogo.POR_PAGINA);
+                stmt.setInt(i, (pagina - 1) * FiltroCatalogo.POR_PAGINA);
+                try (ResultSet rs = stmt.executeQuery()) {
+                    while (rs.next()) {
+                        itens.add(mapear(rs));
+                    }
+                }
+            }
+            return new Pagina<>(itens, total, pagina, FiltroCatalogo.POR_PAGINA);
+        } catch (SQLException e) {
+            throw new RuntimeException("Erro ao buscar o catálogo", e);
+        }
+    }
+
+    /** Países dos vinhos ativos, para a lista do filtro. */
+    public List<String> listarPaises() {
+        String sql = "SELECT DISTINCT " + PAIS + " AS pais FROM produtos WHERE ativo AND COALESCE(origem, '') <> ''"
+                + " ORDER BY pais";
+        List<String> paises = new ArrayList<>();
+        try (Connection conn = ConnectionFactory.getConnection();
+                PreparedStatement stmt = conn.prepareStatement(sql);
+                ResultSet rs = stmt.executeQuery()) {
+            while (rs.next()) {
+                paises.add(rs.getString(1));
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException("Erro ao listar países", e);
+        }
+        return paises;
+    }
+
+    /** Sugestões da lupa do cabeçalho: até 6 vinhos cujo nome, tipo ou origem contém o termo. */
+    public List<Produto> sugerir(String termo, int limite) {
+        String sql = "SELECT " + COLUNAS + " FROM produtos WHERE ativo AND "
+                + semAcento("concat_ws(' ', nome, tipo, origem)") + " LIKE ?"
+                + " ORDER BY (" + semAcento("nome") + " LIKE ?) DESC, (estoque <= 0), nome LIMIT ?";
+        List<Produto> produtos = new ArrayList<>();
+        try (Connection conn = ConnectionFactory.getConnection();
+                PreparedStatement stmt = conn.prepareStatement(sql)) {
+            String like = "%" + Texto.paraBusca(termo) + "%";
+            stmt.setString(1, like);
+            stmt.setString(2, like);
+            stmt.setInt(3, limite);
+            try (ResultSet rs = stmt.executeQuery()) {
+                while (rs.next()) {
+                    produtos.add(mapear(rs));
+                }
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException("Erro ao buscar sugestões", e);
+        }
+        return produtos;
+    }
+
+    private static int preencherParametros(PreparedStatement stmt, List<Object> parametros, int inicio)
+            throws SQLException {
+        int i = inicio;
+        for (Object p : parametros) {
+            stmt.setObject(i++, p);
+        }
+        return i;
     }
 
     // ================================================================== painel administrativo

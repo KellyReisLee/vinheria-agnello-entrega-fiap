@@ -1,5 +1,19 @@
 # Banco de dados
 
+## Conta do cliente e busca (V7) — rodar ANTES de publicar esta versão
+
+Neon → **SQL Editor** → cole `migracoes/V7__conta_cliente_e_busca.sql` → **Run**.
+Pode rodar mais de uma vez sem problema (tudo usa `IF NOT EXISTS`).
+Sem este passo, a área pessoal e o checkout mostram erro ao carregar endereços e favoritos.
+
+| Tabela / coluna | Para quê |
+|---|---|
+| `enderecos` | Até 5 endereços por cliente. O endereço vai **cifrado** (AES-256-GCM, mesma chave do CPF); só o apelido ("Casa") fica legível |
+| `favoritos` | Vinhos guardados com o coração (um registro por cliente + vinho) |
+| `historico_pedidos.pelo_cliente` | Marca os cancelamentos feitos pelo próprio cliente (o painel mostra "pelo cliente") |
+| índices `produtos_ativos_preco` / `_tipo` | Deixam rápidos os filtros de preço e tipo do catálogo |
+
+
 ## Painel administrativo (V6) — rodar ANTES de publicar a versão com o /admin
 
 1. Neon → **SQL Editor** → cole `migracoes/V6__painel_admin.sql` → **Run**.

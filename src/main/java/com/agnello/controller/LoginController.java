@@ -27,11 +27,13 @@ public class LoginController extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        // Quem já está logado vai direto para a área pessoal
+        // Quem já está logado vai direto para a área pessoal (ou para onde ia)
+        String voltar = destinoSeguro(request.getParameter("voltar"));
         if (SessaoCliente.atual(request) != null) {
-            response.sendRedirect(request.getContextPath() + "/area-pessoal");
+            response.sendRedirect(request.getContextPath() + (voltar != null ? voltar : "/area-pessoal"));
             return;
         }
+        request.setAttribute("voltar", voltar);
         request.getRequestDispatcher(PAGINA).forward(request, response);
     }
 
@@ -44,7 +46,9 @@ public class LoginController extends HttpServlet {
         try {
             Usuario usuario = clienteService.autenticar(email, request.getParameter("senha"));
             SessaoCliente.iniciar(request, usuario);
-            response.sendRedirect(request.getContextPath() + "/area-pessoal");
+            // Ex.: clicou no coração do catálogo sem conta → volta ao catálogo depois de entrar
+            String voltar = destinoSeguro(request.getParameter("voltar"));
+            response.sendRedirect(request.getContextPath() + (voltar != null ? voltar : "/area-pessoal"));
             return;
 
         } catch (RegraNegocioException e) {
@@ -54,6 +58,23 @@ public class LoginController extends HttpServlet {
             request.setAttribute("erro", "Não foi possível entrar agora. Tente novamente em alguns instantes.");
         }
 
+        request.setAttribute("voltar", destinoSeguro(request.getParameter("voltar")));
         request.getRequestDispatcher(PAGINA).forward(request, response);
+    }
+
+    /**
+     * Aceita só caminhos DENTRO do site ("/catalogo?tipo=tinto"). Recusa
+     * "https://outro-site", "//outro-site" e "/\outro-site": sem isto, um link
+     * malicioso de login poderia mandar o cliente para uma página falsa
+     * depois de entrar ("open redirect").
+     */
+    static String destinoSeguro(String voltar) {
+        if (voltar == null || voltar.length() > 300 || !voltar.startsWith("/")
+                || voltar.startsWith("//") || voltar.startsWith("/\\")
+                || voltar.chars().anyMatch(c -> c < 0x20 || c == '\\')
+                || voltar.startsWith("/login")) {
+            return null;
+        }
+        return voltar;
     }
 }

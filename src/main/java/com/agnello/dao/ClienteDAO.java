@@ -182,6 +182,28 @@ public class ClienteDAO {
         return executarUpdate(sql, "redefinir senha", novoSenhaHash, tokenHash) > 0;
     }
 
+    // ------------------------------------------------------------------ dados da conta
+
+    /** Atualiza nome, sobrenome e telefone (pessoa física). CPF e e-mail não mudam por aqui. */
+    public boolean atualizarDadosPF(int id, String nome, String sobrenome, String telefone) {
+        return executarUpdate("UPDATE clientes SET nome = ?, sobrenome = ?, telefone_cifrado = ? WHERE id = ?"
+                + " AND tipo_cliente = 'PF'", "atualizar dados",
+                nome, sobrenome, CifraDados.cifrar(CAMPO_TELEFONE, telefone), id) > 0;
+    }
+
+    /** Atualiza razão social e telefone (pessoa jurídica). CNPJ e e-mail não mudam por aqui. */
+    public boolean atualizarDadosPJ(int id, String razaoSocial, String telefone) {
+        return executarUpdate("UPDATE clientes SET razao_social = ?, telefone_cifrado = ? WHERE id = ?"
+                + " AND tipo_cliente = 'PJ'", "atualizar dados",
+                razaoSocial, CifraDados.cifrar(CAMPO_TELEFONE, telefone), id) > 0;
+    }
+
+    /** Grava a nova senha e apaga links de recuperação pendentes. */
+    public void atualizarSenha(int id, String novoSenhaHash) {
+        executarUpdate("UPDATE clientes SET senha_hash = ?, token_recuperacao_hash = NULL,"
+                + " token_recuperacao_expira = NULL WHERE id = ?", "trocar senha", novoSenhaHash, id);
+    }
+
     // ------------------------------------------------------------------ exclusão
 
     public boolean deletarPorId(int id) {

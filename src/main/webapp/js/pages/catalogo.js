@@ -1,170 +1,74 @@
 // js/pages/catalogo.js
-// Pesquisa, filtro por tipo e ordenação do catálogo — tudo no browser, sobre os
-// cards que o servidor (JSTL) já desenhou. Os filtros ficam no endereço da página
-// (ex.: /catalogo?tipo=tinto&q=malbec), por isso dá para partilhar o link.
+// A busca, os filtros, a ordenação e a paginação são feitos NO SERVIDOR (SQL):
+// o formulário #form-catalogo é um GET normal e funciona mesmo sem JavaScript.
+// Este arquivo só torna a experiência mais rápida:
+//  - escolher um tipo, país, ordenação ou "só disponíveis" aplica logo o filtro;
+//  - o "×" limpa a pesquisa;
+//  - campos vazios não aparecem no endereço (/catalogo?tipo=tinto e não ?busca=&tipo=tinto&pais=...).
 document.addEventListener('DOMContentLoaded', () => {
-  const container = document.getElementById('vinhos-container');
-  if (!container) return;
+  const form = document.getElementById('form-catalogo');
+  if (!form) return;
 
-  const cards = Array.from(container.querySelectorAll('.product-card'));
   const inputBusca = document.getElementById('input-busca');
-  const btnLimparBusca = document.querySelector('.agnello-search-clear');
-  const botoesFiltro = document.querySelectorAll('.agnello-filter-btn');
-  const selectOrdenar = document.getElementById('ordenar');
-  const totalEl = document.getElementById('total-produtos');
-  const rotuloEl = document.getElementById('total-produtos-rotulo');
-  const semResultados = document.getElementById('sem-resultados');
-  const btnLimparFiltros = document.getElementById('limpar-filtros');
+  const btnLimparBusca = form.querySelector('.agnello-search-clear');
+  const botaoAplicar = form.querySelector('.agnello-btn-aplicar');
 
-  const estado = { tipo: 'todos', busca: '', ordem: 'relevancia' };
-
-  // "Rosé" -> "rose", "Itália" -> "italia": a pesquisa ignora acentos e maiúsculas
-  const normalizar = (texto) => String(texto || '')
-    .normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().trim();
-
-  // Pré-calcula os dados de cada card uma única vez
-  const dados = new Map(cards.map((card) => [card, {
-    ordem: Number(card.dataset.ordem) || 0,
-    tipo: normalizar(card.dataset.tipo),
-    texto: normalizar(`${card.dataset.nome} ${card.dataset.origem} ${card.dataset.tipo}`),
-    // data-preco vem do Java como número ("189.9"), não como "R$ 189,90"
-    preco: parseFloat(card.dataset.preco) || 0,
-    // "93 Pts - Descorchados" -> 93
-    pontuacao: parseInt(card.dataset.pontuacao, 10) || 0
-  }]));
-
-  function passaTipo(tipo) {
-    switch (estado.tipo) {
-      case 'tinto': return tipo.includes('tinto');
-      case 'branco': return tipo.includes('branco');
-      case 'espumante': return ['espumante', 'cava', 'rose', 'prosecco'].some((t) => tipo.includes(t));
-      default: return true;
-    }
-  }
-
-  function ordenar(lista) {
-    const porOrdem = (a, b) => dados.get(a).ordem - dados.get(b).ordem;
-    const criterios = {
-      'menor-preco': (a, b) => dados.get(a).preco - dados.get(b).preco || porOrdem(a, b),
-      'maior-preco': (a, b) => dados.get(b).preco - dados.get(a).preco || porOrdem(a, b),
-      'pontuacao': (a, b) => dados.get(b).pontuacao - dados.get(a).pontuacao || porOrdem(a, b),
-      // "Relevância" volta mesmo à ordem original do servidor
-      'relevancia': porOrdem
-    };
-    return [...lista].sort(criterios[estado.ordem] || porOrdem);
-  }
-
-  function aplicar() {
-    const termo = normalizar(estado.busca);
-    // Vários termos: "malbec chile" encontra vinhos com as duas palavras
-    const palavras = termo.split(/\s+/).filter(Boolean);
-    let visiveis = 0;
-
-    ordenar(cards).forEach((card) => {
-      const d = dados.get(card);
-      const mostrar = passaTipo(d.tipo) && palavras.every((p) => d.texto.includes(p));
-      card.hidden = !mostrar;
-      if (mostrar) visiveis++;
-      // Reposiciona no DOM (antes da caixa "sem resultados") para refletir a ordem
-      container.insertBefore(card, semResultados);
+  // Remove do endereço os campos vazios antes de enviar
+  form.addEventListener('submit', () => {
+    form.querySelectorAll('input[name], select[name]').forEach((campo) => {
+      const vazio = (campo.type === 'radio' || campo.type === 'checkbox')
+        ? !campo.checked || campo.value === ''
+        : campo.value.trim() === '';
+      // Desativado = não vai no GET; volta ao normal se o usuário regressar (bfcache)
+      if (vazio) campo.disabled = true;
     });
+    if (botaoAplicar) botaoAplicar.setAttribute('aria-busy', 'true');
+    form.classList.add('is-carregando');
+  });
 
-    if (totalEl) totalEl.textContent = visiveis;
-    if (rotuloEl) rotuloEl.textContent = visiveis === 1 ? 'rótulo encontrado' : 'rótulos encontrados';
-    if (semResultados) semResultados.hidden = visiveis > 0 || cards.length === 0;
-    if (btnLimparBusca) btnLimparBusca.hidden = estado.busca === '';
+  window.addEventListener('pageshow', () => {
+    form.querySelectorAll('[disabled]').forEach((c) => { c.disabled = false; });
+    form.classList.remove('is-carregando');
+  });
 
-    guardarNoEndereco();
-  }
+  const enviar = () => (form.requestSubmit ? form.requestSubmit() : form.submit());
 
-  // ---------- Estado <-> endereço da página ----------
-  function guardarNoEndereco() {
-    const params = new URLSearchParams();
-    if (estado.tipo !== 'todos') params.set('tipo', estado.tipo);
-    if (estado.busca) params.set('q', estado.busca);
-    if (estado.ordem !== 'relevancia') params.set('ordem', estado.ordem);
-    const query = params.toString();
-    const url = location.pathname + (query ? `?${query}` : '') + location.hash;
-    history.replaceState(null, '', url);
-  }
+  // Tipo, país, ordenação e "só disponíveis": aplica ao mudar
+  form.querySelectorAll('input[name="tipo"], select[name="pais"], select[name="ordem"], input[name="disponiveis"]')
+    .forEach((campo) => campo.addEventListener('change', enviar));
 
-  function lerDoEndereco() {
-    const params = new URLSearchParams(location.search);
-    const tipo = params.get('tipo');
-    if (tipo && document.querySelector(`.agnello-filter-btn[data-filtro="${CSS.escape(tipo)}"]`)) {
-      estado.tipo = tipo;
-    }
-    estado.busca = params.get('q') || '';
-    const ordem = params.get('ordem');
-    if (ordem && selectOrdenar && selectOrdenar.querySelector(`option[value="${CSS.escape(ordem)}"]`)) {
-      estado.ordem = ordem;
-    }
-  }
-
-  function sincronizarControles() {
-    if (inputBusca) inputBusca.value = estado.busca;
-    if (selectOrdenar) selectOrdenar.value = estado.ordem;
-    botoesFiltro.forEach((b) => {
-      const ativo = b.dataset.filtro === estado.tipo;
-      b.classList.toggle('agnello-ativo', ativo);
-      b.setAttribute('aria-pressed', String(ativo));
-    });
-  }
-
-  // ---------- Eventos ----------
-  let espera;
-  if (inputBusca) {
-    inputBusca.addEventListener('input', () => {
-      clearTimeout(espera);
-      // Espera o utilizador parar de escrever (150 ms) antes de filtrar
-      espera = setTimeout(() => {
-        estado.busca = inputBusca.value.trim();
-        aplicar();
-      }, 150);
-    });
-  }
-
-  if (btnLimparBusca) {
-    btnLimparBusca.addEventListener('click', () => {
-      estado.busca = '';
-      sincronizarControles();
-      aplicar();
-      inputBusca.focus();
-    });
-  }
-
-  botoesFiltro.forEach((botao) => {
-    botao.addEventListener('click', () => {
-      estado.tipo = botao.dataset.filtro || 'todos';
-      sincronizarControles();
-      aplicar();
+  // Botões de tipo: realça o escolhido logo ao clicar (antes da página recarregar)
+  form.querySelectorAll('input[name="tipo"]').forEach((radio) => {
+    radio.addEventListener('change', () => {
+      form.querySelectorAll('.agnello-filter-btn').forEach((l) => {
+        l.classList.toggle('agnello-ativo', l.contains(radio));
+      });
     });
   });
 
-  if (selectOrdenar) {
-    selectOrdenar.addEventListener('change', () => {
-      estado.ordem = selectOrdenar.value;
-      aplicar();
+  if (inputBusca && btnLimparBusca) {
+    inputBusca.addEventListener('input', () => {
+      btnLimparBusca.hidden = inputBusca.value === '';
+    });
+    btnLimparBusca.addEventListener('click', () => {
+      const tinhaBusca = new URLSearchParams(location.search).has('busca');
+      inputBusca.value = '';
+      btnLimparBusca.hidden = true;
+      // Se a página já mostrava uma busca, recarrega sem ela; senão só limpa o campo
+      if (tinhaBusca) enviar(); else inputBusca.focus();
     });
   }
 
-  if (btnLimparFiltros) {
-    btnLimparFiltros.addEventListener('click', () => {
-      estado.tipo = 'todos';
-      estado.busca = '';
-      sincronizarControles();
-      aplicar();
-      if (inputBusca) inputBusca.focus();
-    });
-  }
-
-  // ---------- Início ----------
-  lerDoEndereco();
-  sincronizarControles();
-  aplicar();
-
-  // Vindo da lupa do header (/catalogo#input-busca): foca logo a pesquisa
+  // Vindo da lupa do header sem termo (/catalogo#input-busca): foca a pesquisa
   if (location.hash === '#input-busca' && inputBusca) {
     inputBusca.focus({ preventScroll: true });
+  }
+
+  // Depois de mudar de página/filtro, leva o usuário aos resultados
+  // (só quando veio de um clique na própria página, não ao abrir um link compartilhado)
+  const params = new URLSearchParams(location.search);
+  const resultados = document.getElementById('catalogo-resultados');
+  if (resultados && params.toString() && document.referrer.includes('/catalogo')) {
+    resultados.scrollIntoView({ block: 'start' });
   }
 });
