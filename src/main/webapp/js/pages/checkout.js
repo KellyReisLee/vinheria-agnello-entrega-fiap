@@ -157,15 +157,11 @@ document.addEventListener('DOMContentLoaded', () => {
       if (v.length > 2) return v.replace(/^(\d{2})(\d{0,5})/, '($1) $2');
       return v;
     },
-    cartao: (v) => so(v).slice(0, 16).replace(/(\d{4})(?=\d)/g, '$1 '),
-    validade: (v) => so(v).slice(0, 4).replace(/^(\d{2})(\d)/, '$1/$2')
   };
   document.querySelectorAll('[data-mascara]').forEach((input) => {
     const fn = MASCARAS[input.dataset.mascara];
     if (fn) input.addEventListener('input', () => { input.value = fn(input.value); });
   });
-  const cvv = $('card-cvv');
-  if (cvv) cvv.addEventListener('input', () => { cvv.value = so(cvv.value).slice(0, 4); });
 
   // ======================================================
   // 3) ENDEREÇO: preenchimento automático pelo CEP (ViaCEP)
@@ -388,25 +384,6 @@ document.addEventListener('DOMContentLoaded', () => {
   // ======================================================
   // 5) CONCLUIR PEDIDO
   // ======================================================
-  function luhn(numero) {
-    let soma = 0;
-    let dobro = false;
-    for (let i = numero.length - 1; i >= 0; i--) {
-      let d = Number(numero[i]);
-      if (dobro) { d *= 2; if (d > 9) d -= 9; }
-      soma += d;
-      dobro = !dobro;
-    }
-    return numero.length >= 13 && soma % 10 === 0;
-  }
-
-  function validadeOk(v) {
-    const [mm, aa] = v.split('/').map(Number);
-    if (!mm || mm > 12 || aa === undefined || Number.isNaN(aa)) return false;
-    const fim = new Date(2000 + aa, mm, 0, 23, 59, 59);
-    return fim >= new Date();
-  }
-
   // Devolve [mensagem, campo] do primeiro problema, ou null se está tudo certo
   function validarPedido() {
     if (!logado) return ['Identifique-se no passo 1 (entre ou crie a sua conta) para concluir.', emailInput];
@@ -425,12 +402,6 @@ document.addEventListener('DOMContentLoaded', () => {
       if (!v || (teste && !teste(v))) return [msg, $(id)];
     }
 
-    if (formaPagamento() === 'credit') {
-      if (!luhn(so($('card-num').value))) return ['Número do cartão inválido.', $('card-num')];
-      if (!validadeOk($('card-exp').value)) return ['Validade do cartão inválida ou expirada.', $('card-exp')];
-      if (so($('card-cvv').value).length < 3) return ['Informe o CVV (3 ou 4 dígitos).', $('card-cvv')];
-      if ($('card-name').value.trim().length < 3) return ['Informe o nome impresso no cartão.', $('card-name')];
-    }
     if (itens.some((i) => !Number.isInteger(Number(i.id)) || Number(i.id) <= 0)) {
       return ['Há um vinho antigo no carrinho que já não está disponível. Remova-o e adicione de novo pelo catálogo.', null];
     }
@@ -466,7 +437,15 @@ document.addEventListener('DOMContentLoaded', () => {
       });
       const dados = await resposta.json().catch(() => ({}));
       if (resposta.ok && dados.sucesso) {
-        confirmarPedido(dados.pedido);
+        esvaziarCarrinho();
+        if (dados.pagamentoUrl) {
+          // Pedido gravado: segue para a página segura do Mercado Pago
+          btnConcluir.querySelector('span').textContent = 'Abrindo o Mercado Pago…';
+          mostrarRedirecionamento(dados.pedido);
+          window.location.assign(dados.pagamentoUrl);
+          return;
+        }
+        confirmarPedido(dados.pedido, dados.pagamentoOnline);
         return;
       }
       mostrarAlerta(erroPedido, dados.mensagem || 'Não foi possível registrar o pedido. Tente novamente.');
@@ -503,44 +482,47 @@ document.addEventListener('DOMContentLoaded', () => {
     return dados;
   }
 
-  // Mostra a confirmação com os dados devolvidos pelo servidor
-  function confirmarPedido(pedido) {
-    const forma = pedido.pagamento;
-    const numero = pedido.numero;
-    const total = Number(pedido.total);
-
+  function esvaziarCarrinho() {
     try {
-      localStorage.removeItem('agnello_carrinho'); // esvazia o carrinho
+      localStorage.removeItem('agnello_carrinho');
       localStorage.removeItem('agnello_pedidos'); // pedidos antigos guardados só no navegador
-    } catch (e) { /* sem localStorage: a confirmação aparece na mesma */ }
+    } catch (e) { /* sem localStorage: segue na mesma */ }
+  }
 
-    // Instruções conforme a forma de pagamento (valores de demonstração)
-    const codigoPix = `00020126580014BR.GOV.BCB.PIX0136agnello-${numero.toLowerCase()}5204000053039865406${total.toFixed(2)}5802BR`;
-    const instrucoes = {
-      pix: `
-        <h2>Pague com Pix</h2>
-        <p>Copie o código abaixo e cole na área Pix do seu banco. O pedido é liberado assim que o pagamento for confirmado.</p>
-        <div class="pix-copia">
-          <code id="pix-codigo">${codigoPix}</code>
-          <button type="button" class="checkout-btn-secondary" id="btn-copiar-pix">Copiar código</button>
-        </div>`,
-      credit: `
-        <h2>Pagamento aprovado</h2>
-        <p>O pagamento foi aprovado em ${pedido.parcelas}x de ${brl(Number(pedido.valorParcela))} sem juros.
-          Você receberá um e-mail quando o pedido for enviado.</p>`,
-      boleto: `
-        <h2>Boleto gerado</h2>
-        <p>O boleto vence em 2 dias úteis. O pedido é liberado após a compensação bancária.</p>`
-    };
+  // Aviso curto enquanto o navegador abre o Mercado Pago
+  function mostrarRedirecionamento(pedido) {
+    const conf = $('checkout-confirmacao');
+    conf.innerHTML = `
+      <div class="confirmacao-icone confirmacao-icone--espera" aria-hidden="true"></div>
+      <span class="confirmacao-eyebrow">Pedido ${escapar(pedido.numero)}</span>
+      <h1 id="confirmacao-titulo">Abrindo o pagamento seguro…</h1>
+      <p class="confirmacao-lead">Estamos levando você para o Mercado Pago. Se nada acontecer em alguns segundos,
+        pague pela sua conta em <a href="${ctx}/area-pessoal#pedidos">Meus pedidos</a>.</p>`;
+    $('checkout-conteudo').hidden = true;
+    conf.hidden = false;
+    window.scrollTo({ top: 0 });
+  }
+
+  // Pedido gravado sem pagamento online (Mercado Pago desligado ou indisponível)
+  function confirmarPedido(pedido, pagamentoOnline) {
+    const total = Number(pedido.total);
+    const aviso = pagamentoOnline
+      ? `<h2>Falta pagar</h2>
+         <p>O pedido foi gravado, mas não conseguimos abrir o Mercado Pago agora.
+           Em <strong>Meus pedidos</strong>, use o botão <strong>Pagar agora</strong> daqui a alguns minutos.
+           As garrafas ficam reservadas para você.</p>`
+      : `<h2>Pagamento</h2>
+         <p>O pagamento online não está ativo nesta versão de demonstração. A nossa equipe entra em contato
+           por e-mail com as instruções de pagamento.</p>`;
 
     const conf = $('checkout-confirmacao');
     conf.innerHTML = `
       <div class="confirmacao-icone" aria-hidden="true">✓</div>
-      <span class="confirmacao-eyebrow">Pedido ${numero}</span>
+      <span class="confirmacao-eyebrow">Pedido ${escapar(pedido.numero)}</span>
       <h1 id="confirmacao-titulo">Obrigado! O seu pedido foi recebido.</h1>
       <p class="confirmacao-lead">Enviamos a confirmação para <strong>${escapar(emailSessao)}</strong>.</p>
 
-      <div class="confirmacao-pagamento">${instrucoes[forma] || ''}</div>
+      <div class="confirmacao-pagamento">${aviso}</div>
 
       <div class="confirmacao-resumo">
         <ul>${pedido.itens.map((i) => `<li><span>${i.quantidade}× ${escapar(i.nome)}</span><span>${brl(Number(i.total))}</span></li>`).join('')}</ul>
@@ -561,23 +543,5 @@ document.addEventListener('DOMContentLoaded', () => {
     conf.hidden = false;
     window.scrollTo({ top: 0, behavior: 'smooth' });
     conf.focus({ preventScroll: true });
-
-    const btnCopiar = $('btn-copiar-pix');
-    if (btnCopiar) {
-      btnCopiar.addEventListener('click', async () => {
-        try {
-          await navigator.clipboard.writeText(codigoPix);
-          btnCopiar.textContent = 'Copiado ✓';
-        } catch (e) {
-          // Sem permissão de clipboard: seleciona o texto para a pessoa copiar
-          const range = document.createRange();
-          range.selectNodeContents($('pix-codigo'));
-          const sel = window.getSelection();
-          sel.removeAllRanges();
-          sel.addRange(range);
-          btnCopiar.textContent = 'Selecionado — copie com Ctrl/Cmd+C';
-        }
-      });
-    }
   }
 });

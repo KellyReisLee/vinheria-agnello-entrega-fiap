@@ -167,11 +167,13 @@ public class EmailTemplateUtil {
 
     private static String instrucaoPagamento(Pedido pedido) {
         if (pedido.getFormaPagamento() == FormaPagamento.CARTAO) {
-            return "Pagamento aprovado no cartão de crédito em " + pedido.getParcelas() + "x de "
-                    + reais(pedido.getValorParcela()) + " sem juros.";
+            return "Pagamento no cartão de crédito em " + pedido.getParcelas() + "x de "
+                    + reais(pedido.getValorParcela()) + " sem juros, na página segura do Mercado Pago. "
+                    + "Avisamos por e-mail assim que for aprovado.";
         }
         if (pedido.getFormaPagamento() == FormaPagamento.PIX) {
-            return "Pagamento por Pix: o pedido é liberado assim que o pagamento for confirmado.";
+            return "Pagamento por Pix, na página segura do Mercado Pago: o pedido é liberado assim que o "
+                    + "pagamento for confirmado (em geral, em segundos).";
         }
         return "Pagamento por boleto: vence em 2 dias úteis. O pedido é liberado após a compensação.";
     }

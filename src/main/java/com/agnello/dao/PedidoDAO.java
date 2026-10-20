@@ -118,7 +118,7 @@ public class PedidoDAO {
     /** Pedidos do cliente, do mais recente para o mais antigo, já com os itens. */
     public List<Pedido> listarPorCliente(int clienteId) {
         String sqlPedidos = "SELECT id, numero, cliente_id, status, forma_pagamento, parcelas, tipo_entrega,"
-                + " subtotal, frete, desconto, total, endereco_cifrado, criado_em"
+                + " subtotal, frete, desconto, total, endereco_cifrado, criado_em, pagamento_id, pagamento_status, pago_em"
                 + " FROM pedidos WHERE cliente_id = ? ORDER BY criado_em DESC, id DESC";
         Map<Integer, Pedido> pedidos = new LinkedHashMap<>();
         try (Connection conn = ConnectionFactory.getConnection()) {
@@ -156,7 +156,7 @@ public class PedidoDAO {
     public List<Pedido> listarParaAdmin(StatusPedido status, String busca, int limite, int deslocamento) {
         StringBuilder sql = new StringBuilder("SELECT p.id, p.numero, p.cliente_id, p.status, p.forma_pagamento,"
                 + " p.parcelas, p.tipo_entrega, p.subtotal, p.frete, p.desconto, p.total, NULL AS endereco_cifrado,"
-                + " p.criado_em, " + NOME_CLIENTE + " AS nome_cliente, c.email AS email_cliente,"
+                + " p.criado_em, p.pagamento_id, p.pagamento_status, p.pago_em, " + NOME_CLIENTE + " AS nome_cliente, c.email AS email_cliente,"
                 + " (SELECT COALESCE(sum(quantidade), 0) FROM itens_pedido i WHERE i.pedido_id = p.id) AS garrafas"
                 + " FROM pedidos p LEFT JOIN clientes c ON c.id = p.cliente_id WHERE 1 = 1");
         List<Object> parametros = new ArrayList<>();
@@ -234,9 +234,11 @@ public class PedidoDAO {
     public Pedido buscarParaAdmin(int id) {
         String sql = "SELECT p.id, p.numero, p.cliente_id, p.status, p.forma_pagamento, p.parcelas, p.tipo_entrega,"
                 + " p.subtotal, p.frete, p.desconto, p.total, p.endereco_cifrado, p.criado_em,"
+                + " p.pagamento_id, p.pagamento_status, p.pago_em,"
                 + " " + NOME_CLIENTE + " AS nome_cliente, c.email AS email_cliente"
                 + " FROM pedidos p LEFT JOIN clientes c ON c.id = p.cliente_id WHERE p.id = ?";
-        String sqlHistorico = "SELECT h.status_anterior, h.status_novo, h.criado_em, h.pelo_cliente, a.nome AS nome_admin"
+        String sqlHistorico = "SELECT h.status_anterior, h.status_novo, h.criado_em, h.pelo_cliente, h.pelo_gateway,"
+                + " a.nome AS nome_admin"
                 + " FROM historico_pedidos h LEFT JOIN administradores a ON a.id = h.administrador_id"
                 + " WHERE h.pedido_id = ? ORDER BY h.criado_em, h.id";
 
@@ -267,6 +269,7 @@ public class PedidoDAO {
                         r.setCriadoEm(rs.getObject("criado_em", OffsetDateTime.class));
                         r.setNomeAdministrador(rs.getString("nome_admin"));
                         r.setPeloCliente(rs.getBoolean("pelo_cliente"));
+                        r.setPeloGateway(rs.getBoolean("pelo_gateway"));
                         pedido.getHistorico().add(r);
                     }
                 }
@@ -367,6 +370,73 @@ public class PedidoDAO {
         }
     }
 
+    // ================================================================== pagamento (Mercado Pago)
+
+    /**
+     * Pagamento aprovado: o pedido passa de "Aguardando pagamento" a "Pago" e
+     * o histórico regista que foi o Mercado Pago.
+     *
+     * O "AND status = 'AGUARDANDO_PAGAMENTO'" torna a operação idempotente: o
+     * Mercado Pago avisa várias vezes do mesmo pagamento (e o cliente também
+     * volta pela página de retorno), mas só a primeira muda o pedido.
+     *
+     * @return true se o pedido mudou agora para "Pago"; false se já estava pago
+     *         ou noutro status (nesse caso só os dados do pagamento são guardados)
+     */
+    public boolean confirmarPagamento(int pedidoId, String pagamentoId, String pagamentoStatus) {
+        try (Connection conn = ConnectionFactory.getConnection()) {
+            conn.setAutoCommit(false);
+            try {
+                int alterados;
+                try (PreparedStatement stmt = conn.prepareStatement("UPDATE pedidos SET status = 'PAGO',"
+                        + " pagamento_id = ?, pagamento_status = ?, pago_em = now()"
+                        + " WHERE id = ? AND status = 'AGUARDANDO_PAGAMENTO'")) {
+                    stmt.setString(1, pagamentoId);
+                    stmt.setString(2, pagamentoStatus);
+                    stmt.setInt(3, pedidoId);
+                    alterados = stmt.executeUpdate();
+                }
+                if (alterados == 1) {
+                    try (PreparedStatement stmt = conn.prepareStatement("INSERT INTO historico_pedidos"
+                            + " (pedido_id, status_anterior, status_novo, pelo_gateway)"
+                            + " VALUES (?, 'AGUARDANDO_PAGAMENTO', 'PAGO', TRUE)")) {
+                        stmt.setInt(1, pedidoId);
+                        stmt.executeUpdate();
+                    }
+                } else {
+                    registrarPagamento(conn, pedidoId, pagamentoId, pagamentoStatus);
+                }
+                conn.commit();
+                return alterados == 1;
+            } catch (SQLException | RuntimeException e) {
+                conn.rollback();
+                throw e;
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException("Erro ao confirmar o pagamento do pedido id=" + pedidoId, e);
+        }
+    }
+
+    /** Guarda o número e a situação do pagamento sem mudar o status do pedido (ex.: Pix pendente, recusado). */
+    public void registrarPagamento(int pedidoId, String pagamentoId, String pagamentoStatus) {
+        try (Connection conn = ConnectionFactory.getConnection()) {
+            registrarPagamento(conn, pedidoId, pagamentoId, pagamentoStatus);
+        } catch (SQLException e) {
+            throw new RuntimeException("Erro ao registrar o pagamento do pedido id=" + pedidoId, e);
+        }
+    }
+
+    private static void registrarPagamento(Connection conn, int pedidoId, String pagamentoId, String pagamentoStatus)
+            throws SQLException {
+        try (PreparedStatement stmt = conn.prepareStatement(
+                "UPDATE pedidos SET pagamento_id = ?, pagamento_status = ? WHERE id = ?")) {
+            stmt.setString(1, pagamentoId);
+            stmt.setString(2, pagamentoStatus);
+            stmt.setInt(3, pedidoId);
+            stmt.executeUpdate();
+        }
+    }
+
     /** Carrega numa só consulta os itens de vários pedidos (evita "N+1 consultas"). */
     private void carregarItens(Connection conn, Map<Integer, Pedido> pedidos) throws SQLException {
         String sql = "SELECT id, pedido_id, produto_id, nome_produto, imagem, preco_unitario, quantidade"
@@ -404,6 +474,9 @@ public class PedidoDAO {
         p.setDesconto(rs.getBigDecimal("desconto"));
         p.setTotal(rs.getBigDecimal("total"));
         p.setCriadoEm(rs.getObject("criado_em", OffsetDateTime.class));
+        p.setPagamentoId(rs.getString("pagamento_id"));
+        p.setPagamentoStatus(rs.getString("pagamento_status"));
+        p.setPagoEm(rs.getObject("pago_em", OffsetDateTime.class));
         try {
             p.setEndereco(CifraDados.decifrar(CAMPO_ENDERECO, rs.getString("endereco_cifrado")));
         } catch (IllegalStateException e) {

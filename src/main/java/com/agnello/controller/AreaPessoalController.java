@@ -65,6 +65,7 @@ public class AreaPessoalController extends HttpServlet {
             request.setAttribute("erroEnderecos", true);
         }
         request.setAttribute("maxEnderecos", EnderecoService.MAX_ENDERECOS);
+        request.setAttribute("pagamentoOnline", com.agnello.pagamento.ConfigPagamento.ativo());
         request.getRequestDispatcher("/WEB-INF/views/area-pessoal.jsp").forward(request, response);
     }
 }

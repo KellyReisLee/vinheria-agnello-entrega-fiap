@@ -44,7 +44,7 @@
         </details>
 
         <article class="prose">
-          <p class="doc-atualizado">Última atualização: 19 de outubro de 2026</p>
+          <p class="doc-atualizado">Última atualização: 20 de outubro de 2026</p>
 
           <h2 id="quem-somos">Quem somos</h2>
           <p>A <strong>Vinheria Agnello</strong>, com loja na Rua das Videiras, 1978 — São Paulo, SP, é a controladora
@@ -79,7 +79,7 @@
                 <tr>
                   <td>Dados de pagamento</td>
                   <td>No checkout</td>
-                  <td>Processar o pagamento. Não guardamos o número completo nem o código de segurança do cartão</td>
+                  <td>Processar o pagamento pelo Mercado Pago. Guardamos só o número e a situação do pagamento; nunca recebemos o número do cartão nem o código de segurança</td>
                 </tr>
                 <tr>
                   <td>Mensagens enviadas</td>
@@ -108,7 +108,7 @@
           <p>Não vendemos os seus dados. Compartilhamos apenas o necessário com:</p>
           <ul>
             <li>transportadoras, para fazer a entrega;</li>
-            <li>instituições de pagamento, para processar a compra;</li>
+            <li>o <strong>Mercado Pago</strong>, que processa os pagamentos (Pix, cartão e boleto). Os dados do cartão são digitados diretamente na página segura do Mercado Pago e nunca passam pela Vinheria Agnello;</li>
             <li>fornecedores de hospedagem, banco de dados e envio de e-mails, que tratam os dados apenas sob as nossas instruções;</li>
             <li>autoridades públicas, quando a lei exigir.</li>
           </ul>
@@ -135,7 +135,7 @@
             <li>a sua <strong>senha nunca é guardada</strong>: guardamos apenas um código irreversível gerado a partir dela
               (hash PBKDF2), que não permite descobrir a senha;</li>
             <li><strong>CPF, telefone, endereço de entrega e endereços guardados ficam cifrados</strong> no banco de dados (AES-256), com chaves guardadas separadamente;</li>
-            <li>os <strong>dados do cartão não passam pelos nossos servidores</strong> nem ficam guardados;</li>
+            <li>os <strong>dados do cartão não passam pelos nossos servidores</strong> nem ficam guardados: são digitados na página do Mercado Pago;</li>
             <li>os links de ativação e de recuperação de senha são de uso único e expiram;</li>
             <li>a conta é bloqueada temporariamente depois de várias tentativas de senha erradas.</li>
           </ul>

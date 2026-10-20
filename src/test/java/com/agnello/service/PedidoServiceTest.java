@@ -180,7 +180,7 @@ class PedidoServiceTest {
     // ------------------------------------------------------------------ cartão
 
     @Test
-    void cartaoEhAprovadoNaSimulacaoComParcelasValidas() throws Exception {
+    void cartaoFicaAguardandoOPagamentoComParcelasValidas() throws Exception {
         NovoPedido n = pedidoComEntrega("credit");
         n.adicionarItem(1, 2); // 379,80 + 25 = 404,80 → até 6x (mínimo de R$ 50)
         n.setParcelas(6);
@@ -188,7 +188,8 @@ class PedidoServiceTest {
         Pedido p = service.criarPedido(cliente, n);
 
         assertEquals(FormaPagamento.CARTAO, p.getFormaPagamento());
-        assertEquals(StatusPedido.PAGO, p.getStatus());
+        // Só o Mercado Pago (ou a loja, no painel) pode marcar como pago
+        assertEquals(StatusPedido.AGUARDANDO_PAGAMENTO, p.getStatus());
         assertEquals(6, p.getParcelas());
         assertEquals(new BigDecimal("67.47"), p.getValorParcela());
     }

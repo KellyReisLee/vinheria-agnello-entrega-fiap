@@ -15,6 +15,8 @@ public class RegistroStatus implements Serializable {
     private OffsetDateTime criadoEm;
     /** true quando foi o próprio cliente (ex.: cancelou um pedido não pago). */
     private boolean peloCliente;
+    /** true quando foi o Mercado Pago (pagamento aprovado automaticamente). */
+    private boolean peloGateway;
 
     public Date getData() {
         return criadoEm == null ? null : Date.from(criadoEm.toInstant());
@@ -34,4 +36,7 @@ public class RegistroStatus implements Serializable {
 
     public OffsetDateTime getCriadoEm() { return criadoEm; }
     public void setCriadoEm(OffsetDateTime criadoEm) { this.criadoEm = criadoEm; }
+
+    public boolean isPeloGateway() { return peloGateway; }
+    public void setPeloGateway(boolean peloGateway) { this.peloGateway = peloGateway; }
 }

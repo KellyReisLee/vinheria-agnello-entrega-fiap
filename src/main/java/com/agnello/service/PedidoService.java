@@ -97,11 +97,10 @@ public class PedidoService {
         calcularValores(pedido);
         pedido.setParcelas(validarParcelas(pagamento, dados.getParcelas(), pedido.getTotal()));
 
-        // Sem um gateway de pagamento real, o cartão é dado como aprovado (simulação).
-        // Num site em produção, aqui entraria a chamada ao gateway (Mercado Pago,
-        // Pagar.me, Stripe…) com o "token" do cartão gerado no navegador — o número do
-        // cartão nunca passa pelo nosso servidor.
-        pedido.setStatus(pagamento == FormaPagamento.CARTAO ? StatusPedido.PAGO : StatusPedido.AGUARDANDO_PAGAMENTO);
+        // Todo pedido nasce "Aguardando pagamento". Quem o passa a "Pago" é o
+        // Mercado Pago (PagamentoService), depois de o cliente pagar na página
+        // segura dele — ou a loja, à mão no painel, se o pagamento online estiver desligado.
+        pedido.setStatus(StatusPedido.AGUARDANDO_PAGAMENTO);
 
         pedidoDAO.inserir(pedido);
         LOGGER.log(Level.INFO, "Pedido {0} criado para o cliente id={1}",

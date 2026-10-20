@@ -148,7 +148,7 @@
         <!-- ===================== PEDIDOS ===================== -->
         <section class="conta-secao" id="pedidos" aria-labelledby="titulo-pedidos" tabindex="-1" hidden>
           <h1 class="conta-secao-titulo" id="titulo-pedidos">Meus pedidos</h1>
-          <p class="conta-secao-desc">Pedidos que ainda aguardam pagamento podem ser cancelados aqui mesmo.</p>
+          <p class="conta-secao-desc">Pedidos que ainda aguardam pagamento podem ser pagos ou cancelados aqui mesmo.</p>
           <p class="conta-aviso-repetir" id="aviso-repetir" role="status" hidden></p>
           <div id="lista-pedidos" class="conta-pedidos">
             <c:choose>
@@ -210,6 +210,14 @@
                       <strong><fmt:formatNumber value="${pedido.total}" type="currency" currencySymbol="R$" /></strong>
                     </footer>
                     <div class="conta-pedido-acoes">
+                      <%-- Pedido por pagar: abre de novo a página segura do Mercado Pago --%>
+                      <c:if test="${pagamentoOnline and pedido.status.name() eq 'AGUARDANDO_PAGAMENTO'}">
+                        <form method="post" action="${ctx}/pagamento/pagar" class="conta-form-pagar">
+                          <input type="hidden" name="csrf" value="${csrf}">
+                          <input type="hidden" name="id" value="${pedido.id}">
+                          <button type="submit" class="conta-btn-primario conta-btn-pequeno">Pagar agora</button>
+                        </form>
+                      </c:if>
                       <%-- Repete os vinhos no carrinho com o preço e o estoque de HOJE (area-pessoal.js) --%>
                       <button type="button" class="conta-btn-secundario conta-btn-pequeno" data-repetir="${pedido.id}">
                         Comprar novamente

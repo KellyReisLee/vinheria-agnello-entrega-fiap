@@ -1033,3 +1033,8 @@ input[type="file"] {
 .adm-form > div > .adm-campo:last-child {
   margin-bottom: 0;
 }
+
+/* Situação do pagamento que pede atenção (devolução, contestação, valor errado) */
+.adm-alerta-texto {
+  color: #B3263E;
+}

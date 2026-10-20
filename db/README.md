@@ -1,5 +1,29 @@
 # Banco de dados
 
+## Pagamento com o Mercado Pago (V8) — rodar ANTES de publicar esta versão
+
+Neon → **SQL Editor** → cole `migracoes/V8__pagamentos_mercado_pago.sql` → **Run**.
+Pode rodar mais de uma vez sem problema.
+
+| Coluna | Para quê |
+|---|---|
+| `pedidos.pagamento_id` | Número do pagamento no Mercado Pago (para encontrar no painel deles: devoluções, contestações) |
+| `pedidos.pagamento_status` | Situação lá: `approved`, `pending`, `rejected`, `refunded`… |
+| `pedidos.pago_em` | Quando o pagamento foi aprovado |
+| `historico_pedidos.pelo_gateway` | Marca a mudança para "Pago" feita automaticamente pelo Mercado Pago |
+
+### Variáveis de ambiente (Render → Environment, e no Tomcat do Eclipse)
+
+| Variável | Onde encontrar | Obrigatória? |
+|---|---|---|
+| `MP_ACCESS_TOKEN` | Mercado Pago Developers → Suas integrações → (a sua aplicação) → **Credenciais de teste** → *Access Token* | Sim. Sem ela, os pedidos ficam "Aguardando pagamento" e a loja confirma à mão |
+| `MP_WEBHOOK_SECRET` | Suas integrações → (aplicação) → **Webhooks** → *Configurar notificações* → *Assinatura secreta* | Recomendada (confere que o aviso veio mesmo do Mercado Pago) |
+| `AGNELLO_URL_BASE` | O endereço do site, ex.: `https://vinheria-agnello.onrender.com` | Sim em produção (o Mercado Pago só avisa e devolve o cliente a endereços `https`) |
+
+Nos **Webhooks** do Mercado Pago, use a URL `https://SEU-SITE/pagamento/notificacao` e marque o evento **Pagamentos**.
+Para ir para produção, troque só o `MP_ACCESS_TOKEN` pelas *Credenciais de produção*.
+
+
 ## Conta do cliente e busca (V7) — rodar ANTES de publicar esta versão
 
 Neon → **SQL Editor** → cole `migracoes/V7__conta_cliente_e_busca.sql` → **Run**.
