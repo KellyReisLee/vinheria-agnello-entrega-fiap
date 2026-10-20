@@ -289,4 +289,29 @@ class PedidoServiceTest {
         assertNotNull(p.getNumero());
         assertEquals(1, pedidos.gravados.size());
     }
+
+    // ------------------------------------------------------------------ frete por região
+
+    @Test
+    void freteDependeDoCepDaEntrega() throws Exception {
+        NovoPedido n = pedidoComEntrega("pix");
+        n.setCep("90010-000"); // Porto Alegre
+        n.adicionarItem(1, 1);
+
+        Pedido p = service.criarPedido(cliente, n);
+
+        assertEquals(new BigDecimal("49.00"), p.getFrete());
+    }
+
+    @Test
+    void freteGratisAPartirDeQuinhentosEmVinhos() throws Exception {
+        NovoPedido n = pedidoComEntrega("boleto");
+        n.setCep("60060-000"); // Fortaleza
+        n.adicionarItem(1, 3); // 3 × 189,90 = 569,70
+
+        Pedido p = service.criarPedido(cliente, n);
+
+        assertEquals(new BigDecimal("0.00"), p.getFrete());
+        assertEquals(new BigDecimal("569.70"), p.getTotal());
+    }
 }

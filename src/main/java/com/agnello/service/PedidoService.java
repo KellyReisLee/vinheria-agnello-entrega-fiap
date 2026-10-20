@@ -37,7 +37,6 @@ public class PedidoService {
 
     private static final Logger LOGGER = Logger.getLogger(PedidoService.class.getName());
 
-    public static final BigDecimal VALOR_FRETE = new BigDecimal("25.00");
     /** Desconto para pagamento com Pix (5%). */
     public static final BigDecimal DESCONTO_PIX = new BigDecimal("0.05");
     public static final int MAX_PARCELAS = 6;
@@ -49,16 +48,36 @@ public class PedidoService {
     private final PedidoDAO pedidoDAO;
     private final ProdutoDAO produtoDAO;
     private final EmailService emailService;
+    /** "Avise-me quando chegar": um cancelamento devolve garrafas ao estoque (null nos testes). */
+    private final AvisoEstoqueService avisos;
 
     public PedidoService() {
-        this(new PedidoDAO(), new ProdutoDAO(), new EmailService());
+        this(new PedidoDAO(), new ProdutoDAO(), new EmailService(), new AvisoEstoqueService());
     }
 
     /** Construtor para testes (permite usar versões falsas do banco e do e-mail). */
     public PedidoService(PedidoDAO pedidoDAO, ProdutoDAO produtoDAO, EmailService emailService) {
+        this(pedidoDAO, produtoDAO, emailService, null);
+    }
+
+    public PedidoService(PedidoDAO pedidoDAO, ProdutoDAO produtoDAO, EmailService emailService,
+            AvisoEstoqueService avisos) {
         this.pedidoDAO = pedidoDAO;
         this.produtoDAO = produtoDAO;
         this.emailService = emailService;
+        this.avisos = avisos;
+    }
+
+    /** Depois de um cancelamento: avisa quem esperava por algum destes vinhos. */
+    private void avisarReposicao(Pedido pedido) {
+        if (avisos == null) {
+            return;
+        }
+        for (ItemPedido item : pedido.getItens()) {
+            if (item.getProdutoId() != null) {
+                avisos.avisarSeDisponivel(item.getProdutoId());
+            }
+        }
     }
 
     // ===================================================================== criar
@@ -94,7 +113,7 @@ public class PedidoService {
         pedido.setItens(montarItens(dados.getItens()));
         pedido.setEndereco(entrega == TipoEntrega.ENTREGA ? montarEndereco(dados) : null);
 
-        calcularValores(pedido);
+        calcularValores(pedido, dados.getCep());
         pedido.setParcelas(validarParcelas(pagamento, dados.getParcelas(), pedido.getTotal()));
 
         // Todo pedido nasce "Aguardando pagamento". Quem o passa a "Pago" é o
@@ -137,15 +156,24 @@ public class PedidoService {
         return itens;
     }
 
-    /** Subtotal, frete, desconto Pix e total. Público para poder ser testado sozinho. */
-    public static void calcularValores(Pedido pedido) {
+    /**
+     * Subtotal, frete (pela região do CEP, ver FreteService), desconto Pix e total.
+     * Público para poder ser testado sozinho.
+     */
+    public static void calcularValores(Pedido pedido, String cep) {
         BigDecimal subtotal = BigDecimal.ZERO;
         for (ItemPedido item : pedido.getItens()) {
             subtotal = subtotal.add(item.getTotal());
         }
         subtotal = dinheiro(subtotal);
 
-        BigDecimal frete = pedido.getTipoEntrega() == TipoEntrega.ENTREGA ? VALOR_FRETE : BigDecimal.ZERO;
+        BigDecimal frete = BigDecimal.ZERO;
+        if (pedido.getTipoEntrega() == TipoEntrega.ENTREGA) {
+            FreteService.Cotacao cotacao = FreteService.cotar(cep, subtotal);
+            // Sem CEP válido o endereço já é recusado antes; aqui só por segurança usa a tabela mais cara
+            frete = cotacao != null ? cotacao.getValor()
+                    : FreteService.TABELA.get(FreteService.TABELA.size() - 1).getValor();
+        }
         BigDecimal desconto = pedido.getFormaPagamento() == FormaPagamento.PIX
                 ? dinheiro(subtotal.multiply(DESCONTO_PIX))
                 : BigDecimal.ZERO;
@@ -277,6 +305,9 @@ public class PedidoService {
         }
 
         pedidoDAO.mudarStatus(pedidoId, pedido.getStatus(), novo, admin.getId());
+        if (novo == StatusPedido.CANCELADO) {
+            avisarReposicao(pedido);
+        }
         LOGGER.log(Level.INFO, "Pedido {0}: {1} → {2} (administrador id={3})",
                 new Object[] {pedido.getNumero(), pedido.getStatus(), novo, admin.getId()});
         pedido.setStatus(novo);
@@ -314,6 +345,7 @@ public class PedidoService {
         LOGGER.log(Level.INFO, "Pedido {0} cancelado pelo cliente id={1}",
                 new Object[] {pedido.getNumero(), cliente.getId()});
         pedido.setStatus(StatusPedido.CANCELADO);
+        avisarReposicao(pedido);
         try {
             emailService.enviarEmailAssincrono(cliente.getEmail(),
                     "Pedido " + pedido.getNumero() + " cancelado - Vinheria Agnello",

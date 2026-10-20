@@ -701,6 +701,19 @@ input[type="file"] {
   background: #FFF8E6;
 }
 
+/* "N clientes à espera" do Avise-me, abaixo do campo de estoque */
+.adm-aviso-espera {
+  display: inline-block;
+  margin-top: 0.35rem;
+  padding: 0.15rem 0.55rem;
+  border-radius: 999px;
+  background: #F3E6EA;
+  color: #7A1F35;
+  font-size: 0.75rem;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
 .adm-form-secundario {
   margin-top: 0.75rem;
 }

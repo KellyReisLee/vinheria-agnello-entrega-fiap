@@ -1,5 +1,19 @@
 # Banco de dados
 
+## "Avise-me quando chegar" e frete por região (V9) — rodar ANTES de publicar esta versão
+
+1. Abra o Neon → **SQL Editor**.
+2. Cole o conteúdo de `migracoes/V9__avisos_de_estoque.sql` e clique em **Run**.
+3. Confira: `SELECT count(*) FROM avisos_estoque;` deve responder `0`.
+
+O que muda:
+
+- Nova tabela `avisos_estoque`: e-mails de quem pediu para ser avisado quando um vinho esgotado voltar.
+  Quando o administrador põe estoque (ou reativa o vinho), a loja manda um único e-mail para cada pessoa
+  e marca o aviso como enviado. Avisos enviados são apagados depois de 90 dias.
+- O frete agora depende do CEP (tabela em `FreteService.java`) e é grátis a partir de R$ 500,00.
+  Não precisa de mudança no banco.
+
 ## Pagamento com o Mercado Pago (V8) — rodar ANTES de publicar esta versão
 
 Neon → **SQL Editor** → cole `migracoes/V8__pagamentos_mercado_pago.sql` → **Run**.

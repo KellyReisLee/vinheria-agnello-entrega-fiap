@@ -254,4 +254,18 @@ CREATE INDEX IF NOT EXISTS pedidos_pagamento_id ON pedidos (pagamento_id) WHERE 
 -- Histórico: distingue a aprovação automática feita pelo Mercado Pago
 ALTER TABLE historico_pedidos ADD COLUMN IF NOT EXISTS pelo_gateway BOOLEAN NOT NULL DEFAULT FALSE;
 
+-- ----------------------------------------------------------------- "Avise-me quando chegar" (V9)
+
+-- Quem pediu para ser avisado quando um vinho esgotado voltar ao estoque
+CREATE TABLE IF NOT EXISTS avisos_estoque (
+    id          SERIAL        PRIMARY KEY,
+    produto_id  INTEGER       NOT NULL REFERENCES produtos (id) ON DELETE CASCADE,
+    email       VARCHAR(254)  NOT NULL,
+    cliente_id  INTEGER       REFERENCES clientes (id) ON DELETE CASCADE,
+    criado_em   TIMESTAMPTZ   NOT NULL DEFAULT now(),
+    avisado_em  TIMESTAMPTZ
+);
+CREATE UNIQUE INDEX IF NOT EXISTS avisos_estoque_unico
+    ON avisos_estoque (produto_id, email) WHERE avisado_em IS NULL;
+
 COMMIT;

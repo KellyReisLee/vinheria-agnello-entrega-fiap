@@ -111,7 +111,7 @@
                   </div>
                   <c:choose>
                     <c:when test="${esgotado}">
-                      <button type="button" class="agnello-btn-comprar" disabled>Esgotado</button>
+                      <a href="${ctx}/produto?id=${p.id}#avise-me" class="agnello-btn-avise" aria-label="Avise-me quando <c:out value='${p.nome}' /> chegar">Avise-me</a>
                     </c:when>
                     <c:otherwise>
                       <button type="button" class="agnello-btn-comprar"

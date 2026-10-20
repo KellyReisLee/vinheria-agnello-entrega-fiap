@@ -276,13 +276,14 @@
           </div>
           <fieldset class="shipping-options">
             <legend class="sr-only">Escolha o envio</legend>
+            <%-- O valor do frete vem de GET /frete conforme o CEP (checkout.js); o servidor recalcula ao gravar --%>
             <label class="shipping-option">
-              <input type="radio" name="shipping" value="25.00" data-tipo="ENTREGA" data-nome="Frete Térmico Agnello" checked>
+              <input type="radio" name="shipping" value="" data-tipo="ENTREGA" data-nome="Entrega com embalagem térmica" checked>
               <span class="shipping-info">
-                <span class="ship-name">Frete Térmico Agnello</span>
-                <span class="ship-time">Entrega em até 48h com controle de temperatura</span>
+                <span class="ship-name">Entrega com embalagem térmica</span>
+                <span class="ship-time" id="frete-prazo">Informe o CEP no passo 2 para calcular o frete e o prazo</span>
               </span>
-              <span class="ship-price">R$ 25,00</span>
+              <span class="ship-price" id="frete-preco">—</span>
             </label>
             <label class="shipping-option">
               <input type="radio" name="shipping" value="0" data-tipo="RETIRADA" data-nome="Retirada na adega">
@@ -343,10 +344,12 @@
 
           <dl class="summary-totals">
             <div class="calc-row"><dt>Subtotal</dt><dd id="total-subtotal">R$ 0,00</dd></div>
-            <div class="calc-row"><dt>Envio</dt><dd id="total-frete">R$ 25,00</dd></div>
+            <div class="calc-row"><dt>Envio</dt><dd id="total-frete">—</dd></div>
             <div class="calc-row calc-row--desconto" id="row-discount"><dt>Desconto Pix (5%)</dt><dd id="total-desconto">− R$ 0,00</dd></div>
             <div class="calc-row calc-row--total"><dt>Total</dt><dd id="total-final">R$ 0,00</dd></div>
           </dl>
+
+          <p class="frete-gratis-aviso" id="frete-gratis-aviso" hidden></p>
 
           <div class="checkout-alert checkout-alert--erro" id="pedido-erro" role="alert" hidden></div>
 

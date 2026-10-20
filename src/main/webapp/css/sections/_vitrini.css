@@ -379,3 +379,27 @@
     justify-content: center;
   }
 }
+
+/* Vinho esgotado: em vez de "Comprar", leva ao "Avise-me quando chegar" */
+.product-card .agnello-btn-avise {
+  position: relative;
+  z-index: 1;
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  min-height: 40px;
+  padding: 0.55rem 1rem;
+  border: 1px solid var(--primary-wine);
+  border-radius: 6px;
+  color: var(--primary-wine);
+  font-size: 0.85rem;
+  font-weight: 600;
+  text-decoration: none;
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+.product-card .agnello-btn-avise:hover,
+.product-card .agnello-btn-avise:focus-visible {
+  background-color: var(--primary-wine);
+  color: #FFFFFF;
+}

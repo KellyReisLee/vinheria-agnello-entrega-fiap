@@ -144,7 +144,23 @@
             <c:choose>
               <c:when test="${esgotado}">
                 <p class="pdp-estoque pdp-estoque--esgotado">Esgotado no momento</p>
-                <a href="${ctx}/contato" class="pdp-btn-secundario">Avise-me quando chegar</a>
+                <%-- "Avise-me quando chegar" (avise-me.js → POST /avise-me). Sem JS, cai no Contato. --%>
+                <form class="pdp-avise" id="avise-me" action="${ctx}/contato" method="get" novalidate
+                      data-produto="${p.id}">
+                  <p class="pdp-avise-titulo"><strong>Avise-me quando chegar</strong>
+                    Mandamos um único e-mail assim que este vinho voltar à adega.</p>
+                  <div class="pdp-avise-linha">
+                    <label for="avise-email" class="sr-only">Seu e-mail</label>
+                    <input type="email" id="avise-email" name="email" required autocomplete="email" maxlength="254"
+                           placeholder="Seu e-mail" value="<c:out value='${sessionScope.clienteLogado.email}' />">
+                    <button type="submit" class="pdp-btn-secundario">Avise-me</button>
+                  </div>
+                  <div class="pdp-avise-mel" aria-hidden="true">
+                    <label for="avise-site">Não preencha</label>
+                    <input type="text" id="avise-site" name="site" tabindex="-1" autocomplete="off">
+                  </div>
+                  <p class="pdp-avise-status" role="status" hidden></p>
+                </form>
               </c:when>
               <c:otherwise>
                 <p class="pdp-estoque">
@@ -249,7 +265,7 @@
                     <div class="price-box"><span class="product-price">R$ ${precoRel}</span></div>
                     <c:choose>
                       <c:when test="${r.estoque le 0}">
-                        <button type="button" class="agnello-btn-comprar" disabled>Esgotado</button>
+                        <a href="${ctx}/produto?id=${r.id}#avise-me" class="agnello-btn-avise" aria-label="Avise-me quando <c:out value='${r.nome}' /> chegar">Avise-me</a>
                       </c:when>
                       <c:otherwise>
                       <button type="button" class="agnello-btn-comprar"
@@ -285,5 +301,6 @@
   <jsp:include page="/WEB-INF/componentes/carrinho-gaveta.jsp" />
   <script src="${ctx}/js/pages/produto.js?v=${initParam.versaoArquivos}"></script>
   <script src="${ctx}/js/components/favoritos.js?v=${initParam.versaoArquivos}"></script>
+  <script src="${ctx}/js/components/avise-me.js?v=${initParam.versaoArquivos}"></script>
 </body>
 </html>

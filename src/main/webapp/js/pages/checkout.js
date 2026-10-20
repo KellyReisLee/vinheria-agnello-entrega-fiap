@@ -79,15 +79,16 @@ document.addEventListener('DOMContentLoaded', () => {
 
   function calcularTotais() {
     const envio = document.querySelector('input[name="shipping"]:checked');
-    const frete = envio ? parseFloat(envio.value) || 0 : 0;
+    // Entrega sem CEP ainda: o frete fica "a calcular" (null) e não entra no total
+    const frete = !envio ? 0 : (envio.value === '' ? null : parseFloat(envio.value) || 0);
     const desconto = formaPagamento() === 'pix' ? subtotal * 0.05 : 0;
-    return { subtotal, frete, desconto, total: subtotal + frete - desconto, envio: envio ? envio.dataset.nome : '' };
+    return { subtotal, frete, desconto, total: subtotal + (frete || 0) - desconto, envio: envio ? envio.dataset.nome : '' };
   }
 
   function atualizarTotais() {
     const t = calcularTotais();
     $('total-subtotal').textContent = brl(t.subtotal);
-    $('total-frete').textContent = t.frete === 0 ? 'Grátis' : brl(t.frete);
+    $('total-frete').textContent = t.frete === null ? 'informe o CEP' : (t.frete === 0 ? 'Grátis' : brl(t.frete));
     $('row-discount').hidden = t.desconto === 0;
     $('total-desconto').textContent = `− ${brl(t.desconto)}`;
     $('total-final').textContent = brl(t.total);
@@ -189,6 +190,50 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   // ======================================================
+  // 3a) FRETE PELA REGIÃO DO CEP (GET /frete)
+  // Só para mostrar ao cliente: o servidor recalcula ao gravar o pedido.
+  // ======================================================
+  const radioEntrega = document.querySelector('input[name="shipping"][data-tipo="ENTREGA"]');
+  let ultimoCepCotado = '';
+
+  async function cotarFrete() {
+    const digitos = so($('cep').value);
+    if (digitos.length !== 8) {
+      ultimoCepCotado = '';
+      if (radioEntrega) radioEntrega.value = '';
+      $('frete-preco').textContent = '—';
+      $('frete-prazo').textContent = 'Informe o CEP no passo 2 para calcular o frete e o prazo';
+      $('frete-gratis-aviso').hidden = true;
+      atualizarTotais();
+      return;
+    }
+    if (digitos === ultimoCepCotado) return;
+    ultimoCepCotado = digitos;
+    $('frete-prazo').textContent = 'Calculando…';
+    try {
+      const r = await fetch(`${ctx}/frete?cep=${digitos}&subtotal=${subtotal.toFixed(2)}`);
+      const d = await r.json();
+      if (!r.ok || !d.sucesso || so($('cep').value) !== digitos) throw new Error('cep');
+      radioEntrega.value = String(d.valor);
+      $('frete-preco').textContent = d.gratis ? 'Grátis' : brl(Number(d.valor));
+      $('frete-preco').classList.toggle('ship-price--gratis', d.gratis);
+      $('frete-prazo').textContent = `${d.regiao} · ${d.prazo} · embalagem térmica`;
+      const aviso = $('frete-gratis-aviso');
+      aviso.hidden = false;
+      aviso.classList.toggle('frete-gratis-aviso--ok', d.gratis);
+      aviso.textContent = d.gratis
+        ? 'Você ganhou frete grátis!'
+        : `Faltam ${brl(Number(d.faltaParaGratis))} em vinhos para ter frete grátis (a partir de ${brl(Number(d.gratisAPartirDe))}).`;
+    } catch (e) {
+      ultimoCepCotado = '';
+      $('frete-prazo').textContent = 'Não foi possível calcular agora. O valor é confirmado ao concluir o pedido.';
+    }
+    atualizarTotais();
+  }
+
+  if (cep) cep.addEventListener('input', cotarFrete);
+
+  // ======================================================
   // 3b) ENDEREÇOS GUARDADOS NA CONTA
   // Escolher um cartão preenche o formulário; "Usar outro endereço" limpa-o.
   // A opção "Guardar este endereço" só aparece quando se digita um endereço novo.
@@ -218,6 +263,7 @@ document.addEventListener('DOMContentLoaded', () => {
       CAMPOS_ENDERECO.forEach((id) => $(id).removeAttribute('aria-invalid'));
     }
     atualizarGuardar();
+    cotarFrete();
   }
 
   opcoesSalvas.forEach((o) => o.addEventListener('change', () => usarEndereco(o)));
@@ -240,7 +286,10 @@ document.addEventListener('DOMContentLoaded', () => {
   // Ao abrir: o endereço principal já vem escolhido e preenchido
   const inicial = opcoesSalvas.find((o) => o.checked);
   if (inicial && !$('cep').value) usarEndereco(inicial);
-  else atualizarGuardar();
+  else {
+    atualizarGuardar();
+    cotarFrete();
+  }
 
   // ======================================================
   // 4) IDENTIFICAÇÃO (só quando não há sessão)

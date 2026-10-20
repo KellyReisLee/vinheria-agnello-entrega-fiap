@@ -3,12 +3,12 @@
    Desktop: foto | informações · Telemóvel: tudo numa coluna + barra de compra fixa.
    Os cards de "Você também pode gostar" usam o visual de sections/_vitrini.css.
    ========================================================================== */
-@import url('./sections/_header.css?v=2026.10.20-2');
-@import url('./sections/_buttons.css?v=2026.10.20-2');
-@import url('./sections/_vitrini.css?v=2026.10.20-2');
-@import url('./sections/_footer-completed.css?v=2026.10.20-2');
-@import url('./sections/_carrinho.css?v=2026.10.20-2');
-@import url('./sections/_chat.css?v=2026.10.20-2');
+@import url('./sections/_header.css?v=2026.10.20-3');
+@import url('./sections/_buttons.css?v=2026.10.20-3');
+@import url('./sections/_vitrini.css?v=2026.10.20-3');
+@import url('./sections/_footer-completed.css?v=2026.10.20-3');
+@import url('./sections/_carrinho.css?v=2026.10.20-3');
+@import url('./sections/_chat.css?v=2026.10.20-3');
 
 .pdp-body {
   display: flex;
@@ -307,6 +307,100 @@
 .pdp-btn-secundario:hover {
   background: var(--primary-wine);
   color: #FFFFFF;
+}
+
+/* "Avise-me quando chegar" (vinho esgotado) — js/components/avise-me.js */
+.pdp-avise {
+  display: grid;
+  gap: 0.75rem;
+  padding: 1.1rem;
+  border: 1px dashed var(--primary-wine);
+  border-radius: 12px;
+  background: #FFFFFF;
+  scroll-margin-top: 6rem;
+}
+
+.pdp-avise-titulo {
+  margin: 0;
+  color: var(--text-muted);
+  font-size: 0.9rem;
+  line-height: 1.5;
+}
+
+.pdp-avise-titulo strong {
+  display: block;
+  color: var(--primary-wine);
+  font-size: 1rem;
+}
+
+.pdp-avise-linha {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.pdp-avise-linha[hidden] { display: none; }
+
+.pdp-avise-linha input {
+  flex: 1;
+  min-width: 0;
+  min-height: 48px;
+  padding: 0 0.9rem;
+  border: 1px solid var(--border-soft);
+  border-radius: 10px;
+  font: inherit;
+}
+
+.pdp-avise-linha input:focus-visible {
+  outline: 2px solid var(--primary-wine);
+  outline-offset: 1px;
+}
+
+.pdp-avise-linha .pdp-btn-secundario {
+  width: auto;
+  min-height: 48px;
+  padding: 0 1.1rem;
+  background: none;
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.pdp-avise-linha .pdp-btn-secundario:hover { background: var(--primary-wine); }
+.pdp-avise-linha .pdp-btn-secundario:disabled { opacity: 0.6; cursor: wait; }
+
+/* Armadilha para robôs: fica fora da tela */
+.pdp-avise-mel {
+  position: absolute;
+  left: -9999px;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+}
+
+.pdp-avise-status {
+  margin: 0;
+  font-size: 0.88rem;
+  line-height: 1.45;
+}
+
+.pdp-avise-status--ok { color: #2E6B3F; font-weight: 600; }
+.pdp-avise-status--erro { color: #A3242F; }
+
+@media (max-width: 420px) {
+  .pdp-avise-linha { flex-direction: column; }
+  .pdp-avise-linha .pdp-btn-secundario { width: 100%; }
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
 }
 
 .pdp-garantias {
