@@ -48,6 +48,8 @@ public class CheckoutController extends HttpServlet {
                 LOGGER.log(Level.WARNING, "Não foi possível carregar os endereços no checkout", e);
             }
         }
+        // Mercado Pago ligado? Muda o texto do botão e as instruções de pagamento
+        request.setAttribute("pagamentoOnline", com.agnello.pagamento.ConfigPagamento.ativo());
         request.getRequestDispatcher("/WEB-INF/views/checkout.jsp").forward(request, response);
     }
 

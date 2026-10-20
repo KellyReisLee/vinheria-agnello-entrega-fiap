@@ -27,6 +27,7 @@
   <%-- Estado da sessão para o checkout.js (sem scriptlets; c:out escapa o e-mail) --%>
   <div id="checkout-estado" hidden
        data-logado="${logado}"
+       data-pagamento-online="${pagamentoOnline}"
        data-email="<c:out value='${usuarioLogado.email}' />"></div>
 
   <%-- Header reduzido: no checkout tiramos a navegação para a pessoa não se distrair --%>
@@ -308,42 +309,28 @@
           </div>
 
           <div id="pix" class="pay-content" role="tabpanel" aria-labelledby="tab-pix">
-            <p class="pay-note pay-note--destaque"><strong>5% de desconto</strong> no pagamento via Pix à vista.
-              O código Pix aparece logo após confirmar o pedido.</p>
+            <p class="pay-note pay-note--destaque"><strong>5% de desconto</strong> no Pix à vista.
+              Ao concluir, abrimos o <strong>QR Code</strong> e o código "copia e cola" na página segura do Mercado Pago.
+              A aprovação costuma levar segundos.</p>
           </div>
 
           <div id="credit" class="pay-content" role="tabpanel" aria-labelledby="tab-credit" hidden>
-            <form class="checkout-form" id="form-cartao" novalidate>
-              <div class="field">
-                <label for="card-num">Número do cartão</label>
-                <input type="text" id="card-num" inputmode="numeric" autocomplete="cc-number"
-                       data-mascara="cartao" placeholder="0000 0000 0000 0000" maxlength="19" required>
-              </div>
-              <div class="grid-2">
-                <div class="field">
-                  <label for="card-exp">Validade</label>
-                  <input type="text" id="card-exp" inputmode="numeric" autocomplete="cc-exp"
-                         data-mascara="validade" placeholder="MM/AA" maxlength="5" required>
-                </div>
-                <div class="field">
-                  <label for="card-cvv">CVV</label>
-                  <input type="password" id="card-cvv" inputmode="numeric" autocomplete="cc-csc"
-                         placeholder="123" maxlength="4" required>
-                </div>
-              </div>
-              <div class="field">
-                <label for="card-name">Nome impresso no cartão</label>
-                <input type="text" id="card-name" autocomplete="cc-name" required>
-              </div>
-              <div class="field">
-                <label for="card-parcelas">Parcelas</label>
-                <select id="card-parcelas"></select>
-              </div>
-            </form>
+            <div class="field field--parcelas">
+              <label for="card-parcelas">Parcelas</label>
+              <select id="card-parcelas"></select>
+            </div>
+            <p class="pay-note">Você digita os dados do cartão na <strong>página segura do Mercado Pago</strong>.
+              A Vinheria Agnello nunca vê nem guarda o número do seu cartão.</p>
           </div>
 
           <div id="boleto" class="pay-content" role="tabpanel" aria-labelledby="tab-boleto" hidden>
-            <p class="pay-note">O boleto vence em <strong>2 dias úteis</strong>. O pedido é liberado após a compensação bancária.</p>
+            <p class="pay-note">O boleto é gerado pelo Mercado Pago e vence em <strong>2 dias úteis</strong>.
+              O pedido é liberado após a compensação bancária (até 2 dias úteis).</p>
+          </div>
+
+          <div class="pay-seguro">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3 4 6v6c0 5 3.4 8.6 8 9 4.6-.4 8-4 8-9V6z"></path><path d="m9 12 2 2 4-4"></path></svg>
+            <span>Pagamento processado pelo <strong>Mercado Pago</strong>, com criptografia e proteção contra fraude.</span>
           </div>
         </section>
       </div>
@@ -365,7 +352,7 @@
 
           <button type="button" class="checkout-btn-primary checkout-btn-block" id="btn-concluir">
             <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="11" width="16" height="10" rx="2"></rect><path d="M8 11V7a4 4 0 0 1 8 0v4"></path></svg>
-            <span>Concluir pedido</span>
+            <span>${pagamentoOnline ? 'Ir para o pagamento' : 'Concluir pedido'}</span>
           </button>
           <p class="terms-notice">Ao concluir, você concorda com os <a href="${ctx}/termos" target="_blank">Termos de Uso</a>
             e a <a href="${ctx}/privacidade" target="_blank">Política de Privacidade</a> da Vinheria Agnello

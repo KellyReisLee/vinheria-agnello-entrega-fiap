@@ -1,8 +1,8 @@
 /* ==========================================================================
    CHECKOUT (WEB-INF/views/checkout.jsp)
    ========================================================================== */
-@import url('./sections/_footer-completed.css?v=2026.10.19-1');
-@import url('./sections/_chat.css?v=2026.10.19-1');
+@import url('./sections/_footer-completed.css?v=2026.10.20-1');
+@import url('./sections/_chat.css?v=2026.10.20-1');
 
 .checkout-body {
   display: flex;
@@ -1140,4 +1140,74 @@
   .enderecos-salvos-lista {
     grid-template-columns: minmax(0, 1fr);
   }
+}
+
+/* ==========================================================================
+   PAGAMENTO COM O MERCADO PAGO
+   ========================================================================== */
+.field--parcelas {
+  max-width: 320px;
+  margin-bottom: 0.9rem;
+}
+
+.pay-seguro {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  margin-top: 1rem;
+  color: var(--text-muted);
+  font-size: 0.82rem;
+  line-height: 1.5;
+}
+
+.pay-seguro svg {
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+  fill: none;
+  stroke: #2E7D32;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+/* Ícone "a carregar" (aguardando o Mercado Pago) */
+.confirmacao-icone--espera {
+  position: relative;
+  background: #FFF6DE;
+}
+
+.confirmacao-icone--espera::after {
+  content: '';
+  width: 28px;
+  height: 28px;
+  border: 3px solid rgba(138, 97, 0, 0.25);
+  border-top-color: #8A6100;
+  border-radius: 50%;
+  animation: retornoGirar 0.9s linear infinite;
+}
+
+.confirmacao-icone--erro {
+  background: #FDF0F2;
+  color: #B3263E;
+}
+
+@keyframes retornoGirar {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .confirmacao-icone--espera::after {
+    animation: none;
+  }
+}
+
+.retorno .confirmacao-resumo {
+  text-align: left;
+}
+
+.confirmacao-acoes form {
+  display: contents;
 }

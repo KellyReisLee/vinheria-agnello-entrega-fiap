@@ -2,12 +2,12 @@
    PÁGINA INICIAL (WEB-INF/views/index.jsp)
    Cada secção da home tem o seu ficheiro em css/sections/.
    ========================================================================== */
-@import url('./sections/_header.css?v=2026.10.19-1');
-@import url('./sections/_buttons.css?v=2026.10.19-1');
-@import url('./sections/_hero.css?v=2026.10.19-1');
-@import url('./sections/_family.css?v=2026.10.19-1');
-@import url('./sections/_calculator.css?v=2026.10.19-1');
-@import url('./sections/_vitrini.css?v=2026.10.19-1');
-@import url('./sections/_footer-completed.css?v=2026.10.19-1');
-@import url('./sections/_carrinho.css?v=2026.10.19-1');
-@import url('./sections/_chat.css?v=2026.10.19-1');
+@import url('./sections/_header.css?v=2026.10.20-1');
+@import url('./sections/_buttons.css?v=2026.10.20-1');
+@import url('./sections/_hero.css?v=2026.10.20-1');
+@import url('./sections/_family.css?v=2026.10.20-1');
+@import url('./sections/_calculator.css?v=2026.10.20-1');
+@import url('./sections/_vitrini.css?v=2026.10.20-1');
+@import url('./sections/_footer-completed.css?v=2026.10.20-1');
+@import url('./sections/_carrinho.css?v=2026.10.20-1');
+@import url('./sections/_chat.css?v=2026.10.20-1');

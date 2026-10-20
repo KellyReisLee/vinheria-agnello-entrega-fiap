@@ -2,11 +2,11 @@
    ÁREA PESSOAL (WEB-INF/views/area-pessoal.jsp) + modais de exclusão de conta
    Substitui sections/_modal-deletar.css e sections/modal-delecao-sucesso.css.
    ========================================================================== */
-@import url('./sections/_header.css?v=2026.10.19-1');
-@import url('./sections/_buttons.css?v=2026.10.19-1');
-@import url('./sections/_footer-completed.css?v=2026.10.19-1');
-@import url('./sections/_carrinho.css?v=2026.10.19-1');
-@import url('./sections/_chat.css?v=2026.10.19-1');
+@import url('./sections/_header.css?v=2026.10.20-1');
+@import url('./sections/_buttons.css?v=2026.10.20-1');
+@import url('./sections/_footer-completed.css?v=2026.10.20-1');
+@import url('./sections/_carrinho.css?v=2026.10.20-1');
+@import url('./sections/_chat.css?v=2026.10.20-1');
 
 .conta-body {
   display: flex;
@@ -996,7 +996,7 @@
   border-top: 1px solid #F0EAE1;
 }
 
-.conta-pedido-acoes form {
+.conta-pedido-acoes .conta-form-cancelar {
   margin-left: auto;
 }
 

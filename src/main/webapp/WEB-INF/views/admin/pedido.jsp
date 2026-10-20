@@ -67,7 +67,7 @@
                 <li><strong>Pedido feito</strong> · <fmt:formatDate value="${p.dataCriacao}" pattern="dd/MM/yyyy HH:mm" /></li>
                 <c:forEach var="h" items="${p.historico}">
                   <li><strong><c:out value="${h.novo.descricao}" /></strong> · <fmt:formatDate value="${h.data}" pattern="dd/MM/yyyy HH:mm" />
-                    <c:choose><c:when test="${h.peloCliente}"><span class="adm-mudo">pelo cliente</span></c:when><c:when test="${not empty h.nomeAdministrador}"><span class="adm-mudo">por <c:out value="${h.nomeAdministrador}" /></span></c:when></c:choose></li>
+                    <c:choose><c:when test="${h.peloGateway}"><span class="adm-mudo">pelo Mercado Pago</span></c:when><c:when test="${h.peloCliente}"><span class="adm-mudo">pelo cliente</span></c:when><c:when test="${not empty h.nomeAdministrador}"><span class="adm-mudo">por <c:out value="${h.nomeAdministrador}" /></span></c:when></c:choose></li>
                 </c:forEach>
               </ol>
             </section>
@@ -115,6 +115,21 @@
               <h2>Pagamento e entrega</h2>
               <dl class="adm-dados">
                 <div><dt>Pagamento</dt><dd><c:out value="${p.formaPagamento.descricao}" /><c:if test="${p.parcelas gt 1}"> em ${p.parcelas}x de <fmt:formatNumber value="${p.valorParcela}" type="currency" currencySymbol="R$" /></c:if></dd></div>
+                <c:if test="${not empty p.pagamentoId}">
+                  <%-- Número para procurar o pagamento no painel do Mercado Pago (devoluções, contestações) --%>
+                  <div><dt>Mercado Pago</dt><dd>Nº <c:out value="${p.pagamentoId}" /> ·
+                    <c:choose>
+                      <c:when test="${p.pagamentoStatus eq 'approved'}">aprovado</c:when>
+                      <c:when test="${p.pagamentoStatus eq 'pending' or p.pagamentoStatus eq 'in_process'}">pendente</c:when>
+                      <c:when test="${p.pagamentoStatus eq 'rejected'}">recusado</c:when>
+                      <c:when test="${p.pagamentoStatus eq 'refunded'}"><strong class="adm-alerta-texto">devolvido</strong></c:when>
+                      <c:when test="${p.pagamentoStatus eq 'charged_back'}"><strong class="adm-alerta-texto">contestado pelo cliente</strong></c:when>
+                      <c:when test="${p.pagamentoStatus eq 'valor_divergente'}"><strong class="adm-alerta-texto">valor diferente do pedido — confira</strong></c:when>
+                      <c:otherwise><c:out value="${p.pagamentoStatus}" /></c:otherwise>
+                    </c:choose>
+                    <c:if test="${not empty p.dataPagamento}"><br><span class="adm-mudo">Pago em <fmt:formatDate value="${p.dataPagamento}" pattern="dd/MM/yyyy HH:mm" /></span></c:if>
+                  </dd></div>
+                </c:if>
                 <div><dt>Entrega</dt><dd><c:out value="${p.tipoEntrega.descricao}" /></dd></div>
                 <c:if test="${not empty p.endereco}"><div><dt>Endereço</dt><dd><c:out value="${p.endereco}" /></dd></div></c:if>
               </dl>

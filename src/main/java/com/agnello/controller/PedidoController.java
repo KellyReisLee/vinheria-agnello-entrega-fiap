@@ -13,12 +13,15 @@ import com.agnello.model.ItemPedido;
 import com.agnello.model.Pedido;
 import com.agnello.model.Usuario;
 import com.agnello.model.TipoEntrega;
+import com.agnello.pagamento.ErroGateway;
 import com.agnello.service.EnderecoService;
 import com.agnello.service.NovoPedido;
+import com.agnello.service.PagamentoService;
 import com.agnello.service.PedidoService;
 import com.agnello.util.ProtecaoCsrf;
 import com.agnello.util.RespostaJson;
 import com.agnello.util.SessaoCliente;
+import com.agnello.util.UrlAplicacao;
 
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
@@ -29,7 +32,7 @@ import jakarta.servlet.http.HttpServletResponse;
 /**
  * Recebe o pedido do checkout (POST /pedidos, enviado pelo checkout.js) e
  * responde em JSON:
- *   sucesso  → {"sucesso":true, "pedido":{numero, total, itens…}}
+ *   sucesso  → {"sucesso":true, "pedido":{numero, total, itens…}, "pagamentoUrl":"https://…mercadopago…"}
  *   problema → {"sucesso":false, "mensagem":"texto para o cliente"}
  *
  * Parâmetros recebidos (formulário):
@@ -40,7 +43,8 @@ import jakarta.servlet.http.HttpServletResponse;
  *   cep, logradouro, numero, complemento, bairro, cidade
  *
  * Os dados do cartão NÃO são enviados: o servidor nunca deve receber o número
- * nem o CVV (norma PCI-DSS). Isso é trabalho do gateway de pagamento.
+ * nem o CVV (norma PCI-DSS). O cliente paga na página segura do Mercado Pago,
+ * para onde o checkout.js o leva usando o "pagamentoUrl" da resposta.
  */
 @WebServlet(name = "PedidoController", urlPatterns = {"/pedidos"})
 public class PedidoController extends HttpServlet {
@@ -50,6 +54,7 @@ public class PedidoController extends HttpServlet {
 
     private final PedidoService pedidoService = new PedidoService();
     private final EnderecoService enderecoService = new EnderecoService();
+    private final PagamentoService pagamentoService = new PagamentoService();
 
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
@@ -78,8 +83,21 @@ public class PedidoController extends HttpServlet {
             if (pedido.getTipoEntrega() == TipoEntrega.ENTREGA && request.getParameter("salvarEndereco") != null) {
                 enderecoService.guardarSeNovo(cliente, ContaController.lerEndereco(request));
             }
+
+            // Página de pagamento do Mercado Pago. Se falhar, o pedido continua gravado
+            // e o cliente pode pagar depois pela área pessoal ("Pagar agora").
+            String pagamentoUrl = null;
+            if (pagamentoService.isAtivo()) {
+                try {
+                    pagamentoUrl = pagamentoService.iniciar(cliente, pedido, UrlAplicacao.base(request));
+                } catch (ErroGateway | RegraNegocioException e) {
+                    LOGGER.log(Level.SEVERE, "Pedido " + pedido.getNumero()
+                            + " gravado, mas a página de pagamento não foi criada", e);
+                }
+            }
             response.setStatus(HttpServletResponse.SC_CREATED);
-            RespostaJson.enviar(response, "sucesso", true, "pedido", paraMapa(pedido));
+            RespostaJson.enviar(response, "sucesso", true, "pedido", paraMapa(pedido),
+                    "pagamentoOnline", pagamentoService.isAtivo(), "pagamentoUrl", pagamentoUrl);
 
         } catch (RegraNegocioException e) {
             response.setStatus(422); // "Unprocessable Content": os dados chegaram, mas não são aceitáveis
@@ -142,6 +160,7 @@ public class PedidoController extends HttpServlet {
             itens.add(m);
         }
         Map<String, Object> m = new LinkedHashMap<>();
+        m.put("id", pedido.getId());
         m.put("numero", pedido.getNumero());
         m.put("status", pedido.getStatus().getDescricao());
         m.put("pagamento", pedido.getFormaPagamento().getCodigo());

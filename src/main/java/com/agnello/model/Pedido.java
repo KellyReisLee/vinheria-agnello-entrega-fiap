@@ -36,6 +36,10 @@ public class Pedido implements Serializable {
     private String nomeCliente;
     private String emailCliente;
     private List<RegistroStatus> historico = new ArrayList<>();
+    /** Pagamento no Mercado Pago: número do pagamento, situação lá e data da aprovação. */
+    private String pagamentoId;
+    private String pagamentoStatus;
+    private OffsetDateTime pagoEm;
 
     /** Status para os quais o painel pode mudar este pedido. */
     public List<StatusPedido> getProximosStatus() {
@@ -111,4 +115,18 @@ public class Pedido implements Serializable {
 
     public List<ItemPedido> getItens() { return itens; }
     public void setItens(List<ItemPedido> itens) { this.itens = itens; }
+
+    public String getPagamentoId() { return pagamentoId; }
+    public void setPagamentoId(String pagamentoId) { this.pagamentoId = pagamentoId; }
+
+    public String getPagamentoStatus() { return pagamentoStatus; }
+    public void setPagamentoStatus(String pagamentoStatus) { this.pagamentoStatus = pagamentoStatus; }
+
+    public OffsetDateTime getPagoEm() { return pagoEm; }
+    public void setPagoEm(OffsetDateTime pagoEm) { this.pagoEm = pagoEm; }
+
+    /** Data do pagamento como java.util.Date (para o fmt:formatDate do JSP). */
+    public Date getDataPagamento() {
+        return pagoEm == null ? null : Date.from(pagoEm.toInstant());
+    }
 }
