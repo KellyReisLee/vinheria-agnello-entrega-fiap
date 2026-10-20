@@ -3,11 +3,11 @@
    Nossa História, Contato, Ajuda, Entregas e Trocas, Privacidade e Termos.
    Todas partilham a faixa de título (.inst-hero) e o mesmo ritmo de secções.
    ========================================================================== */
-@import url('./sections/_header.css?v=2026.10.20-1');
-@import url('./sections/_buttons.css?v=2026.10.20-1');
-@import url('./sections/_footer-completed.css?v=2026.10.20-1');
-@import url('./sections/_carrinho.css?v=2026.10.20-1');
-@import url('./sections/_chat.css?v=2026.10.20-1');
+@import url('./sections/_header.css?v=2026.10.20-2');
+@import url('./sections/_buttons.css?v=2026.10.20-2');
+@import url('./sections/_footer-completed.css?v=2026.10.20-2');
+@import url('./sections/_carrinho.css?v=2026.10.20-2');
+@import url('./sections/_chat.css?v=2026.10.20-2');
 
 .inst-body {
   display: flex;

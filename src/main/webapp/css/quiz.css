@@ -2,11 +2,11 @@
    SOMMELIER VIRTUAL — QUIZ (WEB-INF/views/quiz.jsp)
    Um só visual em todos os ecrãs: cartão claro sobre o fundo vinho.
    ========================================================================== */
-@import url('./sections/_header.css?v=2026.10.20-1');
-@import url('./sections/_buttons.css?v=2026.10.20-1');
-@import url('./sections/_footer-completed.css?v=2026.10.20-1');
-@import url('./sections/_carrinho.css?v=2026.10.20-1');
-@import url('./sections/_chat.css?v=2026.10.20-1');
+@import url('./sections/_header.css?v=2026.10.20-2');
+@import url('./sections/_buttons.css?v=2026.10.20-2');
+@import url('./sections/_footer-completed.css?v=2026.10.20-2');
+@import url('./sections/_carrinho.css?v=2026.10.20-2');
+@import url('./sections/_chat.css?v=2026.10.20-2');
 
 .quiz-page-body {
   display: flex;

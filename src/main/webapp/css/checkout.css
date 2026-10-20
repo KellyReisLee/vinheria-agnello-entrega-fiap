@@ -1,8 +1,8 @@
 /* ==========================================================================
    CHECKOUT (WEB-INF/views/checkout.jsp)
    ========================================================================== */
-@import url('./sections/_footer-completed.css?v=2026.10.20-1');
-@import url('./sections/_chat.css?v=2026.10.20-1');
+@import url('./sections/_footer-completed.css?v=2026.10.20-2');
+@import url('./sections/_chat.css?v=2026.10.20-2');
 
 .checkout-body {
   display: flex;
