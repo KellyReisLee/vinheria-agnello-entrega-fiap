@@ -42,7 +42,7 @@
         </details>
 
         <article class="prose">
-          <p class="doc-atualizado">Última atualização: 14 de outubro de 2026</p>
+          <p class="doc-atualizado">Última atualização: 20 de outubro de 2026</p>
 
           <h2 id="prazos">Prazos de entrega</h2>
           <p>O prazo começa a contar depois da confirmação do pagamento. Pagamentos por Pix e cartão
@@ -54,13 +54,17 @@
                 <tr><th scope="col">Região</th><th scope="col">Prazo</th><th scope="col">Frete</th></tr>
               </thead>
               <tbody>
-                <tr><td>Cidade de São Paulo</td><td>até 24 horas</td><td>R$ 25,00</td></tr>
-                <tr><td>Grande São Paulo</td><td>até 48 horas</td><td>R$ 25,00</td></tr>
-                <tr><td>Interior de São Paulo</td><td>2 a 4 dias úteis</td><td>R$ 25,00</td></tr>
-                <tr><td>Demais estados</td><td>3 a 8 dias úteis</td><td>R$ 25,00</td></tr>
+                <%-- Mesmos valores do FreteService.java (o servidor calcula pelo 1.º dígito do CEP) --%>
+                <tr><td>Grande São Paulo <small>(CEP 0…)</small></td><td>até 2 dias úteis</td><td>R$ 25,00</td></tr>
+                <tr><td>Interior e litoral de São Paulo <small>(CEP 1…)</small></td><td>2 a 3 dias úteis</td><td>R$ 35,00</td></tr>
+                <tr><td>Rio de Janeiro, Espírito Santo e Minas Gerais <small>(CEP 2… e 3…)</small></td><td>3 a 5 dias úteis</td><td>R$ 45,00</td></tr>
+                <tr><td>Sul — PR, SC e RS <small>(CEP 8… e 9…)</small></td><td>4 a 6 dias úteis</td><td>R$ 49,00</td></tr>
+                <tr><td>Nordeste (BA, SE, PE, AL, PB, RN) e Centro-Oeste <small>(CEP 4…, 5… e 7…)</small></td><td>5 a 8 dias úteis</td><td>R$ 59,00</td></tr>
+                <tr><td>Norte, Ceará, Piauí e Maranhão <small>(CEP 6…)</small></td><td>6 a 10 dias úteis</td><td>R$ 69,00</td></tr>
               </tbody>
             </table>
           </div>
+          <p><strong>Frete grátis para todo o Brasil</strong> em pedidos a partir de <strong>R$ 500,00</strong> em vinhos.</p>
 
           <h2 id="formas-entrega">Formas de entrega</h2>
           <h3>Frete Térmico Agnello</h3>

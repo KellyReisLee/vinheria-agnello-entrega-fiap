@@ -78,6 +78,11 @@
                         <input type="number" id="estoque-${p.id}" name="estoque" value="${p.estoque}" min="0" max="100000" inputmode="numeric">
                         <button type="submit" class="adm-btn adm-btn--pequeno">Salvar</button>
                       </form>
+                      <%-- Clientes que pediram "Avise-me quando chegar" (recebem e-mail quando o estoque passar de 0) --%>
+                      <c:set var="aEspera" value="${avisosPendentes[p.id]}" />
+                      <c:if test="${aEspera gt 0}">
+                        <span class="adm-aviso-espera" title="Recebem um e-mail automático quando o estoque voltar">${aEspera} ${aEspera eq 1 ? 'cliente à espera' : 'clientes à espera'}</span>
+                      </c:if>
                     </td>
                     <td><span class="adm-situacao ${p.ativo ? 'adm-situacao--ativo' : ''}">${p.ativo ? 'À venda' : 'Desativado'}</span></td>
                     <td class="adm-acoes">

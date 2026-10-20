@@ -68,6 +68,7 @@ public class AdminProdutosController extends HttpServlet {
             request.setAttribute("busca", request.getParameter("busca"));
             request.setAttribute("mostrar", mostrar == null ? "todos" : mostrar);
             request.setAttribute("limiteEstoqueBaixo", ProdutoAdminService.LIMITE_ESTOQUE_BAIXO);
+            request.setAttribute("avisosPendentes", service.avisosPendentes());
             request.getRequestDispatcher("/WEB-INF/views/admin/produtos.jsp").forward(request, response);
         }
     }
@@ -152,8 +153,10 @@ public class AdminProdutosController extends HttpServlet {
     private void alterarEstoque(HttpServletRequest request, HttpServletResponse response) throws IOException {
         int id = Parametros.inteiro(request.getParameter("id"), -1);
         try {
-            service.definirEstoque(SessaoAdmin.atual(request), id, request.getParameter("estoque"));
-            MensagemFlash.sucesso(request, "Estoque atualizado.");
+            int avisados = service.definirEstoque(SessaoAdmin.atual(request), id, request.getParameter("estoque"));
+            MensagemFlash.sucesso(request, avisados == 0 ? "Estoque atualizado."
+                    : "Estoque atualizado. " + avisados + (avisados == 1 ? " cliente foi avisado" : " clientes foram avisados")
+                            + " por e-mail de que o vinho voltou.");
         } catch (RegraNegocioException e) {
             MensagemFlash.erro(request, e.getMessage());
         }

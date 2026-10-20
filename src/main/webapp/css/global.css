@@ -6,7 +6,7 @@
 @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400..900;1,400..900&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap');
 
 /* Confirmação de idade (18+), usada em todas as páginas com header */
-@import url('./sections/_verificacao-idade.css?v=2026.10.20-2');
+@import url('./sections/_verificacao-idade.css?v=2026.10.20-3');
 
 *,
 *::before,

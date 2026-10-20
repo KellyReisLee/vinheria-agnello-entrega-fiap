@@ -87,6 +87,11 @@
                   <td>Responder às suas dúvidas e pedidos</td>
                 </tr>
                 <tr>
+                  <td>E-mail do "Avise-me quando chegar"</td>
+                  <td>Na página de um vinho esgotado</td>
+                  <td>Mandar um único e-mail quando o vinho voltar ao estoque. Depois do aviso, o pedido é apagado em até 90 dias</td>
+                </tr>
+                <tr>
                   <td>Respostas do Sommelier Virtual</td>
                   <td>No quiz</td>
                   <td>Indicar vinhos de acordo com o seu gosto</td>

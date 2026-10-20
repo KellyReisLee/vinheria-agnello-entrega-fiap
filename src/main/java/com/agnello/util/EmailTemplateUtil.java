@@ -377,6 +377,38 @@ public class EmailTemplateUtil {
         return html.toString();
     }
 
+    /** "Avise-me quando chegar": o vinho voltou ao estoque. */
+    public static String getCorpoVoltouAoEstoque(com.agnello.model.Produto p) {
+        String site = System.getenv("AGNELLO_URL_BASE");
+        String base = site == null || site.isBlank() ? null : site.trim().replaceAll("/+$", "");
+        StringBuilder html = new StringBuilder(CABECALHO);
+        html.append("<span style=\"display: inline-block; background: #e6f4e6; color: #2e6b30; font-size: 11px; font-weight: bold; letter-spacing: 1px; text-transform: uppercase; padding: 5px 10px; border-radius: 999px; margin: 0 0 12px;\">De volta à adega</span>")
+            .append("<h2 style=\"color: #4A1525; font-size: 23px; margin: 0 0 8px; font-family: Georgia, serif;\">")
+            .append(escapar(p.getNome())).append("</h2>");
+        if (p.getOrigem() != null || p.getTipo() != null) {
+            html.append("<p style=\"font-size: 12px; letter-spacing: 1px; text-transform: uppercase; color: #999999; margin: 0 0 18px;\">")
+                .append(escapar(p.getOrigem() == null ? "" : p.getOrigem()))
+                .append(p.getOrigem() != null && p.getTipo() != null ? " &middot; " : "")
+                .append(escapar(p.getTipo() == null ? "" : p.getTipo())).append("</p>");
+        }
+        html.append("<p style=\"font-size: 15px; line-height: 1.7; color: #555555; margin: 0 0 18px;\">")
+            .append("Você pediu para ser avisado quando este vinho voltasse. A boa notícia: ele já está disponível na Vinheria Agnello")
+            .append(p.getEstoque() <= 5 ? ", mas chegaram <strong>poucas garrafas</strong>." : ".")
+            .append("</p>")
+            .append("<p style=\"font-family: Georgia, serif; font-size: 26px; color: #4A1525; margin: 0 0 22px;\">")
+            .append(reais(BigDecimal.valueOf(p.getPreco()).setScale(2, java.math.RoundingMode.HALF_UP))).append("</p>");
+        if (base != null && base.startsWith("https://")) {
+            html.append("<table role=\"presentation\" cellpadding=\"0\" cellspacing=\"0\" style=\"margin: 0 0 22px;\"><tr><td style=\"background: #4A1525; border-radius: 6px;\">")
+                .append("<a href=\"").append(escapar(base)).append("/produto?id=").append(p.getId())
+                .append("\" style=\"display: inline-block; padding: 13px 26px; color: #ffffff; text-decoration: none; font-weight: bold; font-size: 14px;\">Ver o vinho e comprar</a>")
+                .append("</td></tr></table>");
+        }
+        html.append("<p style=\"font-size: 12px; line-height: 1.6; color: #999999; margin: 0;\">Este é um aviso único: não vamos enviar mais e-mails sobre este vinho. ")
+            .append("O seu e-mail é apagado da lista de avisos em até 90 dias.</p>");
+        html.append(RODAPE);
+        return html.toString();
+    }
+
     private static String reais(BigDecimal valor) {
         return NumberFormat.getCurrencyInstance(Locale.forLanguageTag("pt-BR")).format(valor).replace('\u00a0', ' ');
     }

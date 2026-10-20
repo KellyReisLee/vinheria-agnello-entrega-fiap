@@ -1,8 +1,8 @@
 /* ==========================================================================
    CHECKOUT (WEB-INF/views/checkout.jsp)
    ========================================================================== */
-@import url('./sections/_footer-completed.css?v=2026.10.20-2');
-@import url('./sections/_chat.css?v=2026.10.20-2');
+@import url('./sections/_footer-completed.css?v=2026.10.20-3');
+@import url('./sections/_chat.css?v=2026.10.20-3');
 
 .checkout-body {
   display: flex;
@@ -1210,4 +1210,28 @@
 
 .confirmacao-acoes form {
   display: contents;
+}
+
+/* Quanto falta para o frete grátis (resumo do pedido) */
+.frete-gratis-aviso {
+  margin: 0 0 1rem;
+  padding: 0.65rem 0.85rem;
+  border: 1px dashed rgba(212, 175, 55, 0.6);
+  border-radius: 8px;
+  background: #FFFBEF;
+  color: #6F4E00;
+  font-size: 0.84rem;
+  line-height: 1.5;
+}
+
+.frete-gratis-aviso[hidden] {
+  display: none;
+}
+
+.frete-gratis-aviso--ok {
+  border-style: solid;
+  border-color: #BFE0C0;
+  background: #EEF8EE;
+  color: #1F5422;
+  font-weight: 600;
 }

@@ -30,15 +30,32 @@ public class ProdutoAdminService {
 
     private final ProdutoDAO produtoDAO;
     private final ImagemDAO imagemDAO;
+    /** "Avise-me quando chegar" (null nos testes que não o usam). */
+    private final AvisoEstoqueService avisos;
 
     public ProdutoAdminService() {
-        this(new ProdutoDAO(), new ImagemDAO());
+        this(new ProdutoDAO(), new ImagemDAO(), new AvisoEstoqueService());
     }
 
     /** Construtor para testes. */
     public ProdutoAdminService(ProdutoDAO produtoDAO, ImagemDAO imagemDAO) {
+        this(produtoDAO, imagemDAO, null);
+    }
+
+    public ProdutoAdminService(ProdutoDAO produtoDAO, ImagemDAO imagemDAO, AvisoEstoqueService avisos) {
         this.produtoDAO = produtoDAO;
         this.imagemDAO = imagemDAO;
+        this.avisos = avisos;
+    }
+
+    /** Avisa quem pediu "Avise-me" se o vinho tem estoque. @return quantas pessoas foram avisadas */
+    private int avisarClientes(int produtoId) {
+        return avisos == null ? 0 : avisos.avisarSeDisponivel(produtoId);
+    }
+
+    /** Pessoas à espera de cada vinho (para a lista do painel). */
+    public java.util.Map<Integer, Integer> avisosPendentes() {
+        return avisos == null ? java.util.Map.of() : avisos.pendentesPorProduto();
     }
 
     public List<Produto> listar(String busca, Boolean ativos) {
@@ -81,6 +98,7 @@ public class ProdutoAdminService {
             throw new RegraNegocioException("Este vinho não existe mais.");
         }
         LOGGER.log(Level.INFO, "Produto id={0} alterado pelo administrador id={1}", new Object[] {p.getId(), admin.getId()});
+        avisarClientes(p.getId());
         return p.getId();
     }
 
@@ -90,9 +108,13 @@ public class ProdutoAdminService {
         }
         LOGGER.log(Level.INFO, "Produto id={0} {1} pelo administrador id={2}",
                 new Object[] {id, ativo ? "ativado" : "desativado", admin.getId()});
+        if (ativo) {
+            avisarClientes(id);
+        }
     }
 
-    public void definirEstoque(Administrador admin, int id, String estoqueTexto) throws RegraNegocioException {
+    /** @return quantos clientes foram avisados ("Avise-me") por o vinho ter voltado */
+    public int definirEstoque(Administrador admin, int id, String estoqueTexto) throws RegraNegocioException {
         int estoque = inteiro(estoqueTexto, "estoque");
         validarEstoque(estoque);
         if (!produtoDAO.definirEstoque(id, estoque)) {
@@ -100,6 +122,7 @@ public class ProdutoAdminService {
         }
         LOGGER.log(Level.INFO, "Estoque do produto id={0} = {1} (administrador id={2})",
                 new Object[] {id, estoque, admin.getId()});
+        return avisarClientes(id);
     }
 
     // ------------------------------------------------------------------ validação
