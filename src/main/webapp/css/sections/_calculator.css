@@ -512,6 +512,31 @@
   display: none;
 }
 
+/* "Pote de mel" contra robôs: fora da tela, mas não display:none (alguns robôs ignoram esses) */
+.calc-honeypot {
+  position: absolute;
+  left: -9999px;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+}
+
+.calc-form-nota {
+  margin: 0;
+  color: rgba(255, 255, 255, 0.55);
+  font-size: 0.75rem;
+  line-height: 1.5;
+}
+
+.calc-form-nota a {
+  color: var(--accent-gold);
+}
+
+.calc-btn-primary:disabled {
+  opacity: 0.6;
+  cursor: progress;
+}
+
 /* Confirmação */
 .calc-success {
   padding: 1.5rem 0 0.5rem;

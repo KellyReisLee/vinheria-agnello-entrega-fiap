@@ -265,6 +265,118 @@ public class EmailTemplateUtil {
                 + RODAPE;
     }
 
+    // ===================================================================== calculadora de eventos
+
+    /** Quadro com as garrafas por tipo (usado nos dois e-mails de orçamento). */
+    private static String quadroGarrafas(com.agnello.model.OrcamentoEvento o) {
+        return "<table role=\"presentation\" width=\"100%\" cellpadding=\"0\" cellspacing=\"0\" style=\"margin: 0 0 24px; border-collapse: collapse;\">"
+                + "<tr><td colspan=\"3\" style=\"background: #4A1525; border-radius: 8px 8px 0 0; padding: 18px 20px; text-align: center;\">"
+                + "<span style=\"display: block; font-size: 11px; letter-spacing: 2px; text-transform: uppercase; color: #c5a059; font-weight: bold;\">Recomendação do sommelier</span>"
+                + "<span style=\"display: block; font-family: Georgia, serif; font-size: 34px; color: #ffffff; margin-top: 6px;\">"
+                + o.getGarrafas() + " <span style=\"font-size: 16px;\">" + (o.getGarrafas() == 1 ? "garrafa" : "garrafas") + "</span></span>"
+                + "<span style=\"display: block; font-size: 12px; color: #e8d9c0; margin-top: 4px;\">de 750 ml</span></td></tr>"
+                + "<tr>"
+                + celulaGarrafa("Tintos", o.getTintos(), "#7A1F36")
+                + celulaGarrafa("Brancos", o.getBrancos(), "#B08A2E")
+                + celulaGarrafa("Espumantes", o.getEspumantes(), "#4F6B4A")
+                + "</tr></table>";
+    }
+
+    private static String celulaGarrafa(String rotulo, int quantidade, String cor) {
+        return "<td width=\"33%\" style=\"background: #fdfbf7; border: 1px solid #efe7da; padding: 14px 8px; text-align: center;\">"
+                + "<span style=\"display: block; font-family: Georgia, serif; font-size: 24px; color: " + cor + "; font-weight: bold;\">" + quantidade + "</span>"
+                + "<span style=\"display: block; font-size: 12px; color: #777777; text-transform: uppercase; letter-spacing: 1px;\">" + rotulo + "</span></td>";
+    }
+
+    private static String linhaDado(String rotulo, String valorHtml) {
+        return "<tr><td style=\"padding: 9px 0; width: 38%; color: #888888; font-size: 13px; border-bottom: 1px solid #f0ebe3; vertical-align: top;\">"
+                + rotulo + "</td><td style=\"padding: 9px 0; color: #333333; font-size: 14px; border-bottom: 1px solid #f0ebe3;\">"
+                + valorHtml + "</td></tr>";
+    }
+
+    private static String descricaoEvento(com.agnello.model.OrcamentoEvento o) {
+        return escapar(o.getEstilo().getNome()) + " &middot; " + o.getConvidados()
+                + (o.getConvidados() == 1 ? " convidado" : " convidados") + " &middot; " + o.getDuracaoHoras()
+                + (o.getDuracaoHoras() == 1 ? " hora" : " horas");
+    }
+
+    /** E-mail interno: novo pedido de orçamento da Calculadora de Eventos. */
+    public static String getCorpoOrcamentoLoja(com.agnello.model.OrcamentoEvento o, int numero) {
+        StringBuilder html = new StringBuilder(CABECALHO);
+        html.append("<span style=\"display: inline-block; background: #fdf3dc; color: #8a6100; font-size: 11px; font-weight: bold; letter-spacing: 1px; text-transform: uppercase; padding: 5px 10px; border-radius: 999px; margin: 0 0 12px;\">Orçamento #")
+            .append(numero).append("</span>")
+            .append("<h2 style=\"color: #4A1525; font-size: 22px; margin: 0 0 6px; font-family: Georgia, serif;\">Novo pedido de orçamento</h2>")
+            .append("<p style=\"font-size: 15px; line-height: 1.6; color: #555555; margin: 0 0 22px;\">Enviado pela Calculadora de Eventos do site. ")
+            .append("<strong>Responda a este e-mail</strong> para falar direto com o cliente.</p>");
+
+        html.append("<h3 style=\"font-size: 13px; letter-spacing: 1px; text-transform: uppercase; color: #c5a059; margin: 0 0 8px;\">Cliente</h3>")
+            .append("<table role=\"presentation\" width=\"100%\" cellpadding=\"0\" cellspacing=\"0\" style=\"border-collapse: collapse; margin: 0 0 24px;\">")
+            .append(linhaDado("Nome", "<strong>" + escapar(o.getNome()) + "</strong>"))
+            .append(linhaDado("E-mail", "<a href=\"mailto:" + escapar(o.getEmail()) + "\" style=\"color: #4A1525;\">"
+                    + escapar(o.getEmail()) + "</a>"));
+        if (o.getTelefone() != null) {
+            html.append(linhaDado("WhatsApp / Telefone", "<a href=\"https://wa.me/55" + o.getTelefone()
+                    + "\" style=\"color: #4A1525;\">" + com.agnello.service.OrcamentoService.formatarTelefone(o.getTelefone())
+                    + "</a>"));
+        }
+        if (o.getOrcamentoEstimado() != null) {
+            html.append(linhaDado("Orçamento estimado", escapar(o.getOrcamentoEstimado())));
+        }
+        html.append(linhaDado("Conta no site", o.getClienteId() == null ? "Não (visitante)" : "Sim (cliente #" + o.getClienteId() + ")"))
+            .append("</table>");
+
+        html.append("<h3 style=\"font-size: 13px; letter-spacing: 1px; text-transform: uppercase; color: #c5a059; margin: 0 0 8px;\">Evento</h3>")
+            .append("<p style=\"font-size: 15px; color: #333333; margin: 0 0 6px;\"><strong>").append(descricaoEvento(o)).append("</strong></p>")
+            .append("<p style=\"font-size: 13px; line-height: 1.6; color: #777777; margin: 0 0 16px;\">")
+            .append(escapar(o.getEstilo().getDescricao())).append("</p>")
+            .append(quadroGarrafas(o));
+
+        if (o.getObservacoes() != null) {
+            html.append("<h3 style=\"font-size: 13px; letter-spacing: 1px; text-transform: uppercase; color: #c5a059; margin: 0 0 8px;\">Detalhes do cliente</h3>")
+                .append("<p style=\"font-size: 14px; line-height: 1.7; color: #333333; white-space: pre-wrap; background: #fdfbf7; padding: 14px 16px; border-left: 4px solid #c5a059; margin: 0 0 24px;\">")
+                .append(escapar(o.getObservacoes())).append("</p>");
+        }
+        html.append("<table role=\"presentation\" cellpadding=\"0\" cellspacing=\"0\" style=\"margin: 0 auto;\"><tr><td style=\"background: #4A1525; border-radius: 6px;\">")
+            .append("<a href=\"mailto:").append(escapar(o.getEmail())).append("?subject=")
+            .append(java.net.URLEncoder.encode("Orçamento do seu evento - Vinheria Agnello", java.nio.charset.StandardCharsets.UTF_8).replace("+", "%20"))
+            .append("\" style=\"display: inline-block; padding: 13px 26px; color: #ffffff; text-decoration: none; font-weight: bold; font-size: 14px;\">Responder ao cliente</a>")
+            .append("</td></tr></table>")
+            .append("<p style=\"font-size: 12px; color: #999999; text-align: center; margin: 14px 0 0;\">O pedido também está no painel, em <strong>Mensagens</strong>.</p>");
+        html.append(RODAPE);
+        return html.toString();
+    }
+
+    /** E-mail ao cliente: confirmação do pedido de orçamento. */
+    public static String getCorpoOrcamentoCliente(com.agnello.model.OrcamentoEvento o, int numero) {
+        String site = System.getenv("AGNELLO_URL_BASE");
+        StringBuilder html = new StringBuilder(CABECALHO);
+        html.append("<h2 style=\"color: #4A1525; font-size: 22px; margin: 0 0 8px; font-family: Georgia, serif;\">Recebemos o seu pedido de orçamento!</h2>")
+            .append("<p style=\"font-size: 15px; line-height: 1.7; color: #555555; margin: 0 0 22px;\">Olá, ")
+            .append(escapar(o.getNome()))
+            .append(". Obrigado por planejar o seu evento com a Vinheria Agnello. O Sr. Giulio e a nossa equipe de sommeliers ")
+            .append("já receberam os detalhes e respondem em até <strong>1 dia útil</strong> com uma seleção de rótulos e o orçamento.</p>")
+            .append("<p style=\"font-size: 13px; letter-spacing: 1px; text-transform: uppercase; color: #c5a059; font-weight: bold; margin: 0 0 6px;\">O seu evento</p>")
+            .append("<p style=\"font-size: 16px; color: #333333; margin: 0 0 18px;\"><strong>").append(descricaoEvento(o)).append("</strong></p>")
+            .append(quadroGarrafas(o))
+            .append("<p style=\"font-size: 14px; line-height: 1.7; color: #4A1525; background: #fdfbf7; border-left: 4px solid #c5a059; padding: 12px 16px; margin: 0 0 22px;\">")
+            .append(escapar(o.getEstilo().getDescricao()))
+            .append(" A conta considera o consumo médio por convidado e por hora; a nossa equipe ajusta a seleção ao seu cardápio.</p>");
+        if (o.getObservacoes() != null) {
+            html.append("<p style=\"font-size: 13px; color: #888888; margin: 0 0 6px;\">O que você nos contou:</p>")
+                .append("<p style=\"font-size: 14px; line-height: 1.7; color: #555555; white-space: pre-wrap; margin: 0 0 22px;\">")
+                .append(escapar(o.getObservacoes())).append("</p>");
+        }
+        if (site != null && site.startsWith("https://")) {
+            html.append("<table role=\"presentation\" cellpadding=\"0\" cellspacing=\"0\" style=\"margin: 0 auto 18px;\"><tr><td style=\"background: #4A1525; border-radius: 6px;\">")
+                .append("<a href=\"").append(escapar(site.replaceAll("/+$", ""))).append("/catalogo\" style=\"display: inline-block; padding: 13px 26px; color: #ffffff; text-decoration: none; font-weight: bold; font-size: 14px;\">Conhecer a adega</a>")
+                .append("</td></tr></table>");
+        }
+        html.append("<p style=\"font-size: 12px; line-height: 1.6; color: #999999; margin: 0;\">Pedido de orçamento nº ")
+            .append(numero).append(". Quer acrescentar alguma coisa? Basta responder a este e-mail.</p>");
+        html.append(RODAPE);
+        return html.toString();
+    }
+
     private static String reais(BigDecimal valor) {
         return NumberFormat.getCurrencyInstance(Locale.forLanguageTag("pt-BR")).format(valor).replace('\u00a0', ' ');
     }

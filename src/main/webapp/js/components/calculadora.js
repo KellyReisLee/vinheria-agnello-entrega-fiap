@@ -3,8 +3,10 @@
  * Baseada em métricas de sommelier: consumo médio por convidado/hora,
  * fator por tipo de evento e proporções ideais entre tintos, brancos e espumantes.
  *
- * A caixa tem 4 "ecrãs" que se alternam SEM recarregar a página:
+ * A caixa tem 4 telas que se alternam SEM recarregar a página:
  *   calculadora -> parecer do sommelier -> formulário de orçamento -> confirmação
+ * O formulário envia o pedido para POST /orcamento (OrcamentoController), que
+ * grava no painel e manda os e-mails para a loja e para o cliente.
  * A aparência está em css/sections/_calculator.css (nada de estilos inline).
  */
 document.addEventListener('DOMContentLoaded', () => {
@@ -216,7 +218,7 @@ document.addEventListener('DOMContentLoaded', () => {
       <form class="calc-form" id="unique-form-consultor" novalidate>
         <div class="calc-field">
           <label for="cli-nome">Nome</label>
-          <input type="text" id="cli-nome" name="nome" autocomplete="name" required>
+          <input type="text" id="cli-nome" name="nome" autocomplete="name" maxlength="80" required>
         </div>
         <div class="calc-field">
           <label for="cli-email">E-mail</label>
@@ -224,17 +226,25 @@ document.addEventListener('DOMContentLoaded', () => {
         </div>
         <div class="calc-field">
           <label for="cli-telefone">WhatsApp / Telefone <span class="calc-optional">(opcional)</span></label>
-          <input type="tel" id="cli-telefone" name="telefone" autocomplete="tel" inputmode="tel">
+          <input type="tel" id="cli-telefone" name="telefone" autocomplete="tel" inputmode="tel"
+            maxlength="15" placeholder="(11) 99999-9999">
         </div>
         <div class="calc-field">
           <label for="cli-orcamento">Orçamento estimado <span class="calc-optional">(opcional)</span></label>
-          <input type="text" id="cli-orcamento" name="orcamento" inputmode="decimal" placeholder="R$">
+          <input type="text" id="cli-orcamento" name="orcamento" inputmode="decimal" maxlength="30" placeholder="R$">
         </div>
         <div class="calc-field calc-field--full">
           <label for="cli-obs">Detalhes do evento <span class="calc-optional">(opcional)</span></label>
-          <textarea id="cli-obs" name="observacoes" rows="3"
+          <textarea id="cli-obs" name="observacoes" rows="3" maxlength="800"
             placeholder="Cardápio, preferências de vinhos, data e local..."></textarea>
         </div>
+        <!-- "pote de mel": invisível para pessoas; robôs preenchem e o servidor descarta -->
+        <div class="calc-honeypot" aria-hidden="true">
+          <label for="cli-site">Não preencha</label>
+          <input type="text" id="cli-site" name="site" tabindex="-1" autocomplete="off">
+        </div>
+        <p class="calc-form-nota calc-field--full">Usamos estes dados só para responder ao seu pedido.
+          Veja a <a href="${window.CONTEXT_PATH || ''}/privacidade" target="_blank" rel="noopener">Política de Privacidade</a>.</p>
         <p class="calc-form-error" role="alert" hidden></p>
         <div class="calc-actions calc-field--full">
           <button type="button" class="calc-btn-secondary" data-calc="parecer">
@@ -245,58 +255,92 @@ document.addEventListener('DOMContentLoaded', () => {
           </button>
         </div>
       </form>
-    `, '#cli-nome', () => ligarFormulario(r));
+    `, '#cli-nome', () => ligarFormulario());
   }
 
-  function ligarFormulario(r) {
+  // Máscara simples do telefone: (11) 99999-9999
+  function mascaraTelefone(v) {
+    const d = String(v).replace(/\D/g, '').slice(0, 11);
+    if (d.length <= 2) return d.length ? `(${d}` : '';
+    if (d.length <= 6) return `(${d.slice(0, 2)}) ${d.slice(2)}`;
+    if (d.length <= 10) return `(${d.slice(0, 2)}) ${d.slice(2, 6)}-${d.slice(6)}`;
+    return `(${d.slice(0, 2)}) ${d.slice(2, 7)}-${d.slice(7)}`;
+  }
+
+  function ligarFormulario() {
     const form = painel.querySelector('#unique-form-consultor');
     if (!form) return;
-    form.addEventListener('submit', (ev) => {
+    const erro = form.querySelector('.calc-form-error');
+    const botao = form.querySelector('button[type="submit"]');
+    const textoBotao = botao.innerHTML;
+
+    form.telefone.addEventListener('input', () => { form.telefone.value = mascaraTelefone(form.telefone.value); });
+
+    const mostrarErro = (msg, campo) => {
+      erro.textContent = msg;
+      erro.hidden = !msg;
+      if (campo) campo.focus();
+    };
+
+    form.addEventListener('submit', async (ev) => {
       ev.preventDefault();
-      const erro = form.querySelector('.calc-form-error');
       const nome = form.nome.value.trim();
       const email = form.email.value.trim();
+      const digitosTel = form.telefone.value.replace(/\D/g, '');
 
-      if (!nome || !form.email.checkValidity() || !email) {
-        erro.textContent = 'Informe seu nome e um e-mail válido.';
-        erro.hidden = false;
-        (nome ? form.email : form.nome).focus();
-        return;
-      }
+      if (!nome) return mostrarErro('Informe o seu nome.', form.nome);
+      if (!email || !form.email.checkValidity()) return mostrarErro('Informe um e-mail válido, como nome@exemplo.com.', form.email);
+      if (digitosTel && digitosTel.length < 10) return mostrarErro('Informe o telefone com DDD ou deixe em branco.', form.telefone);
+      mostrarErro('');
 
-      const dadosEnvio = {
-        cliente: {
-          nome,
-          email,
-          telefone: form.telefone.value.trim(),
-          orcamento: form.orcamento.value.trim(),
-          observacoes: form.observacoes.value.trim()
-        },
-        calculoEvento: {
-          estilo: estado.estilo,
-          convidados: estado.convidados,
-          duracaoHoras: estado.duracao,
-          garrafasTotais: r.total,
-          distribuicao: { tintos: r.tinto, brancos: r.branco, espumantes: r.espumante }
+      // O servidor refaz o cálculo das garrafas: enviamos só os dados do evento
+      const dados = new URLSearchParams({
+        nome,
+        email,
+        telefone: form.telefone.value.trim(),
+        orcamento: form.orcamento.value.trim(),
+        observacoes: form.observacoes.value.trim(),
+        site: form.site.value,
+        estilo: estado.estilo,
+        convidados: String(estado.convidados),
+        duracao: String(estado.duracao)
+      });
+
+      botao.disabled = true;
+      botao.textContent = 'Enviando…';
+      try {
+        const resposta = await fetch(`${window.CONTEXT_PATH || ''}/orcamento`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+            'X-Requested-With': 'fetch' // proteção CSRF (ver ProtecaoCsrf.java)
+          },
+          body: dados.toString()
+        });
+        const json = await resposta.json().catch(() => ({}));
+        if (resposta.ok && json.sucesso) {
+          mostrarConfirmacao(nome, email);
+          return;
         }
-      };
-
-      // TODO: enviar para um Servlet (ex.: POST /orcamento) quando existir no back-end
-      console.log('Pedido de orçamento (simulação):', dadosEnvio);
-
-      mostrarConfirmacao(nome);
+        mostrarErro(json.mensagem || 'Não foi possível enviar agora. Tente novamente.');
+      } catch (e) {
+        mostrarErro('Sem ligação com o servidor. Verifique a internet e tente novamente.');
+      }
+      botao.disabled = false;
+      botao.innerHTML = textoBotao;
     });
   }
 
   // ---------- Ecrã 4: confirmação ----------
-  function mostrarConfirmacao(nome) {
+  function mostrarConfirmacao(nome, email) {
     mostrarPainel(`
       <div class="calc-success">
         <span class="calc-success-icon" aria-hidden="true">✓</span>
         <h3 class="calc-panel-title">Pedido enviado!</h3>
         <p class="calc-panel-text calc-panel-text--center">
           Obrigado, <strong>${escapar(nome)}</strong>! Nossa equipe de sommeliers recebeu os
-          detalhes do seu evento e entrará em contato em breve.
+          detalhes do seu evento e responde em até 1 dia útil. Enviamos um resumo para
+          <strong>${escapar(email)}</strong>.
         </p>
         <button type="button" class="calc-btn-light" data-calc="voltar">Fazer novo cálculo</button>
       </div>

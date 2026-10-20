@@ -5,13 +5,13 @@
          version="5.0">
 
     <!--
-      Versão dos arquivos CSS e JS. Vai no fim de cada endereço (estilo.css?v=2026.10.20-1).
+      Versão dos arquivos CSS e JS. Vai no fim de cada endereço (estilo.css?v=2026.10.20-2).
       Quando um CSS ou JS mudar, troque este valor (e o ?v= dos @import nos arquivos css/*.css):
       o endereço muda e o navegador baixa a versão nova em vez de usar a cópia antiga em cache.
     -->
     <context-param>
         <param-name>versaoArquivos</param-name>
-        <param-value>2026.10.20-1</param-value>
+        <param-value>2026.10.20-2</param-value>
     </context-param>
 
     <!-- Sessão: expira após 30 min sem atividade; o cookie não é acessível por
