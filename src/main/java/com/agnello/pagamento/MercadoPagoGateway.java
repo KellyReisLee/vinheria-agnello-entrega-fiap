@@ -122,9 +122,6 @@ public class MercadoPagoGateway implements GatewayPagamento {
         item.put("currency_id", "BRL");
         item.put("unit_price", pedido.getTotal());
 
-        Map<String, Object> pagador = new LinkedHashMap<>();
-        pagador.put("email", emailCliente);
-
         String retorno = urlBase + "/pagamento/retorno?pedido=" + pedido.getId();
         Map<String, Object> voltas = new LinkedHashMap<>();
         voltas.put("success", retorno);
@@ -147,7 +144,9 @@ public class MercadoPagoGateway implements GatewayPagamento {
 
         Map<String, Object> p = new LinkedHashMap<>();
         p.put("items", List.of(item));
-        p.put("payer", pagador);
+        // O e-mail do cliente NÃO vai para o Mercado Pago: se ele for de uma conta real do
+        // Mercado Pago e a loja estiver com credenciais de teste (ou o contrário), o pagamento
+        // falha com "uma das partes é de teste". O cliente informa o e-mail na própria página.
         p.put("external_reference", String.valueOf(pedido.getId()));
         p.put("back_urls", voltas);
         p.put("payment_methods", meios);
