@@ -1,0 +1,105 @@
+erDiagram
+    CLIENTES ||--o{ PEDIDOS : faz
+    CLIENTES ||--o{ ENDERECOS : guarda
+    CLIENTES ||--o{ FAVORITOS : marca
+    PRODUTOS ||--o{ FAVORITOS : "é favorito em"
+    PEDIDOS ||--|{ ITENS_PEDIDO : contem
+    PRODUTOS |o--o{ ITENS_PEDIDO : "vendido em"
+    PEDIDOS ||--o{ HISTORICO_PEDIDOS : registra
+    ADMINISTRADORES |o--o{ HISTORICO_PEDIDOS : "muda status"
+    CLIENTES |o--o{ MENSAGENS_CONTATO : envia
+    ADMINISTRADORES |o--o{ MENSAGENS_CONTATO : responde
+    PRODUTOS ||--o{ AVISOS_ESTOQUE : "Avise-me"
+    CLIENTES |o--o{ AVISOS_ESTOQUE : pede
+
+    CLIENTES {
+        int id PK
+        varchar tipo_cliente "PF ou PJ"
+        varchar email
+        varchar senha_hash "PBKDF2"
+        text cpf_cifrado "AES-256-GCM"
+        char cpf_indice "HMAC, para CPF único"
+        varchar cnpj
+        text telefone_cifrado "AES-256-GCM"
+        boolean email_verificado
+    }
+    PRODUTOS {
+        int id PK
+        varchar nome
+        varchar tipo
+        varchar origem
+        numeric preco
+        numeric preco_antigo
+        int estoque
+        boolean ativo
+    }
+    PEDIDOS {
+        int id PK
+        varchar numero "AG-000001"
+        int cliente_id FK
+        varchar status
+        varchar forma_pagamento "PIX, CARTAO, BOLETO"
+        varchar tipo_entrega
+        numeric subtotal
+        numeric frete
+        numeric desconto
+        numeric total
+        text endereco_cifrado
+        varchar pagamento_id "Mercado Pago"
+        timestamptz pago_em
+    }
+    ITENS_PEDIDO {
+        int id PK
+        int pedido_id FK
+        int produto_id FK
+        varchar nome_produto
+        numeric preco_unitario
+        int quantidade
+    }
+    HISTORICO_PEDIDOS {
+        int id PK
+        int pedido_id FK
+        varchar status_anterior
+        varchar status_novo
+        int administrador_id FK
+        boolean pelo_cliente
+        boolean pelo_gateway
+    }
+    ENDERECOS {
+        int id PK
+        int cliente_id FK
+        varchar apelido
+        text dados_cifrados
+        boolean principal
+    }
+    FAVORITOS {
+        int cliente_id PK,FK
+        int produto_id PK,FK
+    }
+    ADMINISTRADORES {
+        int id PK
+        varchar nome
+        varchar email
+        varchar senha_hash
+        boolean ativo
+    }
+    MENSAGENS_CONTATO {
+        int id PK
+        int cliente_id FK
+        varchar assunto
+        text mensagem
+        boolean respondida
+        int respondida_por FK
+    }
+    AVISOS_ESTOQUE {
+        int id PK
+        int produto_id FK
+        varchar email
+        int cliente_id FK
+        timestamptz avisado_em
+    }
+    IMAGENS_PRODUTO {
+        int id PK
+        varchar tipo_conteudo
+        bytea dados
+    }

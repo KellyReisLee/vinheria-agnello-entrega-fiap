@@ -1,0 +1,23 @@
+sequenceDiagram
+    autonumber
+    actor Cliente
+    participant Loja as Vinheria Agnello<br/>(Controllers + Services)
+    participant BD as PostgreSQL (Neon)
+    participant MP as Mercado Pago
+
+    Cliente->>Loja: Finaliza o checkout (ids e quantidades)
+    Loja->>BD: Recalcula preços, frete e desconto<br/>e grava o pedido (AGUARDANDO_PAGAMENTO)
+    Loja->>MP: POST /checkout/preferences<br/>(total do pedido, forma de pagamento travada)
+    MP-->>Loja: Endereço da página de pagamento
+    Loja-->>Cliente: Redireciona para o Mercado Pago
+    Cliente->>MP: Paga com Pix, cartão ou boleto
+    par Aviso automático
+        MP->>Loja: Webhook /pagamento/notificacao<br/>(assinatura HMAC-SHA256 conferida)
+    and Volta do cliente
+        MP-->>Cliente: Redireciona para /pagamento/retorno
+        Cliente->>Loja: GET /pagamento/retorno
+    end
+    Loja->>MP: GET /v1/payments/{id}<br/>(confere valor, moeda e pedido)
+    MP-->>Loja: approved
+    Loja->>BD: Pedido → PAGO (uma única vez)
+    Loja-->>Cliente: "Pagamento aprovado" + e-mail de confirmação

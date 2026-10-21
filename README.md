@@ -40,6 +40,31 @@ mensagens num painel administrativo.
 
 ---
 
+## Capturas de tela
+
+<sub>Telas geradas a partir do código do projeto, com dados de exemplo.</sub>
+
+| Página inicial | Catálogo com filtros |
+|---|---|
+| ![Página inicial](docs/capturas/01-home.png) | ![Catálogo](docs/capturas/02-catalogo.png) |
+| **Página do vinho** | **Checkout com frete pelo CEP** |
+| ![Página do vinho](docs/capturas/03-produto.png) | ![Checkout](docs/capturas/04-checkout.png) |
+| **Área pessoal** | **Volta do Mercado Pago** |
+| ![Área pessoal](docs/capturas/05-area-pessoal.png) | ![Pagamento aprovado](docs/capturas/06-pagamento-aprovado.png) |
+| **Painel: visão geral** | **Painel: pedido pago pelo Mercado Pago** |
+| ![Painel](docs/capturas/07-admin-painel.png) | ![Pedido no painel](docs/capturas/08-admin-pedido.png) |
+| **Painel: vinhos e estoque** | **Sommelier Virtual** |
+| ![Vinhos no painel](docs/capturas/09-admin-produtos.png) | ![Sommelier Virtual](docs/capturas/10-sommelier.png) |
+
+<p align="center">
+  <img src="docs/capturas/11-celular-home.png" alt="Página inicial no celular" width="260">
+  &nbsp;&nbsp;
+  <img src="docs/capturas/12-celular-produto.png" alt="Página do vinho no celular" width="260">
+  <br><em>O site também se adapta ao celular.</em>
+</p>
+
+---
+
 ## Tecnologias
 
 | Camada | Tecnologia |
@@ -60,16 +85,179 @@ mensagens num painel administrativo.
 
 O projeto segue o padrão **MVC** em camadas:
 
-```
-Navegador ──► Controller (Servlet) ──► Service (regras de negócio) ──► DAO (SQL) ──► PostgreSQL
-                  │
-                  └──► View (JSP) ◄── dados preparados pelo Controller
+```mermaid
+flowchart TB
+    U(["👤 Cliente"])
+    A(["🧑‍💼 Equipe"])
+
+    subgraph APP["Aplicação Java 17 · Tomcat 10.1 (Docker no Render)"]
+        F["FiltroAdmin<br/>protege o /admin"]
+        C["Controllers<br/>Servlets: recebem a requisição"]
+        V["Views<br/>JSP + JSTL: montam o HTML"]
+        S["Services<br/>regras de negócio"]
+        D["DAOs<br/>SQL com PreparedStatement"]
+    end
+
+    BR["Brevo"]
+    DB[("PostgreSQL<br/>Neon")]
+    MP["Mercado Pago<br/>Checkout Pro + webhook"]
+
+    U --> C
+    A --> F --> C
+    C --> V
+    C --> S
+    S -->|e-mails| BR
+    S --> D --> DB
+    S -->|pagamentos| MP
 ```
 
 - **Controller** recebe a requisição, valida a sessão e o CSRF e escolhe a página (ou responde JSON).
 - **Service** concentra as regras: preços recalculados no servidor, estoque, frete, descontos, pagamento.
 - **DAO** faz o acesso ao banco, sempre com `PreparedStatement`.
 - Formulários usam **Post/Redirect/Get**, com mensagens "flash" entre o POST e a página seguinte.
+
+### Como funciona uma compra
+
+O preço nunca vem do navegador: o servidor recalcula tudo, grava o pedido e só então cria a página de
+pagamento. A confirmação é feita consultando a API do Mercado Pago, seja pelo webhook ou pela volta do cliente.
+
+```mermaid
+sequenceDiagram
+    autonumber
+    actor Cliente
+    participant Loja as Vinheria Agnello<br/>(Controllers + Services)
+    participant BD as PostgreSQL (Neon)
+    participant MP as Mercado Pago
+
+    Cliente->>Loja: Finaliza o checkout (ids e quantidades)
+    Loja->>BD: Recalcula preços, frete e desconto<br/>e grava o pedido (AGUARDANDO_PAGAMENTO)
+    Loja->>MP: POST /checkout/preferences<br/>(total do pedido, forma de pagamento travada)
+    MP-->>Loja: Endereço da página de pagamento
+    Loja-->>Cliente: Redireciona para o Mercado Pago
+    Cliente->>MP: Paga com Pix, cartão ou boleto
+    par Aviso automático
+        MP->>Loja: Webhook /pagamento/notificacao<br/>(assinatura HMAC-SHA256 conferida)
+    and Volta do cliente
+        MP-->>Cliente: Redireciona para /pagamento/retorno
+        Cliente->>Loja: GET /pagamento/retorno
+    end
+    Loja->>MP: GET /v1/payments/{id}<br/>(confere valor, moeda e pedido)
+    MP-->>Loja: approved
+    Loja->>BD: Pedido → PAGO (uma única vez)
+    Loja-->>Cliente: "Pagamento aprovado" + e-mail de confirmação
+```
+
+### Banco de dados
+
+```mermaid
+erDiagram
+    CLIENTES ||--o{ PEDIDOS : faz
+    CLIENTES ||--o{ ENDERECOS : guarda
+    CLIENTES ||--o{ FAVORITOS : marca
+    PRODUTOS ||--o{ FAVORITOS : "é favorito em"
+    PEDIDOS ||--|{ ITENS_PEDIDO : contem
+    PRODUTOS |o--o{ ITENS_PEDIDO : "vendido em"
+    PEDIDOS ||--o{ HISTORICO_PEDIDOS : registra
+    ADMINISTRADORES |o--o{ HISTORICO_PEDIDOS : "muda status"
+    CLIENTES |o--o{ MENSAGENS_CONTATO : envia
+    ADMINISTRADORES |o--o{ MENSAGENS_CONTATO : responde
+    PRODUTOS ||--o{ AVISOS_ESTOQUE : "Avise-me"
+    CLIENTES |o--o{ AVISOS_ESTOQUE : pede
+
+    CLIENTES {
+        int id PK
+        varchar tipo_cliente "PF ou PJ"
+        varchar email
+        varchar senha_hash "PBKDF2"
+        text cpf_cifrado "AES-256-GCM"
+        char cpf_indice "HMAC, para CPF único"
+        varchar cnpj
+        text telefone_cifrado "AES-256-GCM"
+        boolean email_verificado
+    }
+    PRODUTOS {
+        int id PK
+        varchar nome
+        varchar tipo
+        varchar origem
+        numeric preco
+        numeric preco_antigo
+        int estoque
+        boolean ativo
+    }
+    PEDIDOS {
+        int id PK
+        varchar numero "AG-000001"
+        int cliente_id FK
+        varchar status
+        varchar forma_pagamento "PIX, CARTAO, BOLETO"
+        varchar tipo_entrega
+        numeric subtotal
+        numeric frete
+        numeric desconto
+        numeric total
+        text endereco_cifrado
+        varchar pagamento_id "Mercado Pago"
+        timestamptz pago_em
+    }
+    ITENS_PEDIDO {
+        int id PK
+        int pedido_id FK
+        int produto_id FK
+        varchar nome_produto
+        numeric preco_unitario
+        int quantidade
+    }
+    HISTORICO_PEDIDOS {
+        int id PK
+        int pedido_id FK
+        varchar status_anterior
+        varchar status_novo
+        int administrador_id FK
+        boolean pelo_cliente
+        boolean pelo_gateway
+    }
+    ENDERECOS {
+        int id PK
+        int cliente_id FK
+        varchar apelido
+        text dados_cifrados
+        boolean principal
+    }
+    FAVORITOS {
+        int cliente_id PK,FK
+        int produto_id PK,FK
+    }
+    ADMINISTRADORES {
+        int id PK
+        varchar nome
+        varchar email
+        varchar senha_hash
+        boolean ativo
+    }
+    MENSAGENS_CONTATO {
+        int id PK
+        int cliente_id FK
+        varchar assunto
+        text mensagem
+        boolean respondida
+        int respondida_por FK
+    }
+    AVISOS_ESTOQUE {
+        int id PK
+        int produto_id FK
+        varchar email
+        int cliente_id FK
+        timestamptz avisado_em
+    }
+    IMAGENS_PRODUTO {
+        int id PK
+        varchar tipo_conteudo
+        bytea dados
+    }
+```
+
+> Os diagramas também estão em `docs/diagramas/` (código Mermaid e imagem PNG, para usar em apresentações).
 
 ### Estrutura de pastas
 
@@ -167,6 +355,23 @@ No Render: **New → Web Service** → este repositório → ambiente **Docker**
 da tabela acima em **Environment**. Cada push na branch `main` gera um deploy novo.
 
 > Antes de publicar uma versão que traz uma migração nova (`db/migracoes/V*.sql`), rode essa migração no Neon.
+
+### Verificar a configuração: `/saude`
+
+Abra `https://<seu-site>/saude` para ver, em segundos, se está tudo configurado. A página **nunca mostra
+valores** (senhas, chaves, tokens), só se cada item está `ok`:
+
+```json
+{"status":"ok","chaves":"ok","migracaoV8":"ok","migracaoV9":"ok","chavesAbremOsDados":"ok",
+ "banco":"ok","email":"ok","enderecoDoSite":"ok","mercadoPago":"ok","webhookMercadoPago":"ok"}
+```
+
+- `chavesAbremOsDados: "erro"` → as chaves `AGNELLO_CHAVE_*` do servidor são diferentes das usadas quando
+  as contas foram criadas (login e recuperação de senha falham).
+- `migracaoV9: "falta rodar no Neon"` → rode o arquivo da migração no SQL Editor do Neon.
+
+No Render, use `/saude` em **Settings → Health Check Path**: assim uma versão nova só recebe visitantes
+depois de estar pronta (evita o erro 502 durante o deploy).
 
 ---
 

@@ -1,0 +1,23 @@
+flowchart TB
+    U(["👤 Cliente"])
+    A(["🧑‍💼 Equipe"])
+
+    subgraph APP["Aplicação Java 17 · Tomcat 10.1 (Docker no Render)"]
+        F["FiltroAdmin<br/>protege o /admin"]
+        C["Controllers<br/>Servlets: recebem a requisição"]
+        V["Views<br/>JSP + JSTL: montam o HTML"]
+        S["Services<br/>regras de negócio"]
+        D["DAOs<br/>SQL com PreparedStatement"]
+    end
+
+    BR["Brevo"]
+    DB[("PostgreSQL<br/>Neon")]
+    MP["Mercado Pago<br/>Checkout Pro + webhook"]
+
+    U --> C
+    A --> F --> C
+    C --> V
+    C --> S
+    S -->|e-mails| BR
+    S --> D --> DB
+    S -->|pagamentos| MP

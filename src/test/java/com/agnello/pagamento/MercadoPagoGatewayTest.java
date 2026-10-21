@@ -46,7 +46,7 @@ class MercadoPagoGatewayTest {
         assertEquals(0, new BigDecimal("404.80").compareTo((BigDecimal) item.get("unit_price")));
         assertEquals("BRL", item.get("currency_id"));
         assertEquals("57", json.get("external_reference"));
-        assertEquals("ana@exemplo.com", Json.texto(json, "payer", "email"));
+        assertFalse(json.containsKey("payer")); // evita o erro "uma das partes é de teste"
         assertEquals("https://loja.onrender.com/pagamento/retorno?pedido=57", Json.texto(json, "back_urls", "success"));
         assertEquals("approved", json.get("auto_return"));
         assertTrue(Json.texto(json, "notification_url").startsWith("https://loja.onrender.com/pagamento/notificacao"));
