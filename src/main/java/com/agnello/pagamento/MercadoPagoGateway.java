@@ -132,7 +132,12 @@ public class MercadoPagoGateway implements GatewayPagamento {
         voltas.put("failure", retorno);
 
         Map<String, Object> meios = new LinkedHashMap<>();
-        meios.put("excluded_payment_types", tiposExcluidos(pedido.getFormaPagamento()));
+        // A API pede uma lista de objetos: [{"id": "ticket"}, …] (texto puro dá "invalid_field_type")
+        List<Map<String, Object>> excluidos = new ArrayList<>();
+        for (String tipo : tiposExcluidos(pedido.getFormaPagamento())) {
+            excluidos.add(Map.of("id", tipo));
+        }
+        meios.put("excluded_payment_types", excluidos);
         if (pedido.getFormaPagamento() == FormaPagamento.CARTAO) {
             meios.put("installments", pedido.getParcelas());
             meios.put("default_installments", pedido.getParcelas());

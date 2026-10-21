@@ -51,6 +51,16 @@ class MercadoPagoGatewayTest {
         assertEquals("approved", json.get("auto_return"));
         assertTrue(Json.texto(json, "notification_url").startsWith("https://loja.onrender.com/pagamento/notificacao"));
         assertEquals("3", Json.texto(json, "payment_methods", "installments"));
+
+        // A API do Mercado Pago só aceita [{"id": "..."}] aqui (texto puro → HTTP 400 invalid_field_type)
+        List<Object> excluidos = (List<Object>) ((Map<String, Object>) json.get("payment_methods"))
+                .get("excluded_payment_types");
+        assertFalse(excluidos.isEmpty());
+        for (Object tipo : excluidos) {
+            assertTrue(tipo instanceof Map, "cada tipo excluído deve ser um objeto {\"id\": ...}");
+        }
+        assertTrue(excluidos.contains(Map.of("id", "ticket")));
+        assertFalse(excluidos.contains(Map.of("id", "credit_card")));
     }
 
     @Test
